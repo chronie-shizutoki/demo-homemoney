@@ -1,0 +1,239 @@
+/* 现代自适应布局 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-radius: var(--border-radius-lg);
+  color: var(--text-primary);
+  transition: all var(--transition-time) ease;
+}
+
+/* 头部样式 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding-bottom: 1.5rem;
+  transition: box-shadow var(--transition-time) ease;
+}
+
+/* 语言切换器 */
+.lang-switcher {
+  display: flex;
+  gap: 1rem;
+}
+
+/* 卡片模块样式 */
+.form-section,
+.data-section,
+.chart-section {
+  margin: 0;
+  padding: 2rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  transition: all var(--transition-time) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  color: var(--text-primary);
+}
+
+/* 卡片高光效果 */
+.form-section::before,
+.data-section::before,
+.chart-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg, 
+    rgba(var(--highlight-gradient-color, 255,255,255),0) 40%, 
+    rgba(var(--highlight-gradient-color, 255,255,255),0.1) 50%, 
+    rgba(var(--highlight-gradient-color, 255,255,255),0) 60%
+  );
+  pointer-events: none;
+  contain: layout;
+  animation: shine 3s infinite;
+}
+
+/* 卡片悬停效果 */
+.form-section:hover,
+.data-section:hover,
+.chart-section:hover {
+  transform: translateY(-6px) scale(1.005);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 表单卡片样式 */
+.form-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 表格容器 */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-container .row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-time) ease;
+}
+
+.table-container .row:hover {
+  background-color: var(--hover-bg);
+}
+
+/* 图表容器 */
+.chart-container {
+  min-width: 100%;
+  margin: 1rem 0;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 高亮动画 */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+/* 响应式设计 - 小型设备 */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    border-radius: 0;
+    backdrop-filter: none;
+    background: var(--bg-primary);
+  }
+  
+  .form-card {
+    width: 100%;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .table-container .row {
+    grid-template-columns: repeat(2, 1fr);
+    font-size: 0.9em;
+    padding: 0.75rem;
+  }
+  
+  .chart-container {
+    min-width: 100%;
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+  
+  .form-section,
+  .data-section,
+  .chart-section {
+    padding: 1.5rem;
+  }
+  
+  .header {
+    padding-bottom: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+/* 响应式设计 - 中型设备 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+  
+  .form-section,
+  .data-section,
+  .chart-section {
+    padding: 1.75rem;
+  }
+  
+  button {
+    padding: 0.8rem 1.5rem;
+  }
+}
+
+/* 响应式设计 - 大型设备 */
+@media (min-width: 1025px) {
+  .container {
+    padding: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: var(--dark-glass-bg);
+    color: var(--dark-text-primary);
+  }
+  
+  .header {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .form-section,
+  .data-section,
+  .chart-section {
+    background: var(--dark-bg-card);
+    box-shadow: var(--dark-shadow);
+    color: var(--dark-text-primary);
+  }
+  
+  .form-section:hover,
+  .data-section:hover,
+  .chart-section:hover {
+    box-shadow: var(--dark-shadow-lg);
+  }
+  
+  .table-container .row {
+    border-bottom-color: var(--dark-border-color);
+  }
+  
+  .table-container .row:hover {
+    background-color: var(--dark-hover-bg);
+  }
+  
+  .chart-container {
+    background: var(--dark-bg-secondary);
+    box-shadow: var(--dark-shadow-sm);
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      background: var(--dark-bg-primary);
+    }
+  }
+}

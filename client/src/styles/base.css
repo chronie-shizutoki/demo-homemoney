@@ -1,0 +1,31 @@
+/* 磨砂玻璃效果 */
+.glass-effect {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 现代按钮样式 */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-time) ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #388e3c 100%); /* 渐变背景增强质感 */
+  color: white;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25); /* 更明显的阴影 */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1); /* 文字阴影提升可读性 */
+}
+
+.btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 4px rgba(46, 125, 50, 0.3);
+}
