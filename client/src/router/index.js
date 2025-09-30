@@ -11,7 +11,6 @@ import TodoView from '@/views/TodoView.vue';
  * @desc 使用Vue Router管理前端路由，包含历史模式配置和路由守卫
  */
 
-import DonationView from '@/views/DonationView.vue';
 import DebtView from '@/views/DebtView.vue';
 import ChartsView from '@/views/ChartsView.vue';
 
@@ -29,12 +28,6 @@ const router = createRouter({
       name: 'todo',
       meta: { title: 'todo.title' },
       component: TodoView
-    },
-    {
-      path: '/donation',
-      name: 'donation',
-      meta: { title: 'donation.title' },
-      component: DonationView
     },
     {
       path: '/debts',

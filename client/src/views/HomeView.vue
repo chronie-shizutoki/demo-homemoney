@@ -89,10 +89,6 @@
         </div>
       </template>
       <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-        <el-button type="info" @click="goToDonation" size="default">
-          <el-icon><Money /></el-icon>
-          {{ t('donation.title') }}
-        </el-button>
         <el-button type="primary" @click="handleFeedback" size="default">
           <el-icon><Message /></el-icon>
           {{ t('feedback.title') }}
@@ -461,10 +457,6 @@ const handleExcelFileChange = async (file) => {
   }
 };
 
-// 跳转到捐赠页面
-const goToDonation = () => {
-  router.push('/donation');
-};
 const markdownContent = ref('');
 const markdownTitle = ref('');
 // 当前日期时间状态
