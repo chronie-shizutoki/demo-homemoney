@@ -39,7 +39,7 @@
   "common.confirm": "確認",
   "expense.serverError": "伺服器錯誤",
   "app": {
-    "title": "家庭收支記錄（中國）",
+    "title": "家庭收支記錄",
     "addRecord": "新增記錄",
     "statistics": "支出統計",
     "export": "導出資料",
@@ -55,7 +55,7 @@
     "expenseAnalysisReportTitle": "消費分析報告",
     "goToAddExpenseRecord": "添加新消費",
     "viewExpenseAnalysisReport": "查看分析報告",
-    "viewDocument": "查看消費分析報告",
+    "viewDocument": "當月消費分析報告",
     "prevMonth": "上個月",
     "nextMonth": "下個月",
     "dailyTrend": "每日消費趨勢",
@@ -298,5 +298,11 @@
       "button": "啟用預算功能",
       "enabled": "預算功能已啟用"
     }
+  },
+  "function": {
+    "primary": "主要",
+    "aiFeatures": "AI",
+    "other": "其他",
+    "aboutus": "關於"
   }
 }
