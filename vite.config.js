@@ -31,8 +31,7 @@ export default defineConfig({
           // 拆分大型依赖包
           excel: ['xlsx'],
           csv: ['papaparse'],
-          markdown: ['marked'],
-          highlight: ['highlight.js']
+          markdown: ['marked']
         }
       }
     },

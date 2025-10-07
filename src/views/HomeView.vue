@@ -197,7 +197,6 @@ const Header = defineAsyncComponent(() => import('@/components/Header.vue'));
 const ExpenseList = defineAsyncComponent(() => import('@/components/ExpenseList.vue'));
 const ExpenseCharts = defineAsyncComponent(() => import('@/components/ExpenseCharts.vue'));
 const ExportButton = defineAsyncComponent(() => import('@/components/ExportButton.vue'));
-const MarkdownDialog = defineAsyncComponent(() => import('@/components/MarkdownDialog.vue'));
 const TodoList = defineAsyncComponent(() => import('@/components/TodoList.vue'));
 const SpendingLimitDisplay = defineAsyncComponent(() => import('@/components/SpendingLimitDisplay.vue'));
 const MiniAppManager = defineAsyncComponent(() => import('@/components/MiniAppManager.vue'));
