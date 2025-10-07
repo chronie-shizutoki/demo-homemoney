@@ -28,6 +28,7 @@
             <el-icon><Plus /></el-icon>
             {{ t('expense.addRecord') }}
           </el-button>
+          当月报告功能在演示版本不可用
           <el-upload
               class="upload-excel"
               :show-file-list="false"
@@ -41,6 +42,16 @@
               </el-button>
             </el-upload>
         </div>
+      </el-card>
+
+      <!-- AI功能组 -->
+      <el-card>
+        <template #header>
+          <div class="card-header">
+            <span>AI</span>
+          </div>
+        </template>
+        AI功能在演示版本不可用
       </el-card>
       
       <!-- 其他组件组 -->
@@ -84,6 +95,7 @@
             <span>{{ t('function.aboutus') }}</span>
           </div>
         </template>
+        支持功能在演示版本不可用
         <div class="card-content">
           <el-button type="primary" @click="handleFeedback" size="default">
             <el-icon><Message /></el-icon>
