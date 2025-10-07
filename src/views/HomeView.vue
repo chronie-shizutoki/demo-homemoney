@@ -1,0 +1,1150 @@
+<template>
+  <div class="container">
+    <!-- 主弹窗 -->
+    <div v-if="isLoadingCsv" class="loading-alert">{{ t('app.loading') }}</div>
+    <div v-if="error" class="error-alert">{{ error }}</div>
+    <MessageTip v-model:message="successMessage" type="success" />
+    <MessageTip v-model:message="errorMessage" type="error" />
+
+    <Header :title="$t('app.title')" />
+    
+    <!-- 当前日期时间显示 -->
+    <div class="datetime-container">
+      <div class="date-part">{{ formattedDate }}</div>
+      <div class="time-part">{{ formattedTime }}</div>
+    </div>
+
+    <!-- 功能组网格布局 -->
+    <div class="card-grid">
+      <!-- 主要功能组 -->
+      <el-card>
+        <template #header>
+          <div class="card-header">
+            <span>{{ t('function.primary') }}</span>
+          </div>
+        </template>
+        <div class="card-content">
+          <el-button type="primary" @click="showAddDialog = true" size="default">
+            <el-icon><Plus /></el-icon>
+            {{ t('expense.addRecord') }}
+          </el-button>
+          <el-upload
+              class="upload-excel"
+              :show-file-list="false"
+              :before-upload="handleExcelUpload"
+              :auto-upload="true"
+              accept=".xlsx, .xls"
+            >
+              <el-button type="warning" size="default">
+                <el-icon><Upload /></el-icon>
+                {{ t('import.title') }}
+              </el-button>
+            </el-upload>
+        </div>
+      </el-card>
+      
+      <!-- 其他组件组 -->
+      <el-card>
+        <template #header>
+          <div class="card-header">
+            <span>{{ t('function.other') }}</span>
+          </div>
+        </template>
+        <div class="card-content">
+          <el-button type="success" @click="showTodoDialog = true" size="default">
+            <el-icon><List /></el-icon>
+            {{ t('todo.title') }}
+          </el-button>
+          <el-button type="warning" @click="goToDebts" size="default">
+            <el-icon><CreditCard /></el-icon>
+            {{ t('debt.title') }}
+          </el-button>
+        </div>
+      </el-card>
+      
+      <!-- 小程序功能组 -->
+      <el-card>
+        <template #header>
+          <div class="card-header">
+            <span>{{ t('miniapp.title') }}</span>
+          </div>
+        </template>
+        <div class="card-content">
+          <el-button type="primary" @click="showMiniAppManager = true" size="default">
+            <el-icon><Box /></el-icon>
+            {{ t('miniapp.title') }}
+          </el-button>
+        </div>
+      </el-card>
+      
+      <!-- 关于我们组 -->
+      <el-card>
+        <template #header>
+          <div class="card-header">
+            <span>{{ t('function.aboutus') }}</span>
+          </div>
+        </template>
+        <div class="card-content">
+          <el-button type="primary" @click="handleFeedback" size="default">
+            <el-icon><Message /></el-icon>
+            {{ t('feedback.title') }}
+          </el-button>
+        </div>
+      </el-card>
+    </div>
+
+    <!-- 月度消费限制显示 -->
+    <SpendingLimitDisplay :expenses="csvExpenses" />
+    
+    <!-- 图表分析按钮 -->
+    <el-button type="primary" @click="goToCharts" size="default" style="margin-bottom: 20px;">
+      <el-icon><PieChart /></el-icon>
+      {{ t('chart.title') }}
+    </el-button>
+    
+    <ExpenseList :expenses="csvExpenses" />
+    <div :class="['header']"></div>
+    <Transition name="button">
+      <ExportButton
+        v-if="csvExpenses.length > 0"
+        @export-excel="() => exportToExcel(csvExpenses)"
+      />
+      <div v-else class="no-data">{{ t('home.noDataForExport') }}</div>
+    </Transition>
+  </div>
+
+  <!-- 悬浮刷新按钮 -->
+  <div class="floating-refresh-btn">
+    <el-button type="primary" icon="Refresh" @click="refreshPage()" size="default" circle />
+  </div>
+
+  <!-- 添加记录对话框 -->
+  <el-dialog v-model="showAddDialog" :title="t('expense.addDialogTitle')" width="80%">
+    <el-form :model="form" :rules="rules" ref="formRef">
+      <el-form-item :label="t('expense.type')" prop="type">
+        <el-select v-model="form.type" :placeholder="t('expense.selectType')">
+          <el-option v-for="type in expenseTypes" :key="type" :label="type" :value="type"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item :label="t('expense.amount')" prop="amount">
+        <el-input v-model="form.amount" :placeholder="0" type="text" />
+      </el-form-item>
+      <el-form-item :label="t('expense.date')" prop="date">
+        <div class="el-input">
+          <input type="date" v-model="form.date" :placeholder="t('expense.selectDate')" class="el-input__inner" style="width: 100%;">
+        </div>
+      </el-form-item>
+      <el-form-item :label="t('expense.remark')">
+        <el-input v-model="form.remark" :placeholder="t('expense.enterRemark')"></el-input>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="showAddDialog = false">{{ t('common.cancel') }}</el-button>
+      <el-button type="primary" @click="handleAddRecord">{{ t('common.confirm') }}</el-button>
+    </template>
+  </el-dialog>
+
+    <MarkdownDialog
+      v-model:visible="showMarkdownDialog"
+      :title="markdownTitle"
+      :content="markdownContent"
+    />
+
+    <!-- 待办事项对话框 -->
+    <el-dialog v-model="showTodoDialog" :title="t('todo.title')" width="90%" top="5vh">
+      <TodoList />
+  </el-dialog>
+  
+  <!-- 小程序管理器对话框 -->
+  <el-dialog v-model="showMiniAppManager" :title="t('miniapp.title')" width="90%" top="10vh">
+    <MiniAppManager />
+    <template #footer>
+      <el-button @click="showMiniAppManager = false">{{ t('common.cancel') }}</el-button>
+    </template>
+  </el-dialog>
+
+</template>
+
+<script setup>
+import { ElButton, ElDialog, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElIcon, ElMessage, ElUpload } from 'element-plus';
+import { Plus, Document, List, Box, Refresh, Upload, Money, CreditCard, Cpu, PieChart, Message } from '@element-plus/icons-vue';
+import { ref, computed, onMounted, onBeforeUnmount, reactive, defineAsyncComponent, watch } from 'vue';
+import { marked } from 'marked';
+import * as XLSX from 'xlsx';
+import { addExpense, getExpenses } from '@/utils/browserDB';
+
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import Papa from 'papaparse';
+
+import { useExpenseData } from '@/composables/useExpenseData';
+import { useExcelExport } from '@/composables/useExcelExport';
+
+const MessageTip = defineAsyncComponent(() => import('@/components/MessageTip.vue'));
+const Header = defineAsyncComponent(() => import('@/components/Header.vue'));
+const ExpenseList = defineAsyncComponent(() => import('@/components/ExpenseList.vue'));
+const ExpenseCharts = defineAsyncComponent(() => import('@/components/ExpenseCharts.vue'));
+const ExportButton = defineAsyncComponent(() => import('@/components/ExportButton.vue'));
+const MarkdownDialog = defineAsyncComponent(() => import('@/components/MarkdownDialog.vue'));
+const TodoList = defineAsyncComponent(() => import('@/components/TodoList.vue'));
+const SpendingLimitDisplay = defineAsyncComponent(() => import('@/components/SpendingLimitDisplay.vue'));
+const MiniAppManager = defineAsyncComponent(() => import('@/components/MiniAppManager.vue'));
+
+const { t, locale } = useI18n();
+const router = useRouter();
+
+// 按钮状态变量
+const showAddDialog = ref(false);
+const showMarkdownDialog = ref(false);
+const showTodoDialog = ref(false);
+const showAiAddDialog = ref(false);
+// 新增：显示多条记录的对话框
+const showMultiRecordsDialog = ref(false);
+// 新增：显示小程序管理器对话框
+const showMiniAppManager = ref(false);
+const aiForm = reactive({
+  text: '',
+  image: []
+});
+const isParsing = ref(false);
+// 新增：存储多条记录的数据结构
+const multiRecords = ref([]);
+// 新增：全选状态
+const selectAll = ref(false);
+// 新增：报告相关状态
+const isGeneratingReport = ref(false);
+const reportContent = ref('');
+const reportQuestion = ref('');
+
+// 配置marked选项
+marked.setOptions({
+  breaks: true,
+  gfm: true
+});
+
+// 前往债务管理页面
+const goToDebts = () => {
+  router.push('/debts');
+};
+
+// 前往图表页面
+const goToCharts = () => {
+  router.push('/charts');
+};
+
+// 导入处理 - 本地实现
+const handleExcelUpload = async (file) => {
+  try {
+    const reader = new FileReader();
+    
+    return new Promise((resolve, reject) => {
+      reader.onload = async (e) => {
+        try {
+          // 读取Excel文件
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          
+          // 获取第一个工作表
+          const worksheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[worksheetName];
+          
+          // 转换为JSON
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          
+          // 处理数据并导入到本地存储
+          let importedCount = 0;
+          for (const row of jsonData) {
+            // 假设Excel的列名与我们的数据结构匹配
+            const expenseData = {
+              type: row[t('expense.columns.type')] || row['类型'] || '',
+              amount: parseFloat(row[t('expense.columns.amount')] || row['金额'] || '0'),
+              remark: row[t('expense.columns.remark')] || row['备注'] || '',
+              time: row[t('expense.columns.date')] || row['日期'] || formattedDate
+            };
+            
+            if (expenseData.type && expenseData.amount > 0) {
+              await addExpense(expenseData);
+              importedCount++;
+            }
+          }
+          
+          // 刷新数据
+          await fetchData(true);
+          
+          ElMessage.success(`${t('import.success')} (${importedCount} ${t('import.records')})`);
+          resolve(true);
+        } catch (error) {
+          console.error('Excel导入失败:', error);
+          ElMessage.error(`${t('import.failed')}: ${error.message}`);
+          reject(error);
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error('文件读取失败:', error);
+        ElMessage.error(t('import.fileReadError'));
+        reject(error);
+      };
+      
+      // 以二进制方式读取文件
+      reader.readAsArrayBuffer(file);
+    });
+  } catch (error) {
+    console.error('Excel导入异常:', error);
+    ElMessage.error(`${t('import.failed')}: ${error.message}`);
+    return false;
+  }
+};
+
+const markdownContent = ref('');
+const markdownTitle = ref('');
+// 当前日期时间状态
+const currentDateTime = ref('');
+const formattedDate = ref('');
+const formattedTime = ref('');
+let dateTimeTimer = null;
+
+// 初始加载和语言变化时重新加载
+onMounted(async () => {
+  // 初始化并启动日期时间更新
+  updateDateTime();
+  dateTimeTimer = setInterval(updateDateTime, 1000);
+  
+  try {
+    await fetchData(false);
+  } catch (err) {
+    console.error('Failed to initialize data:', err);
+    error.value = t('error.dataInitializationFailed');
+  }
+});
+watch(locale);
+
+// 清理定时器和事件监听器
+onBeforeUnmount(() => {
+  if (dateTimeTimer) {
+    clearInterval(dateTimeTimer);
+  }
+});
+
+// 更新日期时间函数
+const updateDateTime = () => {
+  const now = new Date();
+  // 根据当前语言环境和设备时区格式化日期时间
+  const fullOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+  
+  const dateOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'long'
+  };
+  
+  const timeOptions = {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+  
+  currentDateTime.value = now.toLocaleString(locale.value, fullOptions);
+  formattedDate.value = now.toLocaleDateString(locale.value, dateOptions);
+  formattedTime.value = now.toLocaleTimeString(locale.value, timeOptions);
+};
+
+// 对话框相关数据
+const expenseTypes = ['日常用品', '奢侈品', '通讯费用', '食品', '零食糖果', '冷饮', '方便食品', '纺织品', '饮品', '调味品', '交通出行', '餐饮', '医疗费用', '水果', '其他', '水产品', '乳制品', '礼物人情', '旅行度假', '政务', '水电煤气'];
+const form = reactive({
+  type: '',
+  amount: '',
+  date: '',
+  remark: ''
+});
+
+// 表单验证规则
+const rules = {
+  type: [{ required: true, message: t('expense.selectType'), trigger: 'change' }],
+  amount: [
+    { required: true, message: t('expense.inputAmount'), trigger: 'blur' },
+    { required: true, message: t('expense.amountRequired'), trigger: 'blur' }
+  ],
+  date: [{ required: true, message: t('expense.selectDate'), trigger: 'change' }]
+};
+
+// 表单引用
+const formRef = ref(null);
+
+const handleAddRecord = async () => {
+  try {
+    // 验证表单
+    await formRef.value.validate();
+
+    // 验证金额为正数且支持两位小数
+    // 检查金额是否存在且为有效数字
+    if (form.amount === undefined || form.amount === null) {
+      throw new Error(t('expense.amountUndefined'));
+    }
+    // 检查金额是否存在且为有效数字
+    if (form.amount === undefined || form.amount === null) {
+      throw new Error(t('expense.amountUndefined'));
+    }
+    // 检查金额是否存在且为有效数字
+    if (form.amount === undefined || form.amount === null) {
+      throw new Error(t('expense.amountUndefined'));
+    }
+    // 处理可能的undefined/null值并转换为字符串
+    const amountStr = form.amount.toString().replace(',', '.');
+    const amount = Number(amountStr);
+    if (isNaN(amount) || amount <= 0 || !/^\d+(\.\d{1,2})?$/.test(amountStr)) {
+      throw new Error(t('expense.invalidAmountFormat'));
+    }
+
+    // 格式化日期为YYYY-MM-DD格式
+    const formattedDate = form.date ? new Date(form.date).toISOString().split('T')[0] : '';
+
+    // 构建符合API要求的请求数据
+    const expenseData = {
+      type: form.type,
+      amount: parseFloat(parseFloat(form.amount).toFixed(2)),
+      remark: form.remark,
+      time: formattedDate // 服务器需要的时间字段
+    };
+
+    // 使用本地存储添加消费记录
+    await addExpense(expenseData);
+    showAddDialog.value = false;
+    // 添加成功后刷新数据
+    await fetchData(true);
+    ElMessage.success(t('expense.addSuccess'));
+    // 重置表单
+    Object.assign(form, { type: '', amount: '', date: '', remark: '' });
+    } catch (error) {
+      console.error('添加记录失败:', error);
+      console.error('错误详情:', { status: error.response?.status, data: error.response?.data, headers: error.response?.headers });
+    // 区分表单验证错误和API错误
+    // 细化错误处理
+    // 细化错误类型处理
+    let errorMsg;
+    if (error.name === 'ValidationError') {
+      errorMsg = error.message;
+    } else if (error.response) {
+      // 服务器响应错误
+      const status = error.response.status;
+      const serverMsg = error.response.data?.message || '服务器处理异常';
+      if (status >= 500) {
+        errorMsg = t('expense.serverError', { error: serverMsg });
+      } else if (status === 400) {
+        errorMsg = t('expense.badRequest', { error: serverMsg });
+      } else {
+        errorMsg = t('expense.networkError', { error: `${status} - ${serverMsg}` });
+      }
+    } else if (error.request) {
+      // 无响应错误（网络问题）
+      errorMsg = t('expense.networkTimeout');
+    } else {
+      errorMsg = t('expense.unknownError', { error: error.message || '未知错误' });
+    }
+    ElMessage.error(errorMsg);
+  }
+};
+
+// 状态数据
+const csvExpenses = ref([]);
+const isLoadingCsv = ref(false);
+
+// 导出功能
+const { exportToExcel } = useExcelExport();
+
+// 费用数据管理
+const {
+  fetchData: originalFetchData,
+  errorMessage,
+  error,
+  successMessage
+} = useExpenseData();
+
+// 封装 fetchData
+const fetchData = async (forceRefresh = false) => {
+  console.log('fetchData called, forceRefresh:', forceRefresh);
+  await originalFetchData(forceRefresh);
+  await loadCsvExpenses();
+};
+
+// 载入消费数据（从本地数据库）
+const loadCsvExpenses = async () => {
+  if (isLoadingCsv.value) return;
+  isLoadingCsv.value = true;
+
+  try {
+    // 使用本地存储获取所有数据，传递正确的参数格式
+    const res = await getExpenses(1, 10000);
+    
+    let parsedData = [];
+    
+    // 适配不同的数据格式
+    if (Array.isArray(res)) {
+      // 本地存储格式：直接返回数组
+      parsedData = res;
+    } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+      // 新API格式：{ data: [...], total: number, page: number, limit: number }
+      parsedData = res.data.data;
+    } else if (Array.isArray(res.data)) {
+      // 旧API格式：直接返回数组
+      parsedData = res.data;
+    }
+
+    // 确保数据格式正确
+    csvExpenses.value = parsedData
+      .map(item => ({
+        type: item.type?.trim() || item.type,
+        remark: item.remark?.trim() || item.remark,
+        amount: Number(item.amount),
+        time: item.time
+      }))
+      .filter(item => !isNaN(item.amount) && item.amount > 0);
+
+    if (csvExpenses.value.length === 0) {
+      console.warn('loadCsvExpenses: No valid data found in API response');
+    } else {
+      console.log('loadCsvExpenses: Data loaded, count:', csvExpenses.value.length);
+    }
+  } catch (err) {
+    const errorInfo = err.response
+      ? `${err.response.status} ${err.message}: ${JSON.stringify(err.response.data)}`
+      : err.message;
+    errorMessage.value = t('error.loadCsvFailed', { error: errorInfo });
+    error.value = errorMessage.value;
+
+    console.error('loadCsvExpenses: Error Details:', err);
+    csvExpenses.value = [];
+  } finally {
+    isLoadingCsv.value = false;
+  }
+};
+
+// 新增：处理单个记录选择变化
+const handleRecordSelectChange = () => {
+  const allSelected = multiRecords.value.every(record => record.selected);
+  const noneSelected = multiRecords.value.every(record => !record.selected);
+  
+  selectAll.value = allSelected;
+  // 处理半选中状态
+  if (!allSelected && !noneSelected) {
+    selectAll.value = undefined;
+  }
+};
+
+// 新增：处理多条记录对话框取消
+const handleMultiRecordsCancel = () => {
+  showMultiRecordsDialog.value = false;
+  multiRecords.value = [];
+  selectAll.value = false;
+};
+
+// 新增：处理多条记录提交
+const handleMultiRecordsSubmit = async () => {
+  try {
+    // 获取所有选中的记录
+    const selectedRecords = multiRecords.value.filter(record => record.selected);
+    
+    if (selectedRecords.length === 0) {
+      ElMessage.warning('请至少选择一条记录');
+      return;
+    }
+    
+    // 验证并格式化所有记录
+    const validRecords = [];
+    for (const record of selectedRecords) {
+      // 验证金额
+      if (!record.amount || isNaN(record.amount) || Number(record.amount) <= 0) {
+        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的金额无效`);
+      }
+      
+      // 验证类型
+      if (!record.type) {
+        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的类型不能为空`);
+      }
+      
+      // 验证日期
+      if (!record.date) {
+        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的日期不能为空`);
+      }
+      
+      // 格式化记录
+      validRecords.push({
+        type: record.type,
+        amount: parseFloat(parseFloat(record.amount).toFixed(2)),
+        remark: record.remark || '',
+        time: record.date // 服务器需要的时间字段
+      });
+    }
+    
+    // 提交所有记录到本地存储
+    for (const record of validRecords) {
+      await addExpense(record);
+    }
+    
+    // 关闭对话框
+    showMultiRecordsDialog.value = false;
+    
+    // 刷新数据
+    await fetchData(true);
+    
+    ElMessage.success(`${validRecords.length}条记录添加成功`);
+    
+    // 重置数据
+    multiRecords.value = [];
+    selectAll.value = false;
+  } catch (error) {
+    console.error('批量添加记录失败:', error);
+    ElMessage.error(`添加记录失败: ${error.message}`);
+  }
+};
+
+// 处理反馈按钮点击事件
+const handleFeedback = () => {
+  try {
+    const feedbackUrl = 'https://wj.qq.com/s2/24109109/3572/';
+    window.open(feedbackUrl, '_blank');
+  } catch (error) {
+    console.error('打开反馈链接失败:', error);
+    ElMessage.error('打开反馈链接失败，请重试');
+  }
+};
+
+// Function to force the browser to re-fetch new frontend data
+const refreshPage = () => {
+  // Force a full reload to bypass cache and fetch fresh data
+  // Add a timestamp parameter to ensure the cache is invalidated
+  if (window.location.reload) {
+    window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
+    window.location.reload(true);
+  }
+}
+
+</script>
+
+<style scoped>
+/* 定义 CSS 变量 */
+:root {
+  /* 弹窗样式变量 */
+  --popup-bg: rgba(0,0,0,0.5);
+  --popup-content-bg: #fff;
+  --popup-btn-bg: #4CAF50;
+  --popup-btn-color: white;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --bg-primary: #fff;
+  --border-primary: #e0e0e0;
+  --primary-color: #4CAF50;
+  --error-bg: #ffebee;
+  --error-border: #ffcdd2;
+  --donation-modal-overlay: rgba(0, 0, 0, 0.8);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: var(--text-primary);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.error-alert {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 8px;
+  color: #d32f2f;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer; /* 添加手势 */
+}
+
+.prev-btn, .next-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.chart-btn {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+}
+
+.chart-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: transparent;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem;
+  min-height: 120px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .chart-controls {
+    margin: 1.5rem 0;
+  }
+
+  .month-label {
+    font-size: 1rem;
+  }
+
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* 过渡动画 */
+.chart-enter-active,
+.chart-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.chart-enter-from,
+.chart-leave-to {
+  opacity: 0;
+}
+
+.button-enter-active,
+.button-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.button-enter-from,
+.button-leave-to {
+  opacity: 0;
+}
+/* 日期时间显示样式 */
+.datetime-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.datetime-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.date-part {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.time-part {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  letter-spacing: 1px;
+  animation: timePulse 1s ease-in-out infinite;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .datetime-container {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .date-part {
+    color: #e5e7eb;
+  }
+  
+  .time-part {
+    color: #4ade80;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .datetime-container {
+    margin: 1rem 0;
+    padding: 0.8rem;
+  }
+  
+  .date-part {
+    font-size: 1rem;
+  }
+  
+  .time-part {
+    font-size: 1.2rem;
+  }
+}
+
+/* 输入框容器（修正选择器确保生效） */
+.confirm-input-container {
+  position: relative;
+  margin: 1.5rem 0;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* 输入框基础样式（添加组件作用域前缀） */
+.confirm-input {
+  width: 90%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+/* 输入框占位符样式 */
+.confirm-input::placeholder {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* 悬停效果 */
+.confirm-input:hover {
+  border-color: #b0b0b0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 聚焦效果 */
+.confirm-input:focus {
+  border-color: #4361ee;
+  box-shadow:
+    0 4px 12px rgba(67, 97, 238, 0.2),
+    0 0 0 3px rgba(67, 97, 238, 0.15);
+  transform: translateY(-1px);
+}
+
+/* 输入框标签动画 */
+.confirm-input-label {
+  position: absolute;
+  top: 13px;
+  left: 15px;
+  color: #888;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  background: white;
+  padding: 0 4px;
+}
+
+.confirm-input:focus + .input-label,
+.confirm-input:not(:placeholder-shown) + .input-label {
+  top: -8px;
+  left: 10px;
+  font-size: 0.8rem;
+  color: #4361ee;
+  font-weight: 600;
+}
+
+/* 错误状态 */
+.confirm-input-error .custom-input {
+  border-color: #f44336;
+}
+
+.confirm-input-error .input-label {
+  color: #f44336;
+}
+
+/* 禁用状态 */
+.confirm-input:disabled {
+  background: #f8f8f8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 悬浮刷新按钮样式 */
+.floating-refresh-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.floating-refresh-btn .el-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.floating-refresh-btn .el-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 全局强制捐款弹窗样式 */
+.donation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  opacity: 0.95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999; /* 确保在最顶层 */
+  overflow: hidden;
+}
+
+.donation-modal-content {
+  background: var(--popup-content-bg);
+  padding: 2.5rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: donationModalAppear 0.5s ease-out;
+}
+
+@keyframes donationModalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.donation-modal-title {
+  font-size: 1.8rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.donation-modal-message {
+  font-size: 1.1rem;
+  color: white;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.donation-amount-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.donation-amount-input {
+  width: 120px;
+  padding: 0.75rem 1rem;
+  font-size: 1.2rem;
+  border: 2px solid var(--border-primary);
+  border-radius: 6px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.donation-amount-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.donation-currency {
+  font-size: 1.2rem;
+  color: white;
+}
+
+.donation-modal-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.donation-modal-footer .el-button {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
+}
+
+/* 阻止背景滚动 */
+body.donation-modal-open {
+  overflow: hidden;
+}
+
+/* AI报告内容的Markdown样式 */
+.report-content {
+  line-height: 1.6;
+  padding: 10px 0;
+}
+
+.report-content h1,
+.report-content h2,
+.report-content h3,
+.report-content h4,
+.report-content h5,
+.report-content h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.report-content h1 {
+  font-size: 1.8em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.3em;
+}
+
+.report-content h2 {
+  font-size: 1.5em;
+}
+
+.report-content h3 {
+  font-size: 1.2em;
+}
+
+.report-content p {
+  margin-bottom: 1em;
+  color: var(--text-primary);
+}
+
+.report-content ul,
+.report-content ol {
+  margin-left: 2em;
+  margin-bottom: 1em;
+  color: var(--text-primary);
+}
+
+.report-content li {
+  margin-bottom: 0.5em;
+}
+
+.report-content strong {
+  font-weight: 600;
+}
+
+.report-content em {
+  font-style: italic;
+}
+
+.report-content code {
+  background-color: #f5f5f5;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+.report-content pre {
+  background-color: #f5f5f5;
+  padding: 1em;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.report-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.report-content blockquote {
+  border-left: 4px solid #ddd;
+  padding-left: 1em;
+  color: #666;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 1em;
+}
+
+.report-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+
+.report-content th,
+.report-content td {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+}
+
+.report-content th {
+  background-color: #f9f9f9;
+  font-weight: 600;
+}
+
+.report-content tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .report-content h1,
+  .report-content h2,
+  .report-content h3,
+  .report-content p,
+  .report-content ul,
+  .report-content ol {
+    color: #e5e7eb;
+  }
+  
+  .report-content h1 {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .report-content code,
+  .report-content pre {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .report-content blockquote {
+    border-left-color: rgba(255, 255, 255, 0.2);
+    color: #9ca3af;
+  }
+  
+  .report-content th {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .report-content tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .report-content th,
+  .report-content td {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+</style>
