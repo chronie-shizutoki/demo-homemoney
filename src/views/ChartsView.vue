@@ -51,8 +51,8 @@ const loadCsvExpenses = async () => {
   isLoadingCsv.value = true;
 
   try {
-    // 使用本地存储获取所有数据
-    const res = await getExpenses({ limit: 10000 });
+    // 使用本地存储获取所有数据，参数格式：(page, limit)
+    const res = await getExpenses(1, 10000);
     
     let parsedData = [];
     
