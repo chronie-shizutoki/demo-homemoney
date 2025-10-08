@@ -59,12 +59,12 @@ const localMiniApps = [
     path: '/miniapp/calculator/index.html'
   },
   {
-    id: 'text-encryptor',
+    id: 'text-encryptor-tool',
     name: "文本加密工具",
     description: "使用AES-256加密算法的文本加密工具，支持将加密结果转换为拟声词组合",
     version: "1.0.0",
     author: "胖猪",
-    path: "/miniapp/text-encryptor/index.html"
+    path: "/miniapp/text-encryptor-tool/index.html"
   }
 ];
 
