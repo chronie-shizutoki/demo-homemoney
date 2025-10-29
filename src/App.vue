@@ -65,7 +65,6 @@ button {
   border-radius: var(--border-radius) !important;
   cursor: pointer !important;
   transition: all var(--transition-time) ease !important;
-  font-family: inherit !important;
   font-size: inherit !important;
 }
 
