@@ -5,13 +5,14 @@
         <div class="loading">{{ t('app.loading') }}</div>
       </template>
     </Suspense>
-
+    <Watermark />
 </template>
 
 <script setup>
 import { watchEffect, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import Watermark from './components/Watermark.vue';
 
 const { t } = useI18n();
 const router = useRouter();

@@ -1,4 +1,5 @@
 {
+  "app.locale": "zh-CN",
   "demo.NotSupported": "演示版本不支持此功能",
   "common.back": "返回",
   "chart.title": "支出图表分析",

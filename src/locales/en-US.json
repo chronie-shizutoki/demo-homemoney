@@ -1,4 +1,5 @@
 {
+  "app.locale": "en-US",
   "demo.NotSupported": "Demo version does not support this feature",
   "common.back": "Back",
   "error.dataInitializationFailed": "Data initialization failed, please try again later",

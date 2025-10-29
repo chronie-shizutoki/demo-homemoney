@@ -1,4 +1,5 @@
 {
+  "app.locale": "zh-TW",
   "demo.NotSupported": "演示版本不支持此功能",
   "common.back": "返回",
   "error.dataInitializationFailed": "資料初始化失敗，請稍後再試",

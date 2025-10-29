@@ -34,6 +34,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SpendingLimitDisplay: typeof import('./src/components/SpendingLimitDisplay.vue')['default']
     SpendingLimitSetting: typeof import('./src/components/SpendingLimitSetting.vue')['default']
+    Watermark: typeof import('./src/components/Watermark.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
