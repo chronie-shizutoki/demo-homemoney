@@ -29,9 +29,7 @@ export default defineConfig({
           element: ['element-plus'],
           utils: ['axios', 'dayjs'],
           // 拆分大型依赖包
-          excel: ['xlsx'],
-          csv: ['papaparse'],
-          markdown: ['marked']
+          excel: ['xlsx']
         }
       }
     },

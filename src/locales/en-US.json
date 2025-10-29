@@ -53,10 +53,7 @@
   },
   "home": {
     "closeButton": "× Close",
-    "expenseAnalysisReportTitle": "Spending Analysis",
     "goToAddExpenseRecord": "Log Expense",
-    "viewExpenseAnalysisReport": "View Report",
-    "viewDocument": "Current Month Spending Analysis Report",
     "prevMonth": "Previous Month",
     "nextMonth": "Next Month",
     "dailyTrend": "Daily Spending",
@@ -223,49 +220,6 @@
   "common.perPage": "per page",
   "common.prev": "Previous",
   "common.next": "Next",
-  "todo": {
-    "title": "Todo List",
-    "placeholder": "Enter a new todo item...",
-    "add": "Add",
-    "total": "Total",
-    "completed": "Completed",
-    "pending": "Pending",
-    "clearCompleted": "Clear Completed",
-    "confirmClearCompleted": "Are you sure you want to clear all completed todos?",
-    "warning": "Warning",
-    "clearedSuccess": "Completed todos cleared successfully",
-    "filter": {
-      "all": "All",
-      "pending": "Pending",
-      "completed": "Completed"
-    },
-    "empty": {
-      "all": "No todos yet. Add your first todo!",
-      "pending": "All todos completed! Great job!",
-      "completed": "No completed todos yet."
-    }
-  },
-    "donation": {
-    "title": "Support Us",
-    "description": "Thank you for using the Household Finance Management App! Your donation will help us continuously improve and maintain this project.",
-    "username": "Username",
-    "amount": "Donation Amount",
-    "enterUsername": "Please enter your username",
-    "enterCustomAmount": "Or enter a custom amount",
-    "submitDonation": "Confirm Donation",
-    "usernameRequired": "Please enter your username",
-    "amountRequired": "Please enter the donation amount",
-    "amountMustBeNumber": "Amount must be a number",
-    "amountMustBePositive": "Amount must be greater than 0",
-    "amountMustBeAtLeast100": "Amount must be at least 100",
-    "amountMaxTwoDecimals": "Amount can have a maximum of two decimal places",
-    "successTitle": "Donation Successful",
-    "failureTitle": "Donation Failed",
-    "successMessage": "Thank you for your ${amount} donation! Your support will help us continuously improve the app.",
-    "donationSuccess": "Donation submitted successfully",
-    "donationFailure": "Donation submission failed. Please try again later.",
-    "transactionId": "Transaction ID"
-  },
   "spending": {
     "title": "Monthly Spending Limit",
     "monthlyProgress": "Monthly Spending Progress",

@@ -5,11 +5,10 @@
 class BrowserDB {
   constructor() {
     this.dbName = 'HomeMoneyDB';
-    this.dbVersion = 2; // 增加版本号以支持新的存储结构
+    this.dbVersion = 20251030; // 增加版本号以支持新的存储结构
     this.stores = {
       expenses: 'expenses',
       debts: 'debts',
-      todos: 'todos',
       settings: 'settings'
     };
     this.db = null;
@@ -45,15 +44,6 @@ class BrowserDB {
           debtStore.createIndex('date', 'date');
           debtStore.createIndex('type', 'type');
           debtStore.createIndex('isRepaid', 'isRepaid');
-        }
-
-        // 创建待办事项存储
-        if (!this.db.objectStoreNames.contains(this.stores.todos)) {
-          const todoStore = this.db.createObjectStore(this.stores.todos, {
-            keyPath: 'id'
-          });
-          todoStore.createIndex('completed', 'completed');
-          todoStore.createIndex('createdAt', 'createdAt');
         }
 
         // 创建设置存储
@@ -319,51 +309,6 @@ class BrowserDB {
     });
   }
 
-  // =============== 待办事项操作 ===============
-
-  /**
-   * 获取所有待办事项
-   */
-  async getTodos() {
-    await this.ensureDB();
-    const store = this.getTransaction(this.stores.todos);
-    
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => {
-        resolve(request.result || []);
-      };
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  /**
-   * 保存待办事项列表
-   */
-  async saveTodos(todos) {
-    await this.ensureDB();
-    const store = this.getTransaction(this.stores.todos, 'readwrite');
-    
-    return new Promise((resolve, reject) => {
-      const transaction = store.transaction;
-      
-      // 先清空现有数据
-      store.clear();
-      
-      // 保存新数据
-      try {
-        todos.forEach(todo => {
-          store.put(todo);
-        });
-        
-        transaction.oncomplete = () => resolve({ success: true });
-        transaction.onerror = () => reject(transaction.error);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
   // =============== 设置操作 ===============
 
   /**
@@ -400,16 +345,14 @@ class BrowserDB {
    * 导出所有数据（用于备份）
    */
   async exportAllData() {
-    const [expenses, debts, todos] = await Promise.all([
+    const [expenses, debts] = await Promise.all([
       this.getExpenses(),
-      this.getDebts(),
-      this.getTodos()
+      this.getDebts()
     ]);
     
     return {
       expenses,
       debts,
-      todos,
       exportTime: new Date().toISOString()
     };
   }
@@ -458,19 +401,17 @@ class BrowserDB {
     
     // 使用一个事务处理所有导入操作
     const transaction = this.db.transaction(
-      [this.stores.expenses, this.stores.debts, this.stores.todos],
+      [this.stores.expenses, this.stores.debts],
       'readwrite'
     );
     
     const expenseStore = transaction.objectStore(this.stores.expenses);
     const debtStore = transaction.objectStore(this.stores.debts);
-    const todoStore = transaction.objectStore(this.stores.todos);
     
     // 清空现有数据
     await Promise.all([
       new Promise(resolve => { expenseStore.clear().onsuccess = resolve; }),
-      new Promise(resolve => { debtStore.clear().onsuccess = resolve; }),
-      new Promise(resolve => { todoStore.clear().onsuccess = resolve; })
+      new Promise(resolve => { debtStore.clear().onsuccess = resolve; })
     ]);
     
     // 导入新数据
@@ -480,10 +421,6 @@ class BrowserDB {
     
     if (data.debts && Array.isArray(data.debts)) {
       data.debts.forEach(debt => debtStore.add(debt));
-    }
-    
-    if (data.todos && Array.isArray(data.todos)) {
-      data.todos.forEach(todo => todoStore.add(todo));
     }
     
     return new Promise((resolve, reject) => {

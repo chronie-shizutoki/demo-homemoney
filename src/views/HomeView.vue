@@ -28,7 +28,6 @@
             <el-icon><Plus /></el-icon>
             {{ t('expense.addRecord') }}
           </el-button>
-          当月报告功能在演示版本不可用
           <el-upload
               class="upload-excel"
               :show-file-list="false"
@@ -43,16 +42,6 @@
             </el-upload>
         </div>
       </el-card>
-
-      <!-- AI功能组 -->
-      <el-card>
-        <template #header>
-          <div class="card-header">
-            <span>AI</span>
-          </div>
-        </template>
-        AI功能在演示版本不可用
-      </el-card>
       
       <!-- 其他组件组 -->
       <el-card>
@@ -62,25 +51,10 @@
           </div>
         </template>
         <div class="card-content">
-          <el-button type="success" @click="showTodoDialog = true" size="default">
-            <el-icon><List /></el-icon>
-            {{ t('todo.title') }}
-          </el-button>
           <el-button type="warning" @click="goToDebts" size="default">
             <el-icon><CreditCard /></el-icon>
             {{ t('debt.title') }}
           </el-button>
-        </div>
-      </el-card>
-      
-      <!-- 小程序功能组 -->
-      <el-card>
-        <template #header>
-          <div class="card-header">
-            <span>{{ t('miniapp.title') }}</span>
-          </div>
-        </template>
-        <div class="card-content">
           <el-button type="primary" @click="showMiniAppManager = true" size="default">
             <el-icon><Box /></el-icon>
             {{ t('miniapp.title') }}
@@ -95,7 +69,6 @@
             <span>{{ t('function.aboutus') }}</span>
           </div>
         </template>
-        支持功能在演示版本不可用
         <div class="card-content">
           <el-button type="primary" @click="handleFeedback" size="default">
             <el-icon><Message /></el-icon>
@@ -155,17 +128,6 @@
       <el-button type="primary" @click="handleAddRecord">{{ t('common.confirm') }}</el-button>
     </template>
   </el-dialog>
-
-    <MarkdownDialog
-      v-model:visible="showMarkdownDialog"
-      :title="markdownTitle"
-      :content="markdownContent"
-    />
-
-    <!-- 待办事项对话框 -->
-    <el-dialog v-model="showTodoDialog" :title="t('todo.title')" width="90%" top="5vh">
-      <TodoList />
-  </el-dialog>
   
   <!-- 小程序管理器对话框 -->
   <el-dialog v-model="showMiniAppManager" :title="t('miniapp.title')" width="90%" top="10vh">
@@ -179,15 +141,13 @@
 
 <script setup>
 import { ElButton, ElDialog, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElIcon, ElMessage, ElUpload } from 'element-plus';
-import { Plus, Document, List, Box, Refresh, Upload, Money, CreditCard, Cpu, PieChart, Message } from '@element-plus/icons-vue';
-import { ref, computed, onMounted, onBeforeUnmount, reactive, defineAsyncComponent, watch } from 'vue';
-import { marked } from 'marked';
+import { Plus, Box, Upload, CreditCard, PieChart, Message } from '@element-plus/icons-vue';
+import { ref, onMounted, onBeforeUnmount, reactive, defineAsyncComponent, watch } from 'vue';
 import * as XLSX from 'xlsx';
 import { addExpense, getExpenses } from '@/utils/browserDB';
 
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import Papa from 'papaparse';
 
 import { useExpenseData } from '@/composables/useExpenseData';
 import { useExcelExport } from '@/composables/useExcelExport';
@@ -197,7 +157,6 @@ const Header = defineAsyncComponent(() => import('@/components/Header.vue'));
 const ExpenseList = defineAsyncComponent(() => import('@/components/ExpenseList.vue'));
 const ExpenseCharts = defineAsyncComponent(() => import('@/components/ExpenseCharts.vue'));
 const ExportButton = defineAsyncComponent(() => import('@/components/ExportButton.vue'));
-const TodoList = defineAsyncComponent(() => import('@/components/TodoList.vue'));
 const SpendingLimitDisplay = defineAsyncComponent(() => import('@/components/SpendingLimitDisplay.vue'));
 const MiniAppManager = defineAsyncComponent(() => import('@/components/MiniAppManager.vue'));
 
@@ -206,32 +165,8 @@ const router = useRouter();
 
 // 按钮状态变量
 const showAddDialog = ref(false);
-const showMarkdownDialog = ref(false);
-const showTodoDialog = ref(false);
-const showAiAddDialog = ref(false);
-// 新增：显示多条记录的对话框
-const showMultiRecordsDialog = ref(false);
 // 新增：显示小程序管理器对话框
 const showMiniAppManager = ref(false);
-const aiForm = reactive({
-  text: '',
-  image: []
-});
-const isParsing = ref(false);
-// 新增：存储多条记录的数据结构
-const multiRecords = ref([]);
-// 新增：全选状态
-const selectAll = ref(false);
-// 新增：报告相关状态
-const isGeneratingReport = ref(false);
-const reportContent = ref('');
-const reportQuestion = ref('');
-
-// 配置marked选项
-marked.setOptions({
-  breaks: true,
-  gfm: true
-});
 
 // 前往债务管理页面
 const goToDebts = () => {
@@ -307,8 +242,6 @@ const handleExcelUpload = async (file) => {
   }
 };
 
-const markdownContent = ref('');
-const markdownTitle = ref('');
 // 当前日期时间状态
 const currentDateTime = ref('');
 const formattedDate = ref('');
@@ -538,85 +471,6 @@ const loadCsvExpenses = async () => {
     csvExpenses.value = [];
   } finally {
     isLoadingCsv.value = false;
-  }
-};
-
-// 新增：处理单个记录选择变化
-const handleRecordSelectChange = () => {
-  const allSelected = multiRecords.value.every(record => record.selected);
-  const noneSelected = multiRecords.value.every(record => !record.selected);
-  
-  selectAll.value = allSelected;
-  // 处理半选中状态
-  if (!allSelected && !noneSelected) {
-    selectAll.value = undefined;
-  }
-};
-
-// 新增：处理多条记录对话框取消
-const handleMultiRecordsCancel = () => {
-  showMultiRecordsDialog.value = false;
-  multiRecords.value = [];
-  selectAll.value = false;
-};
-
-// 新增：处理多条记录提交
-const handleMultiRecordsSubmit = async () => {
-  try {
-    // 获取所有选中的记录
-    const selectedRecords = multiRecords.value.filter(record => record.selected);
-    
-    if (selectedRecords.length === 0) {
-      ElMessage.warning('请至少选择一条记录');
-      return;
-    }
-    
-    // 验证并格式化所有记录
-    const validRecords = [];
-    for (const record of selectedRecords) {
-      // 验证金额
-      if (!record.amount || isNaN(record.amount) || Number(record.amount) <= 0) {
-        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的金额无效`);
-      }
-      
-      // 验证类型
-      if (!record.type) {
-        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的类型不能为空`);
-      }
-      
-      // 验证日期
-      if (!record.date) {
-        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的日期不能为空`);
-      }
-      
-      // 格式化记录
-      validRecords.push({
-        type: record.type,
-        amount: parseFloat(parseFloat(record.amount).toFixed(2)),
-        remark: record.remark || '',
-        time: record.date // 服务器需要的时间字段
-      });
-    }
-    
-    // 提交所有记录到本地存储
-    for (const record of validRecords) {
-      await addExpense(record);
-    }
-    
-    // 关闭对话框
-    showMultiRecordsDialog.value = false;
-    
-    // 刷新数据
-    await fetchData(true);
-    
-    ElMessage.success(`${validRecords.length}条记录添加成功`);
-    
-    // 重置数据
-    multiRecords.value = [];
-    selectAll.value = false;
-  } catch (error) {
-    console.error('批量添加记录失败:', error);
-    ElMessage.error(`添加记录失败: ${error.message}`);
   }
 };
 
@@ -1010,152 +864,5 @@ const refreshPage = () => {
 /* 阻止背景滚动 */
 body.donation-modal-open {
   overflow: hidden;
-}
-
-/* AI报告内容的Markdown样式 */
-.report-content {
-  line-height: 1.6;
-  padding: 10px 0;
-}
-
-.report-content h1,
-.report-content h2,
-.report-content h3,
-.report-content h4,
-.report-content h5,
-.report-content h6 {
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.report-content h1 {
-  font-size: 1.8em;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.3em;
-}
-
-.report-content h2 {
-  font-size: 1.5em;
-}
-
-.report-content h3 {
-  font-size: 1.2em;
-}
-
-.report-content p {
-  margin-bottom: 1em;
-  color: var(--text-primary);
-}
-
-.report-content ul,
-.report-content ol {
-  margin-left: 2em;
-  margin-bottom: 1em;
-  color: var(--text-primary);
-}
-
-.report-content li {
-  margin-bottom: 0.5em;
-}
-
-.report-content strong {
-  font-weight: 600;
-}
-
-.report-content em {
-  font-style: italic;
-}
-
-.report-content code {
-  background-color: #f5f5f5;
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.9em;
-}
-
-.report-content pre {
-  background-color: #f5f5f5;
-  padding: 1em;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin-bottom: 1em;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.report-content pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.report-content blockquote {
-  border-left: 4px solid #ddd;
-  padding-left: 1em;
-  color: #666;
-  margin-left: 0;
-  margin-right: 0;
-  margin-bottom: 1em;
-}
-
-.report-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1em;
-}
-
-.report-content th,
-.report-content td {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-}
-
-.report-content th {
-  background-color: #f9f9f9;
-  font-weight: 600;
-}
-
-.report-content tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-  .report-content h1,
-  .report-content h2,
-  .report-content h3,
-  .report-content p,
-  .report-content ul,
-  .report-content ol {
-    color: #e5e7eb;
-  }
-  
-  .report-content h1 {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .report-content code,
-  .report-content pre {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .report-content blockquote {
-    border-left-color: rgba(255, 255, 255, 0.2);
-    color: #9ca3af;
-  }
-  
-  .report-content th {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .report-content tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .report-content th,
-  .report-content td {
-    border-color: rgba(255, 255, 255, 0.1);
-  }
 }
 </style>
