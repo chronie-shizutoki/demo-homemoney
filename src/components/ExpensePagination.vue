@@ -34,7 +34,8 @@ export default {
     currentPage: Number,
     totalPages: Number,
     visiblePages: Array
-  }
+  },
+  emits: ['page-change']
 };
 </script>
 

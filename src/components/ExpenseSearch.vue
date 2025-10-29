@@ -24,21 +24,23 @@
               <div class="select-trigger">
                 <span>{{ month ? formatMonthLabelByLocale(month, props.locale) : $t('expense.search.allMonth') }}</span>
                 <i class="select-icon"></i>
-              </div>
-              <div v-if="isMonthOpen" class="select-dropdown">
-                <div class="select-option" :class="{ 'selected': !month }" @click.stop="setDropdownValue('month', '')">
-                  {{ $t('expense.search.allMonth') }}
+                    </div>
+              <transition name="dropdown-fade">
+                <div v-if="isMonthOpen" class="select-dropdown">
+                  <div class="select-option" :class="{ 'selected': !month }" @click.stop="setDropdownValue('month', '')">
+                    {{ $t('expense.search.allMonth') }}
+                  </div>
+                  <div 
+                    v-for="option in monthOptions" 
+                    :key="option.value" 
+                    class="select-option" 
+                    :class="{ 'selected': month === option.value }" 
+                    @click.stop="setDropdownValue('month', option.value)"
+                  >
+                    {{ option.label }}
+                  </div>
                 </div>
-                <div 
-                  v-for="option in monthOptions" 
-                  :key="option.value" 
-                  class="select-option" 
-                  :class="{ 'selected': month === option.value }" 
-                  @click.stop="setDropdownValue('month', option.value)"
-                >
-                  {{ option.label }}
-                </div>
-              </div>
+              </transition>
             </div>
           </div>
         </div>
@@ -56,20 +58,22 @@
                 <span>{{ type || $t('expense.search.allType') }}</span>
                 <i class="select-icon"></i>
               </div>
-              <div v-if="isTypeOpen" class="select-dropdown">
-                <div class="select-option" :class="{ 'selected': !type }" @click.stop="setDropdownValue('type', '')">
-                  {{ $t('expense.search.allType') }}
+              <transition name="dropdown-fade">
+                <div v-if="isTypeOpen" class="select-dropdown">
+                  <div class="select-option" :class="{ 'selected': !type }" @click.stop="setDropdownValue('type', '')">
+                    {{ $t('expense.search.allType') }}
+                  </div>
+                  <div 
+                    v-for="item in uniqueTypes" 
+                    :key="item" 
+                    class="select-option" 
+                    :class="{ 'selected': type === item }" 
+                    @click.stop="setDropdownValue('type', item)"
+                  >
+                    {{ item }}
+                  </div>
                 </div>
-                <div 
-                  v-for="item in uniqueTypes" 
-                  :key="item" 
-                  class="select-option" 
-                  :class="{ 'selected': type === item }" 
-                  @click.stop="setDropdownValue('type', item)"
-                >
-                  {{ item }}
-                </div>
-              </div>
+              </transition>
             </div>
           </div>
         </div>
@@ -92,20 +96,22 @@
                 </span>
                 <i class="select-icon"></i>
               </div>
-              <div v-if="isSortOpen" class="select-dropdown">
-                <div class="select-option" :class="{ 'selected': sortOption === 'dateDesc' }" @click.stop="setDropdownValue('sort', 'dateDesc')">
-                  {{ $t('expense.sort.dateDesc') }}
+              <transition name="dropdown-fade">
+                <div v-if="isSortOpen" class="select-dropdown">
+                  <div class="select-option" :class="{ 'selected': sortOption === 'dateDesc' }" @click.stop="setDropdownValue('sort', 'dateDesc')">
+                    {{ $t('expense.sort.dateDesc') }}
+                  </div>
+                  <div class="select-option" :class="{ 'selected': sortOption === 'dateAsc' }" @click.stop="setDropdownValue('sort', 'dateAsc')">
+                    {{ $t('expense.sort.dateAsc') }}
+                  </div>
+                  <div class="select-option" :class="{ 'selected': sortOption === 'amountDesc' }" @click.stop="setDropdownValue('sort', 'amountDesc')">
+                    {{ $t('expense.sort.amountDesc') }}
+                  </div>
+                  <div class="select-option" :class="{ 'selected': sortOption === 'amountAsc' }" @click.stop="setDropdownValue('sort', 'amountAsc')">
+                    {{ $t('expense.sort.amountAsc') }}
+                  </div>
                 </div>
-                <div class="select-option" :class="{ 'selected': sortOption === 'dateAsc' }" @click.stop="setDropdownValue('sort', 'dateAsc')">
-                  {{ $t('expense.sort.dateAsc') }}
-                </div>
-                <div class="select-option" :class="{ 'selected': sortOption === 'amountDesc' }" @click.stop="setDropdownValue('sort', 'amountDesc')">
-                  {{ $t('expense.sort.amountDesc') }}
-                </div>
-                <div class="select-option" :class="{ 'selected': sortOption === 'amountAsc' }" @click.stop="setDropdownValue('sort', 'amountAsc')">
-                  {{ $t('expense.sort.amountAsc') }}
-                </div>
-              </div>
+              </transition>
             </div>
           </div>
         </div>
@@ -173,6 +179,9 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatMonthLabelByLocale } from '@/utils/dateFormatter';
 
+// 在setup顶层调用useI18n
+const { t, locale } = useI18n();
+
 const props = defineProps({
   uniqueTypes: Array,
   initialKeyword: String,
@@ -218,18 +227,26 @@ onMounted(() => {
 
 // 切换下拉菜单显示状态
 const toggleDropdown = (dropdownType) => {
+  // 如果点击的是当前打开的下拉菜单，则关闭它
+  const isCurrentlyOpen = 
+    (dropdownType === 'month' && isMonthOpen.value) ||
+    (dropdownType === 'type' && isTypeOpen.value) ||
+    (dropdownType === 'sort' && isSortOpen.value);
+  
   // 先关闭所有下拉菜单
   isMonthOpen.value = false;
   isTypeOpen.value = false;
   isSortOpen.value = false;
   
-  // 再打开被点击的下拉菜单
-  if (dropdownType === 'month') {
-    isMonthOpen.value = true;
-  } else if (dropdownType === 'type') {
-    isTypeOpen.value = true;
-  } else if (dropdownType === 'sort') {
-    isSortOpen.value = true;
+  // 如果当前点击的不是打开的菜单，则打开它
+  if (!isCurrentlyOpen) {
+    if (dropdownType === 'month') {
+      isMonthOpen.value = true;
+    } else if (dropdownType === 'type') {
+      isTypeOpen.value = true;
+    } else if (dropdownType === 'sort') {
+      isSortOpen.value = true;
+    }
   }
 };
 
@@ -268,6 +285,26 @@ const maxSliderValue = computed(() => {
   return props.maxAmountRange || 5000;
 });
 
+// 生成搜索参数对象的计算属性
+const searchParams = computed(() => {
+  // 验证并转换数值类型
+  const min = minAmount.value !== '' ? Number(minAmount.value) : undefined;
+  const max = maxAmount.value !== '' ? Number(maxAmount.value) : undefined;
+
+  // 确保数值有效性
+  const validMin = !isNaN(min) ? min : undefined;
+  const validMax = !isNaN(max) ? max : undefined;
+
+  return {
+    keyword: keyword.value,
+    type: type.value,
+    month: month.value,
+    minAmount: validMin,
+    maxAmount: validMax,
+    sort: sortOption.value
+  };
+});
+
 // 根据表格数据生成月份选项，无数据时显示最近12个月
 const generateMonthOptions = () => {
   let options = [];
@@ -275,7 +312,6 @@ const generateMonthOptions = () => {
   // 检查是否有可用的月份数据，并且数据数组不为空
   if (props.availableMonths?.length) {
     // 使用提供的月份数据，将每个月份转换为包含值和显示标签的对象
-    const { locale } = useI18n();
     options = props.availableMonths.map(month => {
       // 标准化语言环境以支持更多格式
       const localeMap = {
@@ -295,29 +331,20 @@ const generateMonthOptions = () => {
 
 // 搜索处理
 const handleSearch = () => {
-  // 验证并转换数值类型
-  const min = minAmount.value !== '' ? Number(minAmount.value) : undefined;
-  const max = maxAmount.value !== '' ? Number(maxAmount.value) : undefined;
-
-  // 确保数值有效性
-  const validMin = !isNaN(min) ? min : undefined;
-  const validMax = !isNaN(max) ? max : undefined;
-
   // 验证金额范围逻辑
-  if (validMin !== undefined && validMax !== undefined && validMin > validMax) {
+  const { minAmount, maxAmount } = searchParams.value;
+  if (minAmount !== undefined && maxAmount !== undefined && minAmount > maxAmount) {
     // 如果最小值大于最大值，交换它们
-    minAmount.value = validMax;
-    maxAmount.value = validMin;
+    minAmount.value = maxAmount;
+    maxAmount.value = minAmount;
     return;
   }
 
+  // 由于我们已经在searchParams计算属性中处理了数据验证，
+  // 这里可以直接使用该属性的值
   emit('search', {
-    keyword: keyword.value,
-    type: type.value,
-    month: month.value,
-    minAmount: validMin,
-    maxAmount: validMax,
-    sortOption: sortOption.value
+    ...searchParams.value,
+    sortOption: sortOption.value // 保留向后兼容性
   });
 };
 
@@ -358,10 +385,20 @@ const clearAmountFilter = () => {
 // 初始化月份选项
 onMounted(generateMonthOptions);
 
+// 监听availableMonths变化，当数据从父组件更新时重新生成月份选项
+watch(() => props.availableMonths, () => {
+  generateMonthOptions();
+}, { deep: true });
+
 // 监听所有筛选条件变化
 watch([keyword, type, month, minAmount, maxAmount, sortOption], () => {
   handleSearch();
 }, { deep: true });
+
+// 暴露方法给父组件
+defineExpose({
+  handleReset
+});
 </script>
 
   <style scoped>
@@ -496,6 +533,7 @@ watch([keyword, type, month, minAmount, maxAmount, sortOption], () => {
   .select-trigger:hover {
     border-color: #cbd5e0;
     background: #fff;
+    transition: all 0.2s ease;
   }
   
   .select-trigger:focus {
@@ -504,11 +542,15 @@ watch([keyword, type, month, minAmount, maxAmount, sortOption], () => {
     box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
   }
   
-  .select-icon {
-    width: 16px;
-    height: 16px;
-    position: relative;
-    transition: transform 0.2s ease;
+  .select-trigger {
+    transition: all 0.2s ease;
+  }
+  
+  .select-icon {    
+    width: 16px;    
+    height: 16px;    
+    position: relative;    
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);    
   }
   
   .select-icon::before {
@@ -525,6 +567,7 @@ watch([keyword, type, month, minAmount, maxAmount, sortOption], () => {
   
   .custom-select.open .select-icon {
     transform: rotate(180deg);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   
   .select-dropdown {
@@ -540,6 +583,45 @@ watch([keyword, type, month, minAmount, maxAmount, sortOption], () => {
     max-height: 240px;
     overflow-y: auto;
     z-index: 1000;
+    transform-origin: top center;
+  }
+  
+  /* Vue过渡动画类 - 增强版 */
+  .dropdown-fade-enter-active,
+  .dropdown-fade-leave-active {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .dropdown-fade-enter-from {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.9);
+    visibility: hidden;
+  }
+  
+  .dropdown-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.95);
+    visibility: hidden;
+  }
+  
+  /* 确保深色模式下也能看到动画 */
+  :deep(.dropdown-fade-enter-active),
+  :deep(.dropdown-fade-leave-active) {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  :deep(.dropdown-fade-enter-from),
+  :deep(.dropdown-fade-leave-to) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  
+  :deep(.dropdown-fade-enter-from) {
+    transform: translateY(-15px) scale(0.9);
+  }
+  
+  :deep(.dropdown-fade-leave-to) {
+    transform: translateY(-5px) scale(0.95);
   }
 
   /* 自定义滚动条样式 - 正常模式 */

@@ -23,6 +23,7 @@ export default {
       default: () => []
     }
   },
+  emits: ['select'],
   methods: {
     selectPrediction (prediction) {
       this.$emit('select', prediction);
