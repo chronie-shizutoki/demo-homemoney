@@ -361,12 +361,7 @@ const debounce = (func, wait) => {
           const context = ctx.getContext('2d');
           if (context) {
             // 清除Canvas内容
-            context.clearRect(0, 0, ctx.width, ctx.height);
-            // 重置Canvas的宽度和高度，强制清除所有状态
-            const width = ctx.width;
-            const height = ctx.height;
-            ctx.width = width;
-            ctx.height = height;
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
           }
         }
       } catch (error) {
@@ -376,7 +371,19 @@ const debounce = (func, wait) => {
 
       const chartData = prepareChartData(activeChart.value);
       
-      // 检查是否有数据点
+      // 检查是否有数据点，如果没有则不渲染图表
+      if (!chartData.labels || chartData.labels.length === 0) {
+        console.log('No data to display for chart:', activeChart.value);
+        // 清空canvas
+        if (ctx && ctx.getContext) {
+          const context = ctx.getContext('2d');
+          if (context) {
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+          }
+        }
+        return;
+      }
+      
       let options = {};
       
       // 通用配置，特别是针对移动设备的优化

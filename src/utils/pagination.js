@@ -67,8 +67,13 @@ export async function fetchAllPages(options = {}) {
     }
 
     if (totalCount <= pageSize) {
-      // 数据量小于等于一页，直接获取
-      const singlePageData = getDataFromResponse(firstResponse);
+      // 数据量小于等于一页，但需要使用正确的pageSize重新请求
+      const singlePageResponse = await makeApiCallWithRetry(
+        () => apiCall({ page: 1, limit: pageSize }),
+        config,
+        signal
+      );
+      const singlePageData = getDataFromResponse(singlePageResponse);
       console.log(`fetchAllPages: 数据量较小(${totalCount}条)，单页获取完成`);
       return singlePageData;
     }

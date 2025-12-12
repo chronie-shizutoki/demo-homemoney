@@ -50,6 +50,7 @@
   "expense.record.title": "Expense Records",
   "app": {
     "title": "Home Finance Tracker",
+    "locale": "English",
     "addRecord": "Add Expense",
     "statistics": "Spending Insights",
     "export": "Export Data",

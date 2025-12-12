@@ -53,6 +53,7 @@
   "howToUse.title": "使用说明",
   "app": {
     "title": "家庭记账本",
+    "locale": "中文简体",
     "addRecord": "记一笔",
     "statistics": "统计报表",
     "export": "导出数据",

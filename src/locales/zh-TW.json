@@ -51,6 +51,7 @@
   "expense.serverError": "伺服器錯誤",
   "app": {
     "title": "家庭記帳本",
+    "locale": "中文繁體",
     "addRecord": "新增記錄",
     "statistics": "統計報表",
     "export": "匯出資料",
