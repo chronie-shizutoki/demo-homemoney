@@ -240,10 +240,33 @@ class OfflineDataSync {
                      (expense.type && expense.type.toLowerCase().includes(keyword));
             });
           }
+          
+          // 金额范围过滤
+          const minAmount = parseFloat(searchParams.minAmount);
+          const maxAmount = parseFloat(searchParams.maxAmount);
+          if (!isNaN(minAmount)) {
+            expenses = expenses.filter(expense => parseFloat(expense.amount) >= minAmount);
+          }
+          if (!isNaN(maxAmount)) {
+            expenses = expenses.filter(expense => parseFloat(expense.amount) <= maxAmount);
+          }
         }
         
-        // 排序（按日期降序）
-        expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // 排序（根据参数）
+        const sortOption = searchParams?.sort || 'dateDesc';
+        expenses.sort((a, b) => {
+          if (sortOption === 'dateAsc') {
+            return new Date(a.date) - new Date(b.date);
+          } else if (sortOption === 'dateDesc') {
+            return new Date(b.date) - new Date(a.date);
+          } else if (sortOption === 'amountAsc') {
+            return parseFloat(a.amount) - parseFloat(b.amount);
+          } else if (sortOption === 'amountDesc') {
+            return parseFloat(b.amount) - parseFloat(a.amount);
+          }
+          // 默认按日期降序
+          return new Date(b.date) - new Date(a.date);
+        });
         
         // 分页
         const total = expenses.length;
