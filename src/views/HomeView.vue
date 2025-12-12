@@ -355,7 +355,6 @@ const { t, locale } = useI18n();
 const router = useRouter();
 
 // 用户名响应式变量 - 必须在所有使用前定义
-const username = ref(localStorage.getItem('username') || '');
 
 // 安卓设备检测
 const isAndroidDevice = ref(false);
@@ -526,12 +525,6 @@ const checkAndShowLargeExpenseWarning = async (records) => {
 
 // 按钮状态变量
 const showAddDialog = ref(false);
-const showMarkdownDialog = ref(false);
-const showAiAddDialog = ref(false);
-// 新增：显示多条记录的对话框
-const showMultiRecordsDialog = ref(false);
-// 新增：显示AI报告对话框
-const showAiReportDialog = ref(false);
 
 // 新增：编辑和删除对话框状态
 const showEditDialog = ref(false);
@@ -555,75 +548,12 @@ const selectedFunctionGroup = ref('primary');
 // 使用computed属性确保t函数正确初始化后再获取翻译值
 const functionGroups = computed(() => [
   { label: t('function.primary'), value: 'primary' },
-  { label: t('function.aiFeatures'), value: 'ai' },
-  { label: t('function.other'), value: 'other' },
   { label: t('function.aboutus'), value: 'about' }
 ]);
-const aiForm = reactive({
-  text: '',
-  image: []
-});
-const isParsing = ref(false);
-// 新增：存储多条记录的数据结构
-const multiRecords = ref([]);
-// 新增：全选状态
-const selectAll = ref(false);
-// 新增：报告相关状态
-const isGeneratingReport = ref(false);
-const reportContent = ref('');
-const reportQuestion = ref('');
-
-// 配置marked选项
-marked.setOptions({
-  breaks: true,
-  gfm: true
-});
-
-// 渲染报告内容为HTML
-const renderedReportContent = computed(() => {
-  return marked.parse(reportContent.value);
-});
-
-// 新增：计算已选择的记录数量
-const selectedRecordsCount = computed(() => {
-  return multiRecords.value.filter(record => record.selected).length;
-});
-
-// 导入AI API
-import { parseTextToRecord, parseImageToRecord, setApiKey, generateExpenseReport } from '@/api/aiRecord';
-
-// API密钥相关
-const showApiKeyDialog = ref(false);
-const apiKeyForm = reactive({
-  apiKey: localStorage.getItem('siliconflow_api_key') || ''
-});
-
-// 导入会员API
-import { checkMemberStatus } from '@/api/membership';
-
-// 全局会员资格检查弹窗状态
-const showMembershipModal = ref(false);
-const hasActiveMembership = ref(false);
-let membershipCheckTimer = null;
-
 
 // 前往图表页面
 const goToCharts = () => {
   router.push('/charts');
-};
-
-// 前往会员订阅页面
-const goToMembership = () => {
-  router.push('/membership');
-};
-
-// 前往会员订阅页面
-const proceedToMembership = () => {
-  // 保存当前页面作为重定向目标
-  const currentPath = window.location.pathname + window.location.search;
-  localStorage.setItem('redirectAfterMembership', currentPath);
-  // 跳转到会员订阅页面
-  router.push('/membership');
 };
 
 // 处理编辑消费记录
@@ -727,66 +657,14 @@ const confirmDelete = async () => {
   }
 };
 
-// 检查会员状态
-const checkMembership = async () => {
-  try {
-    console.log(`检查会员状态: username=${username.value}`);
-    
-    // 初始状态：默认不是会员，显示弹窗
-    hasActiveMembership.value = false;
-    showMembershipModal.value = true;
-    
-    // 异步检查实际状态
-    const isActive = await checkMemberStatus(username.value);
-    console.log(`会员状态检查结果: isActive=${isActive}`);
-    hasActiveMembership.value = isActive;
-    
-    // 根据实际状态更新弹窗显示
-    showMembershipModal.value = !hasActiveMembership.value;
-  } catch (error) {
-    console.error('检查会员状态失败:', error);
-    // 出错时保持默认状态（非会员），显示弹窗
-    hasActiveMembership.value = false;
-    showMembershipModal.value = true;
-  }
-};
+
 
 // 导出本月数据图片
 const exportMonthData = () => {
   window.open('/photo.html', '_blank');
 };
 
-// 防止用户通过ESC键关闭弹窗
-const preventEscClose = (e) => {
-  if (e.key === 'Escape' && showMembershipModal.value) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-};
 
-// 定期检查会员状态
-const startMembershipCheckInterval = () => {
-  // 清除之前可能存在的定时器
-  if (membershipCheckTimer) {
-    clearInterval(membershipCheckTimer);
-  }
-  
-  // 每5分钟检查一次会员状态
-  membershipCheckTimer = setInterval(async () => {
-    await checkMembership();
-  }, 300000);
-};
-
-// 监听路由变化，确保用户不能绕过会员检查
-const handleRouteChange = () => {
-  if (showMembershipModal.value) {
-    // 除非用户在会员页面或photo.html，否则强制显示弹窗
-    const currentPath = window.location.pathname;
-    if (currentPath !== '/membership' && currentPath !== '/photo.html') {
-      showMembershipModal.value = true;
-    }
-  }
-};
 
 // 组件卸载时清理事件监听器
 onBeforeUnmount(() => {
@@ -813,11 +691,6 @@ const handleImportError = (error) => {
 };
 
 // 打开安卓应用商店
-const openAndroidAppStore = () => {
-  window.open('https://universal-launcher.netlify.app/app-store.html', '_blank');
-};
-const markdownContent = ref('');
-const markdownTitle = ref('');
 
 // 当前日期时间状态
 const currentDateTime = ref('');
@@ -900,18 +773,6 @@ onMounted(async () => {
   updateDateTime();
   dateTimeTimer = setInterval(updateDateTime, 1000);
   
-  // 添加新的事件监听器以强制会员弹窗
-  document.addEventListener('keydown', preventEscClose);
-  
-  // 检查会员状态
-  await checkMembership();
-  
-  // 启动会员状态检查机制
-  startMembershipCheckInterval();
-  
-  // 监听路由变化
-  window.addEventListener('popstate', handleRouteChange);
-  
   // 初始化华丽欢迎效果
   initWelcomeEffects();
   
@@ -931,14 +792,6 @@ onBeforeUnmount(() => {
   if (dateTimeTimer) {
     clearInterval(dateTimeTimer);
   }
-  
-  if (membershipCheckTimer) {
-    clearInterval(membershipCheckTimer);
-  }
-  
-  // 移除强制会员弹窗相关的事件监听器
-  document.removeEventListener('keydown', preventEscClose);
-  window.removeEventListener('popstate', handleRouteChange);
 });
 
 // 更新日期时间函数
@@ -1063,7 +916,6 @@ const handleAddRecord = async () => {
     }
 
     // 处理金额（这里只是再次确认，因为已经在validateForm中验证过）
-    const amountStr = form.amount.toString().replace(',', '.');
 
     // 添加详细日志来跟踪日期
     console.log('用户选择的原始日期:', form.date);
@@ -1235,257 +1087,19 @@ const loadExpenses = async () => {
   }
 };
 
-// 处理AI智能记录生成
-const handleImageChange = (file, fileList) => {
-  aiForm.image = fileList;
-};
 
-// 处理AI智能记录取消
-const handleAiCancel = () => {
-  showAiAddDialog.value = false;
-  // 重置AI表单
-  aiForm.text = '';
-  aiForm.image = [];
-};
 
 // 新增：处理全选/取消全选
-const handleSelectAllChange = (value) => {
-  multiRecords.value.forEach(record => {
-    record.selected = value;
-  });
-};
 
 // 新增：处理单个记录选择变化
-const handleRecordSelectChange = () => {
-  const allSelected = multiRecords.value.every(record => record.selected);
-  const noneSelected = multiRecords.value.every(record => !record.selected);
-  
-  selectAll.value = allSelected;
-  // 处理半选中状态
-  if (!allSelected && !noneSelected) {
-    selectAll.value = undefined;
-  }
-};
 
 // 新增：处理多条记录对话框取消
-const handleMultiRecordsCancel = () => {
-  showMultiRecordsDialog.value = false;
-  multiRecords.value = [];
-  selectAll.value = false;
-};
 
 // 新增：处理多条记录提交
-const handleMultiRecordsSubmit = async () => {
-  try {
-    // 获取所有选中的记录
-    const selectedRecords = multiRecords.value.filter(record => record.selected);
-    console.log('Multi records submit started:', { recordCount: selectedRecords.length });
-    
-    if (selectedRecords.length === 0) {
-      errorMessage.value = t('expense.selectAtLeastOne');
-      return;
-    }
-    
-    // 验证并格式化所有记录
-    const validRecords = [];
-    for (const record of selectedRecords) {
-      // 验证金额
-      if (!record.amount || isNaN(record.amount) || Number(record.amount) <= 0) {
-        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的金额无效`);
-      }
-      
-      // 验证类型
-      if (!record.type) {
-        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的类型不能为空`);
-      }
-      
-      // 验证日期
-      if (!record.date) {
-        throw new Error(`第${multiRecords.value.indexOf(record) + 1}条记录的日期不能为空`);
-      }
-      
-      // 格式化记录
-      validRecords.push({
-        type: record.type,
-        amount: parseFloat(parseFloat(record.amount).toFixed(2)),
-        remark: record.remark || '',
-        date: record.date // 使用date字段，不再需要time字段
-      });
-      console.log('Valid record prepared:', { index: validRecords.length, type: record.type, amount: record.amount });
-    }
-    
-    // 检查是否有单笔大于500元的消费
-    await checkAndShowLargeExpenseWarning(validRecords);
-    
-    // 提交所有记录
-    for (const record of validRecords) {
-      await axios.post('/api/expenses', record, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-    
-    // 关闭对话框
-    showMultiRecordsDialog.value = false;
-    
-    // 刷新数据
-    await fetchData(true);
-    
-    successMessage.value = `${validRecords.length}条记录添加成功`;
-    console.log('Multi records submit successful:', { totalRecords: validRecords.length });
-    
-    // 重置数据
-    multiRecords.value = [];
-    selectAll.value = false;
-  } catch (error) {
-    console.error('批量添加记录失败:', error);
-    console.error('批量添加错误详情:', { message: error.message, stack: error.stack });
-    errorMessage.value = `添加记录失败: ${error.message}`;
-  }
-};
 
-const handleAiGenerate = async () => {
-  try {
-    // 检查API密钥
-    if (!checkApiKey()) {
-      console.log('AI generation skipped: API key not configured');
-      return;
-    }
-    
-    // 检查是否有输入
-    if (!aiForm.text && (!aiForm.image || aiForm.image.length === 0)) {
-      console.log('AI generation skipped: No input text or image provided');
-      errorMessage.value = '请输入文本描述或上传图片';
-      return;
-    }
-    
-    console.log('AI record generation started:', { hasText: !!aiForm.text, hasImage: !!aiForm.image.length });
 
-    isParsing.value = true;
-    let parsedDataList;
 
-    // 解析文本或图片
-    if (aiForm.text) {
-      console.log('Parsing text input for AI generation:', { textPreview: aiForm.text.substring(0, 50) + (aiForm.text.length > 50 ? '...' : '') });
-      parsedDataList = await parseTextToRecord(aiForm.text);
-    } else if (aiForm.image && aiForm.image.length > 0) {
-      console.log('Parsing image input for AI generation:', { fileName: aiForm.image[0].name, size: aiForm.image[0].size });
-      parsedDataList = await parseImageToRecord(aiForm.image[0].raw);
-    }
 
-    // 处理解析结果
-    if (parsedDataList && parsedDataList.length > 0) {
-      console.log('AI generation successful:', { recordCount: parsedDataList.length });
-      if (parsedDataList.length === 1) {
-        // 只有一条记录，保持原有逻辑
-        const parsedData = parsedDataList[0];
-        console.log('Single record generated:', { type: parsedData.type, amount: parsedData.amount, date: parsedData.date });
-        form.type = parsedData.type || '';
-        form.amount = parsedData.amount || '';
-        form.date = parsedData.date || '';
-        form.remark = parsedData.remark || '';
-
-        // 关闭AI对话框，打开普通编辑对话框
-        showAiAddDialog.value = false;
-        showAddDialog.value = true;
-        successMessage.value = 'AI已成功生成记录，请检查并确认';
-      } else {
-        // 多条记录，显示多条记录对话框
-        console.log('Multiple records generated:', parsedDataList.map(r => ({ type: r.type, amount: r.amount })));
-        multiRecords.value = parsedDataList.map(record => ({
-          ...record,
-          date: record.date || '',
-          amount: record.amount || ''
-        }));
-        showAiAddDialog.value = false;
-        showMultiRecordsDialog.value = true;
-        successMessage.value = `AI已成功生成${parsedDataList.length}条记录，请检查并确认`;
-      }
-    }
-  } catch (error) {
-    console.error('AI生成记录失败:', error);
-    console.error('AI generation error details:', { message: error.message, stack: error.stack });
-    errorMessage.value = 'AI生成记录失败，请重试';
-  } finally {
-    isParsing.value = false;
-    // 重置AI表单
-    aiForm.text = '';
-    aiForm.image = [];
-  }
-};
-
-// 处理AI报告生成
-const handleGenerateReport = async () => {
-  try {
-    // 检查API密钥
-    if (!checkApiKey()) {
-      console.log('Report generation skipped: API key not configured');
-      return;
-    }
-    
-    // 检查是否有消费数据
-    if (!Expenses || Expenses.length === 0) {
-      console.log('Report generation skipped: No expense data available');
-      errorMessage.value = '没有足够的消费数据来生成报告';
-      return;
-    }
-    
-    console.log('AI report generation started:', { 
-      question: reportQuestion.value,
-      recordCount: Expenses.value.length 
-    });
-
-    isGeneratingReport.value = true;
-    reportContent.value = '';
-    
-    // 生成报告
-    console.log('Calling expense report generation API');
-    const content = await generateExpenseReport(Expenses.value, reportQuestion.value);
-    reportContent.value = content;
-    console.log('AI report generation successful:', { contentLength: content.length });
-    
-    successMessage.value = 'AI已成功生成消费报告';
-  } catch (error) {
-    console.error('AI生成报告失败:', error);
-    console.error('AI report generation error details:', { message: error.message, stack: error.stack });
-    errorMessage.value = 'AI生成报告失败，请重试';
-  } finally {
-    isGeneratingReport.value = false;
-  }
-};
-
-// 清空报告问题
-const clearReportQuestion = () => {
-  reportQuestion.value = '';
-};
-
-// 处理API密钥设置
-const handleApiKeySave = () => {
-  if (apiKeyForm.apiKey) {
-    console.log('API key save requested');
-    localStorage.setItem('siliconflow_api_key', apiKeyForm.apiKey);
-    setApiKey(apiKeyForm.apiKey);
-    showApiKeyDialog.value = false;
-    successMessage.value = 'API密钥已保存';
-    console.log('API key saved successfully');
-  } else {
-    console.log('API key save failed: Empty key provided');
-    errorMessage.value = '请输入有效的API密钥';
-  }
-};
-
-// 检查是否已设置API密钥
-const checkApiKey = () => {
-  const savedApiKey = localStorage.getItem('siliconflow_api_key');
-  if (!savedApiKey) {
-    errorMessage.value = '请先设置SiliconFlow API密钥';
-    showApiKeyDialog.value = true;
-    return false;
-  }
-  setApiKey(savedApiKey);
-  return true;
-};
 
 // 处理反馈按钮点击事件
 const handleFeedback = () => {
