@@ -228,8 +228,8 @@ class OfflineDataSync {
           }
           
           // 分类过滤
-          if (searchParams.category) {
-            expenses = expenses.filter(expense => expense.category === searchParams.category);
+          if (searchParams.type) {
+            expenses = expenses.filter(expense => expense.type === searchParams.type);
           }
           
           // 关键词搜索
@@ -237,7 +237,7 @@ class OfflineDataSync {
             const keyword = searchParams.keyword.toLowerCase();
             expenses = expenses.filter(expense => {
               return (expense.remark && expense.remark.toLowerCase().includes(keyword)) ||
-                     (expense.category && expense.category.toLowerCase().includes(keyword));
+                     (expense.type && expense.type.toLowerCase().includes(keyword));
             });
           }
         }

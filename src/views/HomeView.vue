@@ -667,9 +667,6 @@ onBeforeUnmount(() => {
   if (dateTimeTimer) {
     clearInterval(dateTimeTimer);
   }
-  
-  document.removeEventListener('keydown', preventEscClose);
-  window.removeEventListener('popstate', handleRouteChange);
 });
 
 // 导入处理

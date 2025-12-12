@@ -63,8 +63,12 @@
   
   <!-- JavaScript代码 -->
   <script>
-    // API基础地址
-    const API_BASE_URL = 'http://192.168.0.197:3010/api';
+    // 前端数据库配置
+    const DB_NAME = 'HomeMoneyDB';
+    const DB_VERSION = 2;
+    const STORES = {
+      expenses: 'expenses'
+    };
     
     // DOM元素
     const exportBtn = document.getElementById('exportBtn');
@@ -458,6 +462,44 @@
       document.body.removeChild(link);
     }
     
+    // 打开IndexedDB并获取数据
+    async function getDataFromIndexedDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = () => {
+          reject(new Error('打开数据库失败'));
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          const transaction = db.transaction(STORES.expenses, 'readonly');
+          const store = transaction.objectStore(STORES.expenses);
+          const getRequest = store.getAll();
+          
+          getRequest.onsuccess = () => {
+            resolve(getRequest.result);
+            db.close();
+          };
+          
+          getRequest.onerror = () => {
+            reject(new Error('获取数据失败'));
+            db.close();
+          };
+          
+          transaction.onerror = () => {
+            reject(new Error('事务失败'));
+            db.close();
+          };
+        };
+        
+        request.onupgradeneeded = () => {
+          // 如果数据库版本升级，但我们只是读取数据，所以这里不做任何操作
+          resolve([]);
+        };
+      });
+    }
+    
     // 处理导出
     async function handleExport() {
       exportBtn.disabled = true;
@@ -470,19 +512,11 @@
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
         const currentMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
         
-        // 从API获取数据
-        const response = await fetch(`${API_BASE_URL}/expenses?limit=10000`, {
-          timeout: 10000
-        });
-        
-        if (!response.ok) {
-          throw new Error('获取数据失败');
-        }
-        
-        const data = await response.json();
+        // 从IndexedDB获取数据
+        const allExpenses = await getDataFromIndexedDB();
         
         // 过滤当月数据
-        const filteredData = Array.isArray(data.data) ? data.data.filter(expense => {
+        const filteredData = Array.isArray(allExpenses) ? allExpenses.filter(expense => {
           // 使用date字段替代time字段，保持向后兼容
           if (!expense || (!expense.date && !expense.time)) return false;
           const expenseDate = expense.date || expense.time;
