@@ -35,20 +35,6 @@
               <template #icon><FontAwesomeIcon icon="plus" /></template>
               {{ t('expense.addRecord') }}
             </GlassButton>
-            <CustomUpload
-              class="upload-excel"
-              :show-file-list="false"
-              @success="handleImportSuccess"
-              @error="handleImportError"
-              accept=".xlsx, .xls"
-            >
-              <template #default="{ triggerUpload }">
-                <GlassButton type="warning" @click="triggerUpload" :dark-theme="isDarkMode">
-                  <template #icon><FontAwesomeIcon icon="upload" /></template>
-                  {{ t('import.title') }}
-                </GlassButton>
-              </template>
-            </CustomUpload>
             <GlassButton type="primary" @click="exportMonthData" :dark-theme="isDarkMode">
               <template #icon><FontAwesomeIcon icon="download" /></template>
               导出本月数据
@@ -79,20 +65,6 @@
             <template #icon><FontAwesomeIcon icon="plus" /></template>
             {{ t('expense.addRecord') }}
           </GlassButton>
-          <CustomUpload
-            class="upload-excel"
-            :show-file-list="false"
-            @success="handleImportSuccess"
-            @error="handleImportError"
-            accept=".xlsx, .xls"
-          >
-            <template #default="{ triggerUpload }">
-              <GlassButton type="warning" size="large" @click="triggerUpload" class="mobile-btn" :dark-theme="isDarkMode">
-                <template #icon><FontAwesomeIcon icon="upload" /></template>
-                {{ t('import.title') }}
-              </GlassButton>
-            </template>
-          </CustomUpload>
           <GlassButton type="primary" @click="exportMonthData" size="large" class="mobile-btn" :dark-theme="isDarkMode">
             <template #icon><FontAwesomeIcon icon="download" /></template>
             导出本月数据
@@ -344,23 +316,9 @@ import ExportButton from '@/components/ExportButton.vue';
 import SpendingLimitDisplay from '@/components/SpendingLimitDisplay.vue';
 import GlassCard from '@/components/GlassCard.vue';
 import GlassButton from '@/components/GlassButton.vue';
-import CustomUpload from '@/components/CustomUpload.vue';
-
 
 const { t, locale } = useI18n();
 const router = useRouter();
-
-// 用户名响应式变量 - 必须在所有使用前定义
-
-// 安卓设备检测
-const isAndroidDevice = ref(false);
-
-const detectAndroidDevice = () => {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  // 检查是否为安卓设备
-  const androidRegex = /Android/i;
-  isAndroidDevice.value = androidRegex.test(userAgent);
-};
 
 // 播放警报声 - 支持循环多秒
 const playAlertSound = (duration = 5) => {
@@ -664,18 +622,6 @@ onBeforeUnmount(() => {
     clearInterval(dateTimeTimer);
   }
 });
-
-// 导入处理
-const handleImportSuccess = () => {
-  successMessage.value = t('import.success');
-  // 导入成功后刷新数据
-  fetchData(true);
-};
-
-const handleImportError = (error) => {
-  errorMessage.value = t('import.failed');
-  console.error('Import error:', error);
-};
 
 // 当前日期时间状态
 const currentDateTime = ref('');
