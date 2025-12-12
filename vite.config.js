@@ -27,10 +27,7 @@ export default defineConfig({
             vendor: ['vue', 'vue-router', 'pinia'],
             utils: ['axios', 'dayjs'],
             // 拆分大型依赖包
-            excel: ['xlsx'],
-            csv: ['papaparse'],
-            markdown: ['marked'],
-            highlight: ['highlight.js']
+            excel: ['xlsx']
           }
         }
     },

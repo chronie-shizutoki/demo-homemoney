@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import dayjs from 'dayjs';
+import offlineSync from '@/utils/offlineDataSync';
 
 export const useSpendingStore = defineStore('spending', {
   state: () => ({
@@ -208,12 +209,11 @@ export const useSpendingStore = defineStore('spending', {
     },
 
     // 从前端数据库获取消费数据
-    async fetchExpenses () {
-      try {
-        console.log('Fetching expenses from IndexedDB...');
-        const offlineSync = await import('@/utils/offlineDataSync');
-        const result = await offlineSync.default.getExpenses(1, 1000); // 获取更多数据用于计算
-        console.log('Fetched expenses data:', result);
+  async fetchExpenses () {
+    try {
+      console.log('Fetching expenses from IndexedDB...');
+      const result = await offlineSync.getExpenses(1, 1000); // 获取更多数据用于计算
+      console.log('Fetched expenses data:', result);
         
         // 适配数据格式
         let expenses = [];
