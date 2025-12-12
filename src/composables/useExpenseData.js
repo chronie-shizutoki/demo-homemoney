@@ -9,7 +9,7 @@
 
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ExpenseAPI } from '@/api/expenses';
+import offlineSync from '@/utils/offlineDataSync';
 
 /**
 * 获取并管理消费数据的组合式函数
@@ -49,9 +49,9 @@ export function useExpenseData () {
   const fetchData = async (forceRefresh = false) => {
     console.log('useExpenseData: fetchData called.');
     try {
-      const res = await ExpenseAPI.getExpenses();
-      // 确保 res.data.data 是一个数组，即使 API 返回 null 或 undefined
-      const newData = res && res.data && res.data.data && Array.isArray(res.data.data) ? res.data.data : [];
+      const res = await offlineSync.getExpenses();
+      // 确保 res.data 是一个数组，即使返回 null 或 undefined
+      const newData = res && res.data && Array.isArray(res.data) ? res.data : [];
 
       // 当强制刷新时直接更新数据，否则检查内容变化
       if (forceRefresh || JSON.stringify(expenses.value) !== JSON.stringify(newData)) {

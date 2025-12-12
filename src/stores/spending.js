@@ -207,22 +207,18 @@ export const useSpendingStore = defineStore('spending', {
       this.saveSettings();
     },
 
-    // 从后端API获取消费数据
+    // 从前端数据库获取消费数据
     async fetchExpenses () {
       try {
-        console.log('Fetching expenses from API...');
-        const response = await fetch('/api/expenses?limit=1000'); // 获取更多数据用于计算
-        console.log('Expenses API response status:', response.status);
-        if (!response.ok) throw new Error(`Failed to fetch expenses: ${response.statusText}`);
-        const result = await response.json();
+        console.log('Fetching expenses from IndexedDB...');
+        const offlineSync = await import('@/utils/offlineDataSync');
+        const result = await offlineSync.default.getExpenses(1, 1000); // 获取更多数据用于计算
         console.log('Fetched expenses data:', result);
         
-        // 适配新的API响应格式
+        // 适配数据格式
         let expenses = [];
         if (result && result.data && Array.isArray(result.data)) {
           expenses = result.data;
-        } else if (Array.isArray(result)) {
-          expenses = result;
         }
         
         this.updateExpenses(expenses);

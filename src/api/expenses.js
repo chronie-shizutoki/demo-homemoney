@@ -1,16 +1,11 @@
-import axios from 'axios';
+import offlineSync from '@/utils/offlineDataSync';
 
-// 使用相对路径API基础URL，通过Vite代理转发请求
-export const API_BASE = '/api';
+export const API_BASE = '/api'; // 保留这个常量以避免其他文件报错
 
 export const ExpenseAPI = {
   async addExpensesBatch (records) {
     try {
-      return await axios.post(`${API_BASE}/expenses/batch`, records, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      return await offlineSync.addExpensesBatch(records);
     } catch (error) {
       console.error('批量添加消费记录失败:', error);
       throw error;
@@ -18,91 +13,78 @@ export const ExpenseAPI = {
   },
 
   async getExpenses (page = 1, limit = 10, searchParams = {}) {
-    console.log('[Expense API] 尝试获取消费数据，API基础URL:', API_BASE);
+    console.log('[Expense API] 尝试获取消费数据（前端数据库）');
     try {
-      // 构建查询参数
-      let params;
-      
-      // 处理URLSearchParams对象或普通对象
+      // 处理URLSearchParams对象为普通对象
+      let searchParamsObj = {};
       if (searchParams instanceof URLSearchParams) {
-        params = {};
-        // 添加基础分页参数
-        params.page = page;
-        params.limit = limit;
-        
-        // 从URLSearchParams中提取所有参数
         searchParams.forEach((value, key) => {
-          params[key] = value;
+          searchParamsObj[key] = value;
         });
       } else {
-        // 普通对象的情况
-        params = {
-          page,
-          limit,
-          ...searchParams
-        };
+        searchParamsObj = searchParams;
       }
       
-      console.log('[Expense API] 请求参数:', params);
-      const response = await axios.get(`${API_BASE}/expenses`, {
-        params
-      });
+      console.log('[Expense API] 请求参数:', { page, limit, ...searchParamsObj });
+      const result = await offlineSync.getExpenses(page, limit, searchParamsObj);
       
-      // 返回完整的响应对象，包括数据、总数、页码等信息
-      return response;
+      // 模拟axios响应格式
+      return {
+        data: {
+          data: result.data,
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages
+        },
+        status: 200,
+        statusText: 'OK'
+      };
     } catch (error) {
-      if (error.code === 'ERR_NETWORK') {
-        console.error('获取消费数据失败：网络连接异常，请检查服务器或网络状态。', error);
-      } else {
-        console.error('获取消费数据失败:', error);
-      }
-      console.error('[Expense API] 获取消费数据失败详情:', error.response || error.message || error);
-      throw error; // 向上传递错误以便前端处理
+      console.error('获取消费数据失败:', error);
+      throw error;
     }
   },
 
   async addExpense (data) {
     try {
-      return await axios.post(`${API_BASE}/expenses`, data, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        transformRequest: [(data) => JSON.stringify({
-          ...data,
-          amount: parseFloat(data.amount),
-          // 确保使用date字段，不再需要time字段
-          date: data.date,
-          // 使用remark字段
-          remark: data.remark || ''
-        })]
-      });
+      // 转换数据格式
+      const expenseData = {
+        ...data,
+        amount: parseFloat(data.amount),
+        date: data.date,
+        remark: data.remark || ''
+      };
+      
+      const result = await offlineSync.addExpense(expenseData);
+      
+      // 模拟axios响应格式
+      return {
+        data: result,
+        status: 201,
+        statusText: 'Created'
+      };
     } catch (error) {
       console.error('添加消费数据失败:', error);
-      throw error; // 添加操作失败需要向上抛出错误
+      throw error;
     }
   },
 
   async getStatistics (searchParams = {}) {
     try {
-      // 处理URLSearchParams对象或普通对象
-      let params;
+      // 处理URLSearchParams对象为普通对象
+      let searchParamsObj = {};
       if (searchParams instanceof URLSearchParams) {
-        params = {};
-        // 从URLSearchParams中提取所有参数
         searchParams.forEach((value, key) => {
-          params[key] = value;
+          searchParamsObj[key] = value;
         });
       } else {
-        // 普通对象的情况
-        params = { ...searchParams };
+        searchParamsObj = searchParams;
       }
       
-      console.log('[Expense API] 获取统计数据请求参数:', params);
-      const response = await axios.get(`${API_BASE}/expenses/statistics`, {
-        params
-      });
-      return response.data;
+      console.log('[Expense API] 获取统计数据请求参数:', searchParamsObj);
+      const result = await offlineSync.getExpenseStatistics(searchParamsObj);
+      return result;
     } catch (error) {
       console.error('获取统计数据失败:', error);
       return { error: error.message || '未知错误' };
@@ -113,18 +95,16 @@ export const ExpenseAPI = {
   async updateExpense (id, data) {
     try {
       console.log(`[Expense API] 更新消费记录 ID: ${id}`, data);
-      const response = await axios.put(`${API_BASE}/expenses/${id}`, data, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        transformRequest: [(data) => JSON.stringify({
-          ...data,
-          amount: parseFloat(data.amount),
-          // 确保使用date字段，不再需要time字段
-          date: data.date
-        })]
-      });
-      return response.data;
+      
+      // 转换数据格式
+      const expenseData = {
+        ...data,
+        amount: parseFloat(data.amount),
+        date: data.date
+      };
+      
+      const result = await offlineSync.updateExpense(id, expenseData);
+      return result;
     } catch (error) {
       console.error(`更新消费记录失败 ID: ${id}:`, error);
       throw error;
@@ -135,8 +115,8 @@ export const ExpenseAPI = {
   async deleteExpense (id) {
     try {
       console.log(`[Expense API] 删除消费记录 ID: ${id}`);
-      const response = await axios.delete(`${API_BASE}/expenses/${id}`);
-      return response.data;
+      const result = await offlineSync.deleteExpense(id);
+      return result;
     } catch (error) {
       console.error(`删除消费记录失败 ID: ${id}:`, error);
       throw error;

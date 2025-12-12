@@ -26,7 +26,7 @@ import { ref, onMounted } from 'vue';
 import GlassButton from '@/components/GlassButton.vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import axios from 'axios';
+import { ExpenseAPI } from '@/api/expenses';
 
 import { useExpenseData } from '@/composables/useExpenseData';
 import { fetchAllPages, createCancellationController } from '@/utils/pagination';
@@ -65,7 +65,7 @@ const loadExpenses = async () => {
     // 使用分页工具获取所有数据
     const allData = await fetchAllPages({
       apiCall: ({ page, limit }) => 
-        axios.get(`/api/expenses?page=${page}&limit=${limit}`),
+        ExpenseAPI.getExpenses(page, limit).then(response => response.data),
       pageSize: 100,           // 每页100条记录
       maxConcurrent: 2,        // 图表页面使用2个并发请求，避免影响其他操作
       signal: paginationController.signal,

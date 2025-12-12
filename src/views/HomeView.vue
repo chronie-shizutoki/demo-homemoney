@@ -37,7 +37,6 @@
             </GlassButton>
             <CustomUpload
               class="upload-excel"
-              action="/api/import/excel"
               :show-file-list="false"
               @success="handleImportSuccess"
               @error="handleImportError"
@@ -82,7 +81,6 @@
           </GlassButton>
           <CustomUpload
             class="upload-excel"
-            action="/api/import/excel"
             :show-file-list="false"
             @success="handleImportSuccess"
             @error="handleImportError"
@@ -328,9 +326,7 @@
 
 <script setup>
 
-import axios from 'axios';
 import { ref, computed, onMounted, onBeforeUnmount, reactive } from 'vue';
-import { marked } from 'marked';
 
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -672,10 +668,6 @@ onBeforeUnmount(() => {
     clearInterval(dateTimeTimer);
   }
   
-  if (membershipCheckTimer) {
-    clearInterval(membershipCheckTimer);
-  }
-  
   document.removeEventListener('keydown', preventEscClose);
   window.removeEventListener('popstate', handleRouteChange);
 });
@@ -683,6 +675,8 @@ onBeforeUnmount(() => {
 // 导入处理
 const handleImportSuccess = () => {
   successMessage.value = t('import.success');
+  // 导入成功后刷新数据
+  fetchData(true);
 };
 
 const handleImportError = (error) => {
@@ -783,9 +777,6 @@ onMounted(async () => {
     error.value = t('error.dataInitializationFailed');
   }
 });
-
-// 导入操作日志工具
-import { logUserAction } from '@/utils/operationLogger';
 
 // 清理定时器和事件监听器
 onBeforeUnmount(() => {
@@ -902,12 +893,6 @@ const validateForm = () => {
 
 const handleAddRecord = async () => {
   try {
-    // 记录添加记录操作开始
-    logUserAction('record_add_start', { 
-      type: form.type, 
-      amount: form.amount,
-      date: form.date
-    });
     
     // 使用自定义验证函数
     if (!validateForm()) {
@@ -940,25 +925,15 @@ const handleAddRecord = async () => {
     // 检查是否有单笔大于500元的消费
     await checkAndShowLargeExpenseWarning([expenseData]);
 
-    // 使用与Expenses.vue相同的批量提交接口，明确指定为1条记录
-    await axios.post('/api/expenses', expenseData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // 使用ExpenseAPI添加消费记录
+    await ExpenseAPI.addExpense(expenseData);
+
     showAddDialog.value = false;
     // 添加成功后刷新数据
     await fetchData(true);
     // 触发ExpenseList组件刷新
     refreshTrigger.value++;
     successMessage.value = t('expense.addSuccess');
-    
-    // 记录添加成功
-    logUserAction('record_add_success', { 
-      type: expenseData.type, 
-      amount: expenseData.amount,
-      date: expenseData.date
-    });
     
     // 重置表单
     Object.assign(form, { type: '', amount: '', date: '', remark: '' });
@@ -987,12 +962,6 @@ const handleAddRecord = async () => {
       errorMsg = t('expense.unknownError', { error: error.message || '未知错误' });
     }
     errorMessage.value = errorMsg;
-    
-    // 记录添加失败
-    logUserAction('record_add_failed', { 
-      error: errorMsg,
-      attemptedData: { type: form.type, amount: form.amount, date: form.date }
-    });
   }
 };
 
@@ -1040,7 +1009,7 @@ const loadExpenses = async () => {
     // 使用分页工具获取所有数据
     const allData = await fetchAllPages({
       apiCall: ({ page, limit }) => 
-        axios.get(`/api/expenses?page=${page}&limit=${limit}`),
+        ExpenseAPI.getExpenses(page, limit).then(response => response.data),
       pageSize: 100,           // 每页100条记录
       maxConcurrent: 3,        // 最多3个并发请求
       signal: paginationController.signal,

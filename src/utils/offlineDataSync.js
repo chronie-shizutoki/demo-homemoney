@@ -1,18 +1,17 @@
-import axios from 'axios';
-import { STORAGE_KEYS } from '@/utils/constants';
-import { logApiRequest, logApiResponse, logApiError } from '@/utils/operationLogger';
+// 移除了与后端API相关的导入，现在只使用前端数据库
 
 /**
- * 离线数据同步工具
- * 基于IndexedDB实现离线数据存储和网络恢复后的自动同步
+ * 前端数据库存储工具
+ * 基于IndexedDB实现完整的数据存储功能，替代后端API
  */
 class OfflineDataSync {
   constructor () {
     this.dbName = 'HomeMoneyDB';
-    this.dbVersion = 1;
+    this.dbVersion = 2; // 增加版本号以支持新的存储结构
     this.stores = {
       cache: 'keyValueCache', // 键值对缓存存储
-      syncQueue: 'syncQueue' // 待同步请求队列
+      syncQueue: 'syncQueue', // 待同步请求队列
+      expenses: 'expenses' // 消费记录表
     };
     this.db = null;
     this.initDB();
@@ -40,6 +39,18 @@ class OfflineDataSync {
             keyPath: 'id',
             autoIncrement: true
           });
+        }
+
+        // 创建消费记录表
+        if (!this.db.objectStoreNames.contains(this.stores.expenses)) {
+          const expenseStore = this.db.createObjectStore(this.stores.expenses, {
+            keyPath: 'id',
+            autoIncrement: true
+          });
+          // 创建索引以支持快速查询
+          expenseStore.createIndex('date', 'date', { unique: false });
+          expenseStore.createIndex('category', 'category', { unique: false });
+          expenseStore.createIndex('amount', 'amount', { unique: false });
         }
       };
 
@@ -136,30 +147,224 @@ class OfflineDataSync {
    * 同步队列中的所有请求
    */
   async syncQueue () {
-    if (!navigator.onLine) return;
+    // 由于我们已经不使用后端API，所以这个方法不再需要
+    // 保留这个方法只是为了保持向后兼容性
+    return;
+  }
 
-    try {
-      const queue = await this.getSyncQueue();
-      if (queue.length === 0) return;
+  /**
+   * 添加消费记录
+   */
+  async addExpense (expense) {
+    if (!this.db) await this.initDB();
+    const store = this.getTransaction(this.stores.expenses, 'readwrite');
+    return new Promise((resolve, reject) => {
+      const expenseData = {
+        ...expense,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      const request = store.add(expenseData);
+      request.onsuccess = () => resolve({ id: request.result, ...expenseData });
+      request.onerror = () => reject(request.error);
+    });
+  }
 
-      console.log(`开始同步${queue.length}个离线请求`);
-      for (const request of queue) {
-        try {
-          // 重新发送请求
-          const response = await axios(request);
-          if (response.status >= 200 && response.status < 300) {
-            await this.removeFromSyncQueue(request.id);
-            console.log(`已同步请求: ${request.url}`);
-          }
-        } catch (error) {
-          console.error(`同步请求失败: ${request.url}`, error);
-          // 保留失败的请求，等待下次同步
-          break;
-        }
+  /**
+   * 批量添加消费记录
+   */
+  async addExpensesBatch (expenses) {
+    if (!this.db) await this.initDB();
+    const store = this.getTransaction(this.stores.expenses, 'readwrite');
+    return new Promise((resolve, reject) => {
+      try {
+        const results = [];
+        let completedCount = 0;
+        
+        expenses.forEach(expense => {
+          const expenseData = {
+            ...expense,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          const request = store.add(expenseData);
+          request.onsuccess = () => {
+            results.push({ id: request.result, ...expenseData });
+            completedCount++;
+            if (completedCount === expenses.length) {
+              resolve(results);
+            }
+          };
+          request.onerror = (error) => {
+            reject(error);
+          };
+        });
+      } catch (error) {
+        reject(error);
       }
-    } catch (error) {
-      console.error('同步队列处理失败', error);
-    }
+    });
+  }
+
+  /**
+   * 获取消费记录列表
+   */
+  async getExpenses (page = 1, limit = 10, searchParams = {}) {
+    if (!this.db) await this.initDB();
+    const store = this.getTransaction(this.stores.expenses);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => {
+        let expenses = request.result;
+        
+        // 应用搜索条件
+        if (searchParams) {
+          // 日期范围过滤
+          if (searchParams.startDate) {
+            expenses = expenses.filter(expense => expense.date >= searchParams.startDate);
+          }
+          if (searchParams.endDate) {
+            expenses = expenses.filter(expense => expense.date <= searchParams.endDate);
+          }
+          
+          // 分类过滤
+          if (searchParams.category) {
+            expenses = expenses.filter(expense => expense.category === searchParams.category);
+          }
+          
+          // 关键词搜索
+          if (searchParams.keyword) {
+            const keyword = searchParams.keyword.toLowerCase();
+            expenses = expenses.filter(expense => {
+              return (expense.remark && expense.remark.toLowerCase().includes(keyword)) ||
+                     (expense.category && expense.category.toLowerCase().includes(keyword));
+            });
+          }
+        }
+        
+        // 排序（按日期降序）
+        expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // 分页
+        const total = expenses.length;
+        const offset = (page - 1) * limit;
+        const paginatedExpenses = expenses.slice(offset, offset + limit);
+        
+        resolve({
+          data: paginatedExpenses,
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        });
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  /**
+   * 更新消费记录
+   */
+  async updateExpense (id, expenseData) {
+    if (!this.db) await this.initDB();
+    const store = this.getTransaction(this.stores.expenses, 'readwrite');
+    
+    return new Promise((resolve, reject) => {
+      // 先获取现有记录
+      const getRequest = store.get(id);
+      getRequest.onsuccess = () => {
+        const existingExpense = getRequest.result;
+        if (!existingExpense) {
+          reject(new Error(`消费记录不存在: ${id}`));
+          return;
+        }
+        
+        // 更新记录
+        const updatedExpense = {
+          ...existingExpense,
+          ...expenseData,
+          updatedAt: new Date().toISOString()
+        };
+        
+        const updateRequest = store.put(updatedExpense);
+        updateRequest.onsuccess = () => resolve(updatedExpense);
+        updateRequest.onerror = () => reject(updateRequest.error);
+      };
+      getRequest.onerror = () => reject(getRequest.error);
+    });
+  }
+
+  /**
+   * 删除消费记录
+   */
+  async deleteExpense (id) {
+    if (!this.db) await this.initDB();
+    const store = this.getTransaction(this.stores.expenses, 'readwrite');
+    
+    return new Promise((resolve, reject) => {
+      const request = store.delete(id);
+      request.onsuccess = () => resolve({ success: true });
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  /**
+   * 获取消费统计数据
+   */
+  async getExpenseStatistics (searchParams = {}) {
+    if (!this.db) await this.initDB();
+    const store = this.getTransaction(this.stores.expenses);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => {
+        let expenses = request.result;
+        
+        // 应用搜索条件
+        if (searchParams) {
+          if (searchParams.startDate) {
+            expenses = expenses.filter(expense => expense.date >= searchParams.startDate);
+          }
+          if (searchParams.endDate) {
+            expenses = expenses.filter(expense => expense.date <= searchParams.endDate);
+          }
+        }
+        
+        // 计算统计数据
+        const totalAmount = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+        const totalCount = expenses.length;
+        
+        // 按分类统计
+        const categoryStats = expenses.reduce((stats, expense) => {
+          if (!stats[expense.category]) {
+            stats[expense.category] = { amount: 0, count: 0 };
+          }
+          stats[expense.category].amount += parseFloat(expense.amount);
+          stats[expense.category].count += 1;
+          return stats;
+        }, {});
+        
+        // 按日期统计
+        const dateStats = expenses.reduce((stats, expense) => {
+          const date = expense.date.split('T')[0]; // 获取日期部分
+          if (!stats[date]) {
+            stats[date] = { amount: 0, count: 0 };
+          }
+          stats[date].amount += parseFloat(expense.amount);
+          stats[date].count += 1;
+          return stats;
+        }, {});
+        
+        resolve({
+          totalAmount,
+          totalCount,
+          categoryStats,
+          dateStats,
+          averageAmount: totalCount > 0 ? totalAmount / totalCount : 0
+        });
+      };
+      request.onerror = () => reject(request.error);
+    });
   }
 
   /**
@@ -179,58 +384,4 @@ const offlineSync = new OfflineDataSync();
 
 export default offlineSync;
 
-export function setupAxiosInterceptors (axiosInstance) {
-  // 请求拦截器 - 添加认证令牌并处理离线请求
-  axiosInstance.interceptors.request.use(async (config) => {
-    // 添加请求时间戳
-    config.timestamp = Date.now();
-    
-    // 添加认证令牌
-    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
 
-    // 记录API请求日志
-    logApiRequest(config);
-
-    // 处理离线POST/PUT/DELETE请求
-    if (!navigator.onLine && ['post', 'put', 'delete', 'patch'].includes(config.method)) {
-      console.log(`离线模式: 将请求加入同步队列 - ${config.url}`);
-      await offlineSync.queueForSync({
-        url: config.url,
-        method: config.method,
-        data: config.data,
-        headers: config.headers
-      });
-      return Promise.reject(new Error('OFFLINE_MODE'));
-    }
-    return config;
-  });
-
-  // 响应拦截器 - 缓存GET请求结果
-  axiosInstance.interceptors.response.use(async (response) => {
-    // 记录API响应日志
-    logApiResponse(response);
-    
-    if (response.config.method === 'get' && response.status === 200) {
-      const cacheKey = `${response.config.method}-${response.config.url}`;
-      await offlineSync.cacheResponse(cacheKey, response.data);
-    }
-    return response;
-  }, async (error) => {
-    // 记录API错误日志
-    logApiError(error);
-    
-    // 请求失败且离线时，尝试从缓存获取GET请求数据
-    if (!navigator.onLine && error.config?.method === 'get') {
-      const cacheKey = `${error.config.method}-${error.config.url}`;
-      const cachedData = await offlineSync.getCachedResponse(cacheKey);
-      if (cachedData) {
-        console.log(`离线模式: 使用缓存数据 - ${error.config.url}`);
-        return Promise.resolve({ data: cachedData });
-      }
-    }
-    return Promise.reject(error);
-  });
-}
