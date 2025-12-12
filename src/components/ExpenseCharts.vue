@@ -1,9 +1,12 @@
 <template>
   <div class="charts-container">
     <div class="chart-controls">
-      <el-select v-model="activeChart" @change="renderChart">
-        <el-option v-for="chart in chartTypes" :key="chart.value" :label="chart.label" :value="chart.value" />
-      </el-select>
+      <CustomSelect 
+        v-model="activeChart" 
+        :options="chartTypes"
+        @change="renderChart"
+        :include-empty-option="false"
+      />
       <div class="date-range-picker">
         <input
           type="date"
@@ -29,18 +32,13 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
-import { ElSelect, ElOption } from 'element-plus';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
 import dayjs from 'dayjs';
 import { useI18n } from 'vue-i18n';
 
 export default {
   name: 'ExpenseCharts',
-  components: {
-    ElSelect,
-    ElOption
-  },
   props: {
     expenses: {
       type: Array,
@@ -119,16 +117,16 @@ const debounce = (func, wait) => {
       console.log('Date range filter:', startDateObj.format('YYYY-MM-DD'), 'to', endDateObj.format('YYYY-MM-DD'));
 
       filteredExpenses.value = props.expenses.filter(expense => {
-        // 确保expense.time有效
-        if (!expense.time) {
-          console.warn('Expense with no time:', expense);
+        // 确保expense.date有效
+        if (!expense.date) {
+          console.warn('Expense with no date:', expense);
           return false;
         }
         
-        const expenseDate = dayjs(expense.time);
+        const expenseDate = dayjs(expense.date);
         // 检查日期解析是否成功
         if (!expenseDate.isValid()) {
-          console.warn('Invalid expense time format:', expense.time);
+          console.warn('Invalid expense date format:', expense.date);
           return false;
         }
         
@@ -136,7 +134,7 @@ const debounce = (func, wait) => {
         const isAfterStart = expenseDate.isAfter(startDateObj.subtract(1, 'day'));
         const isBeforeEnd = expenseDate.isBefore(endDateObj.add(1, 'day'));
         
-        console.log(`Expense time ${expenseDate.format('YYYY-MM-DD')}: isAfterStart=${isAfterStart}, isBeforeEnd=${isBeforeEnd}`);
+        console.log(`Expense date ${expenseDate.format('YYYY-MM-DD')}: isAfterStart=${isAfterStart}, isBeforeEnd=${isBeforeEnd}`);
         
         return isAfterStart && isBeforeEnd;
       });
@@ -251,24 +249,26 @@ const debounce = (func, wait) => {
         
         // 按时间排序
         const sortedExpenses = [...filteredExpenses.value].sort((a, b) => {
-          const dateA = dayjs(a.time);
-          const dateB = dayjs(b.time);
+          // 使用date字段替代time字段，与后端数据保持一致
+          const dateA = dayjs(a.date || a.time);
+          const dateB = dayjs(b.date || b.time);
           return dateA.diff(dateB);
         });
         
-        console.log('First expense time:', sortedExpenses.length > 0 ? dayjs(sortedExpenses[0].time).format('YYYY-MM-DD') : 'No data');
-        console.log('Last expense time:', sortedExpenses.length > 0 ? dayjs(sortedExpenses[sortedExpenses.length - 1].time).format('YYYY-MM-DD') : 'No data');
+        console.log('First expense time:', sortedExpenses.length > 0 ? dayjs(sortedExpenses[0].date || sortedExpenses[0].time).format('YYYY-MM-DD') : 'No data');
+        console.log('Last expense time:', sortedExpenses.length > 0 ? dayjs(sortedExpenses[sortedExpenses.length - 1].date || sortedExpenses[sortedExpenses.length - 1].time).format('YYYY-MM-DD') : 'No data');
 
       // 按日期分组
       const dateData = {};
       sortedExpenses.forEach(expense => {
-        // 再次验证时间有效性
-        if (!expense.time || !dayjs(expense.time).isValid()) {
-          console.warn('Skipping expense with invalid time:', expense);
+        // 再次验证日期有效性，使用date字段替代time字段
+        const expenseDate = expense.date || expense.time;
+        if (!expenseDate || !dayjs(expenseDate).isValid()) {
+          console.warn('Skipping expense with invalid date:', expense);
           return;
         }
         
-        const dateStr = dayjs(expense.time).format('YYYY-MM-DD');
+        const dateStr = dayjs(expenseDate).format('YYYY-MM-DD');
         if (!dateData[dateStr]) {
           dateData[dateStr] = 0;
         }
@@ -285,36 +285,6 @@ const debounce = (func, wait) => {
       console.log('Line chart labels:', labels);
       console.log('Line chart data points:', data);
       console.log('Number of data points:', data.length);
-      
-      // 如果没有实际数据，生成一些模拟数据作为演示
-      if (data.length === 0) {
-        console.warn('No actual expense data available, generating mock data for demonstration...');
-        const mockLabels = [];
-        const mockData = [];
-        
-        // 生成过去14天的模拟数据
-        for (let i = 13; i >= 0; i--) {
-          const date = dayjs().subtract(i, 'day').format('YYYY-MM-DD');
-          mockLabels.push(date);
-          mockData.push(Math.floor(Math.random() * 1000) + 100); // 100-1100之间的随机数
-        }
-        
-        return {
-          labels: mockLabels,
-          datasets: [{
-            label: t('expense.dailyExpense') + '（' + t('chart.mockData') + '）',
-            data: mockData,
-            fill: false,
-            backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 2,
-            tension: 0.3,
-            pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }]
-        };
-      }
 
       return {
         labels,
@@ -353,7 +323,7 @@ const debounce = (func, wait) => {
         const values = Array(7).fill(0);
         filteredExpenses.value.forEach(expense => {
           if (expense.type === category) {
-            const weekday = dayjs(expense.time).day();
+            const weekday = dayjs(expense.date).day();
             values[weekday] += parseFloat(expense.amount);
           }
         });
@@ -405,6 +375,8 @@ const debounce = (func, wait) => {
       }
 
       const chartData = prepareChartData(activeChart.value);
+      
+      // 检查是否有数据点
       let options = {};
       
       // 通用配置，特别是针对移动设备的优化
@@ -1011,10 +983,6 @@ const debounce = (func, wait) => {
     
     .chart-wrapper {
       height: 350px;
-    }
-    
-    .el-select {
-      width: 100%;
     }
     
     .date-range-picker {

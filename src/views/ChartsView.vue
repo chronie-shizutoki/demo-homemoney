@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- 顶部加载和错误提示 -->
-    <div v-if="isLoadingCsv" class="loading-alert">{{ t('app.loading') }}</div>
+    <div v-if="isLoading" class="loading-alert">{{ t('app.loading') }}</div>
     <div v-if="error" class="error-alert">{{ error }}</div>
     <MessageTip v-model:message="successMessage" type="success" />
     <MessageTip v-model:message="errorMessage" type="error" />
@@ -10,27 +10,26 @@
     <Header :title="t('chart.title')" />
 
     <!-- 消费图表分析 -->
-    <ExpenseCharts :expenses="csvExpenses" />
+    <ExpenseCharts :expenses="Expenses" />
 
     <!-- 返回主页按钮 -->
     <div class="back-button-container">
-      <el-button type="primary" @click="goBack" size="default">
-        <el-icon><ArrowLeft /></el-icon>
-        {{ t('common.back') }}
-      </el-button>
+      <GlassButton type="primary" @click="goBack" size="default">
+       < {{ t('common.back') }}
+      </GlassButton>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { ElButton, ElIcon } from 'element-plus';
-import { ArrowLeft } from '@element-plus/icons-vue';
+import GlassButton from '@/components/GlassButton.vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { getExpenses } from '@/utils/browserDB';
+import axios from 'axios';
 
 import { useExpenseData } from '@/composables/useExpenseData';
+import { fetchAllPages, createCancellationController } from '@/utils/pagination';
 import Header from '@/components/Header.vue';
 import ExpenseCharts from '@/components/ExpenseCharts.vue';
 import MessageTip from '@/components/MessageTip.vue';
@@ -39,56 +38,76 @@ const { t } = useI18n();
 const router = useRouter();
 
 // 状态数据
-const csvExpenses = ref([]);
-const isLoadingCsv = ref(false);
+const Expenses = ref([]);
+const isLoading = ref(false);
+
+// 取消控制器
+let paginationController = null;
 
 // 费用数据管理
 const { error, successMessage, errorMessage } = useExpenseData();
 
-// 载入消费数据（从本地数据库）
-const loadCsvExpenses = async () => {
-  if (isLoadingCsv.value) return;
-  isLoadingCsv.value = true;
+// 载入消费数据（从SQLite数据库）- 使用分页加载优化性能
+const loadExpenses = async () => {
+  if (isLoading.value) return;
+
+  // 取消之前的请求
+  if (paginationController) {
+    paginationController.abort();
+  }
+
+  paginationController = createCancellationController();
+  isLoading.value = true;
 
   try {
-    // 使用本地存储获取所有数据，参数格式：(page, limit)
-    const res = await getExpenses(1, 10000);
-    
-    let parsedData = [];
-    
-    // 适配数据格式
-    if (res && res.data && Array.isArray(res.data)) {
-      parsedData = res.data;
-    } else if (Array.isArray(res)) {
-      parsedData = res;
-    }
+    console.log('ChartsView: 开始使用分页加载数据...');
+
+    // 使用分页工具获取所有数据
+    const allData = await fetchAllPages({
+      apiCall: ({ page, limit }) => 
+        axios.get(`/api/expenses?page=${page}&limit=${limit}`),
+      pageSize: 100,           // 每页100条记录
+      maxConcurrent: 2,        // 图表页面使用2个并发请求，避免影响其他操作
+      signal: paginationController.signal,
+      onProgress: (progressData) => {
+        console.log(`ChartsView: 数据加载进度: ${progressData.progress}% (${progressData.loaded}/${progressData.total})`);
+      },
+      onError: (error) => {
+        console.error('ChartsView: 分页加载错误:', error);
+        throw error;
+      }
+    });
 
     // 确保数据格式正确
-    csvExpenses.value = parsedData
+    Expenses.value = allData
       .map(item => ({
         type: item.type?.trim() || item.type,
         remark: item.remark?.trim() || item.remark,
         amount: Number(item.amount),
-        time: item.time
+        date: item.date
       }))
       .filter(item => !isNaN(item.amount) && item.amount > 0);
 
-    if (csvExpenses.value.length === 0) {
+    if (Expenses.value.length === 0) {
       console.warn('ChartsView: No valid data found in API response');
     } else {
-      console.log('ChartsView: Data loaded, count:', csvExpenses.value.length);
+      console.log('ChartsView: 分页加载完成, count:', Expenses.value.length);
     }
   } catch (err) {
-    const errorInfo = err.response
-      ? `${err.response.status} ${err.message}: ${JSON.stringify(err.response.data)}`
-      : err.message;
-    errorMessage.value = t('error.loadCsvFailed', { error: errorInfo });
-    error.value = errorMessage.value;
+    if (err.message !== '操作已被取消') {
+      const errorInfo = err.response
+        ? `${err.response.status} ${err.message}: ${JSON.stringify(err.response.data)}`
+        : err.message;
+      errorMessage.value = t('common.loadFailed', { error: errorInfo });
+      error.value = errorMessage.value;
 
-    console.error('ChartsView: Error Details:', err);
-    csvExpenses.value = [];
+      console.error('ChartsView: Error Details:', err);
+      Expenses.value = [];
+    } else {
+      console.log('ChartsView: 数据加载被用户取消');
+    }
   } finally {
-    isLoadingCsv.value = false;
+    isLoading.value = false;
   }
 };
 
@@ -100,7 +119,7 @@ const goBack = () => {
 // 组件挂载时加载数据
 onMounted(async () => {
   try {
-    await loadCsvExpenses();
+    await loadExpenses();
   } catch (err) {
     console.error('Failed to initialize data:', err);
     error.value = t('error.dataInitializationFailed');

@@ -6,62 +6,83 @@
       <table class="expense-table">
         <thead>
           <tr>
-            <th @click="$emit('sort', 'time')" class="sortable">
+            <th @click="$emit('sort', 'date')" class="sortable">
               {{ $t('expense.date') }}
-              <span v-if="sortField === 'time'" class="sort-indicator">
+              <span v-if="sortField && sortField === 'date'" class="sort-indicator">
                 {{ sortOrder === 'asc' ? '↑' : '↓' }}
               </span>
             </th>
             <th @click="$emit('sort', 'type')" class="sortable">
               {{ $t('expense.type') }}
-              <span v-if="sortField === 'type'" class="sort-indicator">
+              <span v-if="sortField && sortField === 'type'" class="sort-indicator">
                 {{ sortOrder === 'asc' ? '↑' : '↓' }}
               </span>
             </th>
             <th @click="$emit('sort', 'amount')" class="sortable">
               {{ $t('expense.amount') }}
-              <span v-if="sortField === 'amount'" class="sort-indicator">
+              <span v-if="sortField && sortField === 'amount'" class="sort-indicator">
                 {{ sortOrder === 'asc' ? '↑' : '↓' }}
               </span>
             </th>
             <th>{{ $t('expense.remark') }}</th>
+            <th>{{ $t('common.action') }}</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="expense in expenses" :key="expense.id">
-            <td>{{ formatDate(expense.time) }}</td>
+        <transition-group name="row-fade" tag="tbody">
+          <tr v-for="(expense, index) in expenses" :key="expense.id" :data-index="index">
+            <td>{{ formatDate(expense.date) }}</td>
             <td>
-              <span class="type-tag" :style="{ backgroundColor: getTypeColor(expense.type, isDarkMode) }">
+              <span class="type-tag" :style="{ '--tag-color': getTypeColor(expense.type, isDarkMode) }">
                 {{ expense.type }}
               </span>
             </td>
             <td class="amount-cell">¥{{ expense.amount.toFixed(2) }}</td>
             <td>{{ expense.remark || '-' }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="edit-btn" @click="handleEdit(expense)">
+                  {{ $t('common.edit') }}
+                </button>
+                <button class="delete-btn" @click="handleDelete(expense.id)">
+                  {{ $t('common.delete') }}
+                </button>
+              </div>
+            </td>
           </tr>
-        </tbody>
+        </transition-group>
       </table>
     </div>
 
     <!-- 小屏幕卡片视图 -->
     <div class="card-view">
-      <div v-for="expense in expenses" :key="expense.id" class="expense-card">
-        <div class="card-header">
-          <div class="date">{{ formatDate(expense.time) }}</div>
-          <div class="amount">¥{{ expense.amount.toFixed(2) }}</div>
-        </div>
-        <div class="card-body">
-          <div class="type-section">
-            <span class="type-label">{{ $t('expense.type') }}:</span>
-            <span class="type-tag" :style="{ backgroundColor: getTypeColor(expense.type, isDarkMode) }">
-              {{ expense.type }}
-            </span>
+      <transition-group name="row-fade" tag="div">
+        <div v-for="(expense, index) in expenses" :key="expense.id" class="expense-card" :data-index="index">
+          <div class="card-header">
+            <div class="date">{{ formatDate(expense.date) }}</div>
+            <div class="amount">¥{{ expense.amount.toFixed(2) }}</div>
           </div>
-          <div v-if="expense.remark" class="remark-section">
-            <span class="remark-label">{{ $t('expense.remark') }}:</span>
-            <span class="remark-text">{{ expense.remark }}</span>
+          <div class="card-body">
+            <div class="type-section">
+              <span class="type-label">{{ $t('expense.type') }}:</span>
+              <span class="type-tag" :style="{ '--tag-color': getTypeColor(expense.type, isDarkMode) }">
+                  {{ expense.type }}
+              </span>
+            </div>
+            <div v-if="expense.remark" class="remark-section">
+              <span class="remark-label">{{ $t('expense.remark') }}:</span>
+              <span class="remark-text">{{ expense.remark }}</span>
+            </div>
+            <div class="card-actions">
+              <GlassButton type="primary" class="card-edit-btn" @click="handleEdit(expense)">
+                {{ $t('common.edit') }}
+              </GlassButton>
+              <GlassButton type="danger" class="card-delete-btn" @click="handleDelete(expense.id)">
+                {{ $t('common.delete') }}
+              </GlassButton>
+            </div>
           </div>
         </div>
-      </div>
+      </transition-group>
     </div>
 
     <!-- 空数据状态 -->
@@ -75,21 +96,35 @@
 
 <script>
 import { getTypeColor } from '../utils/expenseUtils';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 
 export default {
   props: {
-    expenses: Array,
-    sortField: String,
-    sortOrder: String
+    expenses: {
+      type: Array,
+      default: () => []
+    },
+    // 使sortField和sortOrder成为可选属性
+    sortField: {
+      type: String,
+      default: ''
+    },
+    sortOrder: {
+      type: String,
+      default: 'asc'
+    }
   },
 
-  setup () {
+  setup (props, { emit }) {
     const isDarkMode = ref(false);
     
     // 检测当前系统主题
     const checkDarkMode = () => {
-      isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const newMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (newMode !== isDarkMode.value) {
+        console.log('Dark mode changed:', { from: isDarkMode.value, to: newMode });
+        isDarkMode.value = newMode;
+      }
     };
     
     // 初始化检测
@@ -97,6 +132,7 @@ export default {
     
     // 监听主题变化
     onMounted(() => {
+      console.log('ExpenseTable component mounted:', { initialDarkMode: isDarkMode.value });
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkDarkMode);
     });
     
@@ -106,18 +142,33 @@ export default {
     });
 
     const formatDate = (dateString) => {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      // 直接返回YYYY-MM-DD格式的日期字符串，不再需要转换
+      return dateString || '';
     };
+    
+    // 处理编辑事件
+    const handleEdit = (expense) => {
+      console.log('Edit expense clicked:', expense);
+      emit('edit', expense);
+    };
+
+    // 处理删除事件
+    const handleDelete = (id) => {
+      console.log('Delete expense clicked:', { id });
+      emit('delete', id);
+    };
+
+    // 监听数据变化
+    watch(() => props.expenses, (newVal) => {
+      console.log('Expense data updated:', { recordCount: newVal?.length || 0 });
+    }, { deep: true });
 
     return {
       getTypeColor,
       formatDate,
-      isDarkMode
+      isDarkMode,
+      handleEdit,
+      handleDelete
     };
   }
 };
@@ -223,11 +274,44 @@ export default {
 }
 
 .remark-text {
-  font-size: 14px;
-  color: #333;
-  flex: 1;
-  word-break: break-word;
-}
+    font-size: 14px;
+    color: #333;
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .card-edit-btn,
+  .card-delete-btn {
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .card-edit-btn {
+    background-color: #4361ee;
+    color: white;
+  }
+
+  .card-edit-btn:hover {
+    background-color: #3a56d4;
+  }
+
+  .card-delete-btn {
+    background-color: #e63946;
+    color: white;
+  }
+
+  .card-delete-btn:hover {
+    background-color: #c1121f;
+  }
 
 /* 通用样式 */
 .sortable {
@@ -248,11 +332,46 @@ export default {
   font-size: 12px;
   font-weight: 500;
   color: rgb(0, 0, 0);
+  background-color: var(--tag-color);
+  border: none;
 }
 
 .amount-cell {
   font-weight: 600;
   color: #2b2d42;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background-color: #4361ee;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #3a56d4;
+}
+
+.delete-btn {
+  background-color: #e63946;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c1121f;
 }
 
 .no-data {
@@ -277,6 +396,42 @@ export default {
   max-width: 500px;
   margin: 0 auto;
 }
+
+/* 表格行动画效果 */
+.row-fade-enter-active,
+.row-fade-leave-active {
+  transition: all 0.3s ease-out;
+  position: relative;
+}
+
+.row-fade-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.row-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.row-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+  position: absolute;
+  width: 100%;
+  left: 0;
+}
+
+/* 为每行添加不同的延迟，实现逐行动画 */
+.row-fade-enter-active > [data-index="0"] { transition-delay: 0ms; }
+.row-fade-enter-active > [data-index="1"] { transition-delay: 30ms; }
+.row-fade-enter-active > [data-index="2"] { transition-delay: 60ms; }
+.row-fade-enter-active > [data-index="3"] { transition-delay: 90ms; }
+.row-fade-enter-active > [data-index="4"] { transition-delay: 120ms; }
+.row-fade-enter-active > [data-index="5"] { transition-delay: 150ms; }
+.row-fade-enter-active > [data-index="6"] { transition-delay: 180ms; }
+.row-fade-enter-active > [data-index="7"] { transition-delay: 210ms; }
+.row-fade-enter-active > [data-index="8"] { transition-delay: 240ms; }
+.row-fade-enter-active > [data-index="9"] { transition-delay: 270ms; }
 
 /* 响应式设计 - 小屏幕使用卡片视图 */
 @media (max-width: 768px) {
@@ -314,9 +469,10 @@ export default {
   }
 
   .type-tag {
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: var(--tag-color);
+    background-color: transparent;
+    border: 1px solid white;
+    box-shadow: none;
   }
 
   .no-data-icon {
@@ -354,6 +510,16 @@ export default {
   .type-label,
   .remark-label {
     color: #888;
+  }
+  
+  .card-edit-btn,
+  .card-delete-btn {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .card-edit-btn:hover,
+  .card-delete-btn:hover {
+    opacity: 0.9;
   }
 }
 </style>

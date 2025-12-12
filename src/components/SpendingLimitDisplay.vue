@@ -1,20 +1,22 @@
 <template>
   <div class="spending-limit-display" v-if="spendingStore.isLimitEnabled">
+    <MessageTip v-model:message="successMessage" type="success" />
+    <MessageTip v-model:message="errorMessage" type="error" />
     <div class="display-header">
       <div class="header-left">
         <h4 class="display-title">{{ $t('spending.monthlyProgress') }}</h4>
         <span class="current-month">{{ currentMonthName }}</span>
       </div>
       <div class="header-right">
-        <el-button
-          @click="showSettings = !showSettings"
-          :icon="Setting"
+        <GlassButton
+          @click="showSettings = true"
           size="small"
           type="text"
           class="settings-btn"
         >
+          <template #icon><FontAwesomeIcon icon="cog" /></template>
           {{ $t('spending.settings.title') }}
-        </el-button>
+        </GlassButton>
       </div>
     </div>
 
@@ -33,35 +35,29 @@
         </span>
       </div>
 
-      <el-progress
+      <CustomProgress
         :percentage="Math.min(spendingStore.spendingPercentage, 100)"
         :color="progressColor"
         :stroke-width="12"
-        :show-text="false"
+        :dark-theme="darkTheme"
         class="spending-progress"
       />
     </div>
 
     <!-- 状态提示 -->
     <div class="status-section">
-      <el-alert
-        :title="statusAlert.title"
-        :description="statusAlert.description"
+      <GlassAlert
         :type="statusAlert.type"
-        :show-icon="true"
         :closable="false"
         class="status-alert"
-      />
+      >
+        <strong>{{ statusAlert.title }}</strong><br>
+        {{ statusAlert.description }}
+      </GlassAlert>
     </div>
 
     <!-- 详细信息 -->
     <div class="details-section">
-      <div class="detail-item">
-        <span class="detail-label">{{ $t('spending.remaining') }}:</span>
-        <span class="detail-value" :class="remainingClass">
-          ¥{{ formatAmount(spendingStore.remainingAmount) }}
-        </span>
-      </div>
       <div class="detail-item" v-if="spendingStore.isOverLimit">
         <span class="detail-label">{{ $t('spending.exceeded') }}:</span>
         <span class="detail-value exceeded-amount">
@@ -82,47 +78,51 @@
       </div>
     </div>
 
-    <!-- 设置面板 -->
-    <el-collapse-transition>
-      <div v-show="showSettings" class="settings-panel">
-        <SpendingLimitSetting />
-      </div>
-    </el-collapse-transition>
+    
   </div>
 
   <!-- 启用提示 -->
   <div class="enable-prompt" v-else>
     <div class="prompt-content">
-      <el-icon class="prompt-icon"><TrendCharts /></el-icon>
+<FontAwesomeIcon icon="chart-line" class="prompt-icon" />
       <div class="prompt-text">
         <h4>{{ $t('spending.enablePrompt.title') }}</h4>
         <p>{{ $t('spending.enablePrompt.description') }}</p>
       </div>
-      <el-button
-        @click="enableSpendingLimit"
+<GlassButton
+        @click="handleEnableSpendingLimit"
         type="primary"
-        :icon="Plus"
         class="enable-btn"
       >
+        <template #icon><FontAwesomeIcon icon="plus" /></template>
         {{ $t('spending.enablePrompt.button') }}
-      </el-button>
+      </GlassButton>
     </div>
   </div>
+
+  <!-- 独立的预算设置弹窗 -->
+  <SpendingLimitSetting v-model="showSettings" :dark-theme="darkTheme" />
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useSpendingStore } from '../stores/spending.js';
 import { useI18n } from 'vue-i18n';
-import { Setting, TrendCharts, Plus } from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
+
+
+import MessageTip from './MessageTip.vue';
 import SpendingLimitSetting from './SpendingLimitSetting.vue';
+import GlassAlert from './GlassAlert.vue';
+import CustomProgress from './CustomProgress.vue';
 import dayjs from 'dayjs';
 
 const { t } = useI18n();
 const spendingStore = useSpendingStore();
 
 // 本地状态
+const successMessage = ref('');
+const errorMessage = ref('');
+// 控制独立弹窗的显示/隐藏
 const showSettings = ref(false);
 
 // 计算属性
@@ -142,13 +142,6 @@ const progressColor = computed(() => {
   if (percentage >= 100) return '#f56c6c';
   if (percentage >= spendingStore.warningThreshold * 100) return '#e6a23c';
   return '#67c23a';
-});
-
-const remainingClass = computed(() => {
-  const remaining = spendingStore.remainingAmount;
-  if (remaining <= 0) return 'negative-amount';
-  if (remaining < spendingStore.monthlyLimit * 0.2) return 'warning-amount';
-  return 'positive-amount';
 });
 
 const statusAlert = computed(() => {
@@ -219,8 +212,13 @@ const formatAmount = (amount) => {
 
 const enableSpendingLimit = () => {
   spendingStore.toggleLimitEnabled(true);
+  successMessage.value = t('spending.enablePrompt.enabled');
+};
+
+const handleEnableSpendingLimit = () => {
+  spendingStore.toggleLimitEnabled(true);
   showSettings.value = true;
-  ElMessage.success(t('spending.enablePrompt.enabled'));
+  successMessage.value = t('spending.enablePrompt.enabled');
 };
 
 // 监听消费数据变化
@@ -228,6 +226,10 @@ const props = defineProps({
   expenses: {
     type: Array,
     default: () => []
+  },
+  darkTheme: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -470,40 +472,9 @@ onMounted(() => {
     color: #d1d5db;
   }
 
-  /* Element Plus 组件样式调整 */
-  :deep(.el-progress-bar__outer) {
+  /* Custom Progress styles */
+  :deep(.progress-bar-outer) {
     background-color: rgba(75, 85, 99, 0.3);
-  }
-
-  :deep(.el-progress-bar__inner) {
-    background-color: #4361ee;
-  }
-
-  :deep(.el-alert) {
-    background-color: rgba(30, 30, 30, 0.5);
-    border-color: #4b5563;
-    color: #e5e7eb;
-  }
-
-  :deep(.el-alert__title) {
-    color: #f9fafb;
-  }
-
-  :deep(.el-button) {
-    --el-button-text-color: #e5e7eb;
-    --el-button-hover-text-color: #ffffff;
-    --el-button-bg-color: #374151;
-    --el-button-hover-bg-color: #4b5563;
-    --el-button-border-color: #4b5563;
-    --el-button-hover-border-color: #6b7280;
-  }
-
-  :deep(.el-button--primary) {
-    --el-button-text-color: #ffffff;
-    --el-button-bg-color: #3b82f6;
-    --el-button-hover-bg-color: #2563eb;
-    --el-button-border-color: #3b82f6;
-    --el-button-hover-border-color: #2563eb;
   }
 
     /* 月度预算相关元素颜色区分 */
@@ -532,11 +503,6 @@ onMounted(() => {
 @media (max-width: 768px) {
   .spending-limit-display {
     padding: 16px;
-  }
-
-  .display-header {
-    flex-direction: column;
-    gap: 12px;
   }
 
   .details-section {

@@ -3,15 +3,15 @@
     <h1>{{ title }}</h1>
 
     <div class="language-buttons">
-      <button
+      <GlassButton
         v-for="lang in languages"
         :key="lang.code"
         @click="switchLanguage(lang.code)"
-        :class="['language-btn', { 'active': currentLanguage === lang.code }]"
+        :class="['language-btn', { 'active': currentLang.value === lang.code }]"
         :aria-label="`切换到${lang.label}`"
       >
         {{ lang.shortLabel }}
-      </button>
+      </GlassButton>
     </div>
 
   </div>
@@ -24,13 +24,24 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 defineOptions({ name: 'AppHeader' });
-const { t } = useI18n();
+useI18n();
 
 // 定义组件接收的 props
 const props = defineProps({ title: String });
 
 // 调用 useLanguageSwitch 获取语言切换函数和当前语言
-const { switchLanguage, currentLanguage } = useLanguageSwitch();
+const { switchLanguage: originalSwitchLanguage, currentLang } = useLanguageSwitch();
+
+// 增强版语言切换函数，添加日志记录
+const switchLanguage = (langCode) => {
+  console.log('Language switch requested:', { from: currentLang.value, to: langCode });
+  try {
+    originalSwitchLanguage(langCode);
+    console.log('Language switch successful:', { currentLanguage: langCode });
+  } catch (error) {
+    console.error('Language switch failed:', { error: error.message, requestedLang: langCode });
+  }
+};
 
 // 定义支持的语言列表
 const languages = [
@@ -44,16 +55,22 @@ const headerRef = ref(null);
 
 const handleScroll = () => {
   if (headerRef.value) {
-    if (window.scrollY > 50) {
+    const shouldBeScrolled = window.scrollY > 50;
+    const isCurrentlyScrolled = headerRef.value.classList.contains('scrolled');
+    
+    if (shouldBeScrolled && !isCurrentlyScrolled) {
       headerRef.value.classList.add('scrolled');
-    } else {
+      console.log('Header scroll effect activated:', { scrollY: window.scrollY });
+    } else if (!shouldBeScrolled && isCurrentlyScrolled) {
       headerRef.value.classList.remove('scrolled');
+      console.log('Header scroll effect deactivated:', { scrollY: window.scrollY });
     }
   }
 };
 
 // 生命周期钩子
 onMounted(() => {
+  console.log('Header component mounted:', { initialLanguage: currentLang.value });
   window.addEventListener('scroll', handleScroll);
 });
 
@@ -72,7 +89,7 @@ onUnmounted(() => {
   background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(250,250,250,0.9) 100%); /* 渐变背景 */
   backdrop-filter: blur(10px); /* 毛玻璃效果 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* 底部阴影 */
-  border-bottom: 1px solid var(--el-border-color-light, #e4e7ed); /* 底部边框 */
+  border-bottom: 1px solid var(#e4e7ed); /* 底部边框 */
   position: sticky; /* 粘性定位，使其在滚动时保持在顶部 */
   top: 0; /* 距离顶部0 */
   z-index: 100; /* 确保在其他内容之上 */
@@ -88,12 +105,12 @@ onUnmounted(() => {
 /* 标题样式 */
 .header h1 {
   font-size: 1.8rem; /* 标题字体大小 */
-  color: var(--el-text-color-primary, #303133); /* 标题文本颜色 */
+  color: var(#303133); /* 标题文本颜色 */
   margin: 0; /* 移除默认外边距 */
   flex-grow: 1; /* 允许标题占据可用空间 */
   text-align: left; /* 文本左对齐 */
   font-weight: 600; /* 字体粗细 */
-  background: linear-gradient(90deg, var(--el-color-primary, #409eff), #7928ca); /* 文本渐变背景 */
+  background: linear-gradient(90deg, #409eff, #7928ca); /* 文本渐变背景 */
   -webkit-background-clip: text; /* 背景裁剪到文本 */
   background-clip: text;
   -webkit-text-fill-color: transparent; /* 文本填充透明，显示背景渐变 */
@@ -113,10 +130,10 @@ onUnmounted(() => {
 /* 语言按钮样式 */
 .language-btn {
   padding: 8px 16px; /* 内边距 */
-  border: 1px solid var(--el-border-color, #dcdfe6); /* 边框 */
-  border-radius: var(--el-border-radius-base, 6px); /* 圆角 */
-  background-color: var(--el-bg-color, #ffffff); /* 背景色 */
-  color: var(--el-text-color-regular, #606266); /* 文本颜色 */
+  border: 1px solid #dcdfe6; /* 边框 */
+  border-radius: 6px; /* 圆角 */
+  background-color: #ffffff; /* 背景色 */
+  color: #606266; /* 文本颜色 */
   font-size: 14px; /* 字体大小 */
   font-weight: 500; /* 字体粗细 */
   cursor: pointer; /* 鼠标悬停时显示手型光标 */
@@ -124,28 +141,6 @@ onUnmounted(() => {
   white-space: nowrap; /* 禁止文本换行 */
   outline: none; /* 移除默认轮廓 */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 阴影效果 */
-}
-
-/* 语言按钮悬停效果 */
-.language-btn:hover {
-  border-color: var(--el-color-primary, #409eff); /* 边框颜色变为主题色 */
-  color: var(--el-color-primary, #409eff); /* 文本颜色变为主题色 */
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15); /* 增强阴影 */
-  transform: translateY(-1px); /* 轻微上移 */
-}
-
-/* 选中状态的语言按钮 */
-.language-btn.active {
-  background-color: var(--el-color-primary, #409eff); /* 背景色变为主题色 */
-  color: white; /* 文本颜色变为白色 */
-  border-color: var(--el-color-primary, #409eff); /* 边框颜色变为主题色 */
-  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.2); /* 增强阴影 */
-}
-
-/* 选中状态的语言按钮悬停效果 */
-.language-btn.active:hover {
-  background-color: var(--el-color-primary-dark-2, #3a8ee6); /* 背景色稍微变深 */
-  border-color: var(--el-color-primary-dark-2, #3a8ee6); /* 边框颜色稍微变深 */
 }
 
 /* 移动端适配 */
@@ -171,7 +166,7 @@ onUnmounted(() => {
   }
 
   /* 移动端下拉菜单宽度调整 */
-  .header :deep(.el-dropdown-menu) {
+  .header {
     min-width: 200px !important;
     max-width: 90vw !important;
   }
@@ -198,24 +193,6 @@ onUnmounted(() => {
     color: #e0e0e0;
     border-color: #555;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .language-btn:hover {
-    border-color: #79bbff;
-    color: #79bbff;
-    box-shadow: 0 4px 12px rgba(121, 187, 255, 0.15);
-  }
-
-  .language-btn.active {
-    background-color: #79bbff;
-    color: #1a1a1a;
-    border-color: #79bbff;
-    box-shadow: 0 4px 16px rgba(121, 187, 255, 0.25);
-  }
-
-  .language-btn.active:hover {
-    background-color: #5da8ff;
-    border-color: #5da8ff;
   }
 }
 

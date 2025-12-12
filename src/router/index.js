@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import i18n from '@/locales/i18n';
-import { ElMessage } from 'element-plus';
 import HomeView from '@/views/HomeView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 
@@ -10,7 +9,6 @@ import NotFoundView from '@/views/NotFoundView.vue';
  * @desc 使用Vue Router管理前端路由，包含历史模式配置和路由守卫
  */
 
-import DebtView from '@/views/DebtView.vue';
 import ChartsView from '@/views/ChartsView.vue';
 
 const router = createRouter({
@@ -23,16 +21,16 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/debts',
-      name: 'debts',
-      meta: { title: 'debt.title' },
-      component: DebtView
-    },
-    {
       path: '/charts',
       name: 'charts',
       meta: { title: 'chart.title' },
       component: ChartsView
+    },
+    {
+      path: '/photo.html',
+      name: 'photo',
+      meta: { title: 'photo.title' },
+      component: () => import('@/../photo.html')
     },
     {
       path: '/:pathMatch(.*)*',
@@ -40,13 +38,13 @@ const router = createRouter({
       component: NotFoundView
     }
   ],
-  scrollBehavior (to, from, savedPosition) {
+  scrollBehavior (_to, _from, savedPosition) {
     return savedPosition || { top: 0 };
   }
 });
 
 // 全局前置守卫：整合所有路由控制逻辑
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   try {
     const userAgent = navigator.userAgent || 'unknown';
     // 更新页面标题

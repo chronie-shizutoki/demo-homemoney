@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import dayjs from 'dayjs';
-import { getExpenses } from '@/utils/browserDB';
 
 export const useSpendingStore = defineStore('spending', {
   state: () => ({
@@ -97,8 +96,11 @@ export const useSpendingStore = defineStore('spending', {
       // 计算当前月的消费总额
       const monthlyTotal = this.expenses
         .filter(expense => {
-          if (!expense.time) return false;
-          const expenseMonth = dayjs(expense.time).format('YYYY-MM');
+          // 使用date字段替代time字段，与后端数据保持一致
+          // 同时保持向后兼容性，先检查date字段，再检查time字段
+          const expenseDate = expense.date || expense.time;
+          if (!expenseDate) return false;
+          const expenseMonth = dayjs(expenseDate).format('YYYY-MM');
           return expenseMonth === currentMonth;
         })
         .reduce((total, expense) => {
@@ -114,7 +116,8 @@ export const useSpendingStore = defineStore('spending', {
 
     // 添加新的消费记录
     addExpense (expense) {
-      if (expense && expense.amount && expense.time) {
+      // 使用date字段替代time字段，保持向后兼容
+      if (expense && expense.amount && (expense.date || expense.time)) {
         this.expenses.push(expense);
         this.calculateCurrentMonthSpending();
       }
@@ -204,14 +207,17 @@ export const useSpendingStore = defineStore('spending', {
       this.saveSettings();
     },
 
-    // 从本地存储获取消费数据
+    // 从后端API获取消费数据
     async fetchExpenses () {
       try {
-        console.log('Fetching expenses from local storage...');
-        const result = await getExpenses({ limit: 1000 }); // 获取更多数据用于计算
+        console.log('Fetching expenses from API...');
+        const response = await fetch('/api/expenses?limit=1000'); // 获取更多数据用于计算
+        console.log('Expenses API response status:', response.status);
+        if (!response.ok) throw new Error(`Failed to fetch expenses: ${response.statusText}`);
+        const result = await response.json();
         console.log('Fetched expenses data:', result);
         
-        // 适配数据格式
+        // 适配新的API响应格式
         let expenses = [];
         if (result && result.data && Array.isArray(result.data)) {
           expenses = result.data;
@@ -222,7 +228,7 @@ export const useSpendingStore = defineStore('spending', {
         this.updateExpenses(expenses);
         console.log('Updated expenses - currentMonthSpending:', this.currentMonthSpending);
       } catch (error) {
-        console.error('Error fetching expenses from local storage:', error);
+        console.error('Error fetching expenses:', error);
       }
     }
   }

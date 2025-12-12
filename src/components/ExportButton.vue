@@ -8,7 +8,7 @@
 -->
 <template>
   <div class="export-section">
-    <button @click="handleExport" class="btn btn-primary">{{ $t('app.export') }}</button>
+    <GlassButton type="primary" @click="handleExport" class="btn btn-primary">{{ $t('app.export') }}</GlassButton>
   </div>
 </template>
 
@@ -28,5 +28,8 @@ const handleExport = () => { emits('export-excel'); };
 </script>
 
 <style scoped>
-/* 已迁移至common.css，仅保留作用域标识 */
+.export-section {
+  display: flex;
+  justify-content: center;
+}
 </style>

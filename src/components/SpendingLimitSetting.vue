@@ -1,145 +1,127 @@
 <template>
-  <div class="spending-limit-setting">
-    <div class="setting-header">
-      <h3 class="setting-title">{{ $t('spending.settings.title') }}</h3>
-      <el-switch
-        v-model="spendingStore.isLimitEnabled"
-        @change="handleToggleEnabled"
-        :active-text="$t('spending.settings.enabled')"
-        :inactive-text="$t('spending.settings.disabled')"
-        class="enable-switch"
-      />
-    </div>
-
-    <div class="setting-content" v-if="spendingStore.isLimitEnabled">
-      <!-- 月度限制设置 -->
-      <div class="setting-item">
-        <label class="setting-label">{{ $t('spending.settings.monthlyLimit') }}</label>
-        <el-input-number
-          v-model="localLimit"
-          @change="handleLimitChange"
-          :min="0"
-          :max="999999"
-          :step="100"
-          :precision="2"
-          :placeholder="$t('spending.settings.enterLimit')"
-          class="limit-input"
-          size="large"
-        >
-          <template #prefix>
-            <span class="currency-symbol">¥</span>
-          </template>
-        </el-input-number>
-      </div>
-
-      <!-- 警告阈值设置 -->
-      <div class="setting-item">
-        <label class="setting-label">
-          {{ $t('spending.settings.warningThreshold') }}
-          <span class="threshold-value">({{ Math.round(spendingStore.warningThreshold * 100) }}%)</span>
-        </label>
-        <el-slider
-          v-model="thresholdPercentage"
-          @change="handleThresholdChange"
-          :min="50"
-          :max="95"
-          :step="5"
-          :format-tooltip="formatTooltip"
-          show-stops
-          class="threshold-slider"
-        />
-        <div class="threshold-description">
-          {{ $t('spending.settings.thresholdDescription') }}
-        </div>
-      </div>
-
-      <!-- 快速设置按钮 -->
-      <div class="setting-item">
-        <label class="setting-label">{{ $t('spending.settings.quickSet') }}</label>
-        <div class="quick-buttons">
-          <el-button
-            v-for="amount in quickAmounts"
-            :key="amount"
-            @click="setQuickLimit(amount)"
-            size="small"
-            :type="localLimit === amount ? 'primary' : 'default'"
-            class="quick-btn"
-          >
-            ¥{{ formatAmount(amount) }}
-          </el-button>
-        </div>
-      </div>
-
-      <!-- 当前状态预览 -->
-      <div class="setting-item">
-        <label class="setting-label">{{ $t('spending.settings.preview') }}</label>
-        <div class="preview-card">
-          <div class="preview-item">
-            <span class="preview-label">{{ $t('spending.currentMonth') }}:</span>
-            <span class="preview-value">{{ currentMonthName }}</span>
+  <!-- 独立弹窗容器 -->
+  <transition name="dialog-overlay">
+    <div v-if="modelValue" class="custom-dialog-overlay" @click.self="closeDialog">
+      <transition name="dialog-content">
+        <div v-if="modelValue" class="custom-dialog settings-panel-dialog" :class="{ 'dark-theme': darkTheme }">
+          <div class="dialog-header">
+            <h3 class="dialog-title">{{ $t('spending.settings.title') }}</h3>
+            <button class="dialog-close-btn" @click="closeDialog" aria-label="关闭">
+              <FontAwesomeIcon icon="times" />
+            </button>
           </div>
-          <div class="preview-item">
-            <span class="preview-label">{{ $t('spending.currentSpending') }}:</span>
-            <span class="preview-value spending-amount">¥{{ formatAmount(spendingStore.currentMonthSpending) }}</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">{{ $t('spending.monthlyLimit') }}:</span>
-            <span class="preview-value limit-amount">¥{{ formatAmount(spendingStore.monthlyLimit) }}</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">{{ $t('spending.remaining') }}:</span>
-            <span class="preview-value" :class="remainingClass">
-              ¥{{ formatAmount(spendingStore.remainingAmount) }}
-            </span>
+          
+          <div class="dialog-body">
+            <div class="spending-limit-setting">
+              <MessageTip v-model:message="successMessage" type="success" />
+              <MessageTip v-model:message="errorMessage" type="error" />
+              <div class="setting-header">
+                <h3 class="setting-title">{{ $t('spending.settings.on') }}</h3>
+                <GlassSwitch
+                  v-model="spendingStore.isLimitEnabled"
+                  @change="handleToggleEnabled"
+                  active-text=""
+                  inactive-text=""
+                  class="enable-switch"
+                >
+                  <template #active-text>{{ $t('spending.settings.enabled') }}</template>
+                  <template #inactive-text>{{ $t('spending.settings.disabled') }}</template>
+                </GlassSwitch>
+              </div>
+
+              <div class="setting-content" v-if="spendingStore.isLimitEnabled">
+                <!-- 月度限制设置 -->
+                <div class="setting-item">
+                  <label class="setting-label">{{ $t('spending.settings.monthlyLimit') }}</label>
+                  <GlassInputNumber
+                    v-model="localLimit"
+                    @change="handleLimitChange"
+                    :min="0"
+                    :max="999999"
+                    :step="100"
+                    :precision="2"
+                    :placeholder="$t('spending.settings.enterLimit')"
+                    class="limit-input"
+                    size="large"
+                    prefix="¥"
+                  />
+                </div>
+
+                <!-- 警告阈值设置 -->
+                <div class="setting-item">
+                  <label class="setting-label">{{ $t('spending.settings.warningThreshold') }}</label>
+                  <GlassInputNumber
+                    v-model="thresholdPercentage"
+                    @change="handleThresholdChange"
+                    :min="1"
+                    :max="100"
+                    :step="1"
+                    :precision="0"
+                    :placeholder="$t('spending.settings.enterThreshold')"
+                    class="threshold-input"
+                    size="large"
+                    suffix="%"
+                  />
+                </div>
+              </div>
+
+              <!-- 禁用状态说明 -->
+              <div class="disabled-notice" v-else>
+                <div class="notice-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <span>{{ $t('spending.settings.disabledNotice') }}</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </transition>
     </div>
-
-    <!-- 禁用状态说明 -->
-    <div class="disabled-notice" v-else>
-      <el-icon class="notice-icon"><InfoFilled /></el-icon>
-      <span>{{ $t('spending.settings.disabledNotice') }}</span>
-    </div>
-  </div>
+  </transition>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useSpendingStore } from '../stores/spending.js';
 import { useI18n } from 'vue-i18n';
-import { InfoFilled } from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
-import dayjs from 'dayjs';
+import GlassSwitch from './GlassSwitch.vue';
+import GlassInputNumber from './GlassInputNumber.vue';
+import MessageTip from './MessageTip.vue';
 
 const { t } = useI18n();
 const spendingStore = useSpendingStore();
 
+// Props
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  darkTheme: {
+    type: Boolean,
+    default: false
+  }
+});
+
+// Emits
+const emit = defineEmits(['update:modelValue']);
+
 // 本地状态
 const localLimit = ref(0);
 const thresholdPercentage = ref(80);
-
-// 快速设置金额选项
-const quickAmounts = [1000, 2000, 3000, 5000, 8000, 10000];
-
-// 计算属性
-const currentMonthName = computed(() => {
-  return dayjs().format('YYYY-MM');
-});
-
-const remainingClass = computed(() => {
-  const remaining = spendingStore.remainingAmount;
-  if (remaining <= 0) return 'negative-amount';
-  if (remaining < spendingStore.monthlyLimit * 0.2) return 'warning-amount';
-  return 'positive-amount';
-});
+const successMessage = ref('');
+const errorMessage = ref('');
 
 // 方法
 const handleToggleEnabled = (enabled) => {
   spendingStore.toggleLimitEnabled(enabled);
   if (enabled && spendingStore.monthlyLimit <= 0) {
     // 如果启用但没有设置限制，提示用户设置
-    ElMessage.info(t('spending.settings.pleaseSetLimit'));
+    errorMessage.value = t('spending.settings.pleaseSetLimit');
   }
 };
 
@@ -150,25 +132,10 @@ const handleLimitChange = (value) => {
 };
 
 const handleThresholdChange = (value) => {
-  const threshold = value / 100;
-  spendingStore.setWarningThreshold(threshold);
-};
-
-const setQuickLimit = (amount) => {
-  localLimit.value = amount;
-  spendingStore.setMonthlyLimit(amount);
-  ElMessage.success(t('spending.settings.limitUpdated', { amount: formatAmount(amount) }));
-};
-
-const formatAmount = (amount) => {
-  return new Intl.NumberFormat('zh-CN', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  }).format(amount || 0);
-};
-
-const formatTooltip = (value) => {
-  return `${value}%`;
+  if (value !== null && value >= 1 && value <= 100) {
+    const threshold = value / 100;
+    spendingStore.setWarningThreshold(threshold);
+  }
 };
 
 // 监听store变化，同步到本地状态
@@ -180,6 +147,11 @@ watch(() => spendingStore.warningThreshold, (newValue) => {
   thresholdPercentage.value = Math.round(newValue * 100);
 }, { immediate: true });
 
+// 关闭弹窗
+const closeDialog = () => {
+  emit('update:modelValue', false);
+};
+
 // 组件挂载时加载设置
 onMounted(() => {
   spendingStore.loadSettings();
@@ -187,11 +159,71 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.spending-limit-setting {
+.custom-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.custom-dialog {
   background: #ffffff;
   border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: dialog-fade-in 0.3s ease-out;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.dialog-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #909399;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+}
+
+.dialog-close-btn:hover {
+  color: #606266;
+}
+
+.dialog-body {
   padding: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.spending-limit-setting {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
 
 .setting-header {
@@ -205,23 +237,21 @@ onMounted(() => {
 
 .setting-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #303133;
 }
 
-.enable-switch {
-  --el-switch-on-color: #67c23a;
-}
-
 .setting-content {
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .setting-item {
   margin-bottom: 24px;
+  flex: 1;
 }
 
 .setting-label {
@@ -232,87 +262,19 @@ onMounted(() => {
   color: #606266;
 }
 
-.threshold-value {
-  color: #409eff;
-  font-weight: 600;
-}
-
 .limit-input {
   width: 100%;
+  max-width: 300px;
+}
+
+.threshold-input {
+  width: 100%;
+  max-width: 300px;
 }
 
 .currency-symbol {
   color: #909399;
   font-weight: 500;
-}
-
-.threshold-slider {
-  margin: 16px 0;
-}
-
-.threshold-description {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 8px;
-}
-
-.quick-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.quick-btn {
-  min-width: 80px;
-}
-
-.preview-card {
-  background: #f5f7fa;
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid #e4e7ed;
-}
-
-.preview-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.preview-item:last-child {
-  margin-bottom: 0;
-}
-
-.preview-label {
-  font-size: 13px;
-  color: #606266;
-}
-
-.preview-value {
-  font-size: 13px;
-  font-weight: 500;
-  color: #303133;
-}
-
-.spending-amount {
-  color: #e6a23c;
-}
-
-.limit-amount {
-  color: #409eff;
-}
-
-.positive-amount {
-  color: #67c23a;
-}
-
-.warning-amount {
-  color: #e6a23c;
-}
-
-.negative-amount {
-  color: #f56c6c;
 }
 
 .disabled-notice {
@@ -329,40 +291,117 @@ onMounted(() => {
   font-size: 16px;
 }
 
+/* 动画效果 */
+@keyframes dialog-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dialog-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+}
+
+/* 遮罩层过渡 */
+.dialog-overlay-enter-active,
+.dialog-overlay-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.dialog-overlay-enter-from,
+.dialog-overlay-leave-to {
+  opacity: 0;
+}
+
+/* 弹窗内容过渡 */
+.dialog-content-enter-active {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dialog-content-leave-active {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dialog-content-enter-from {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.95);
+}
+
+.dialog-content-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+
+/* 对话框关闭按钮动画 */
+.dialog-close-btn:hover {
+  transform: rotate(90deg);
+}
+
+.dialog-close-btn {
+  transition: transform 0.3s ease;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .spending-limit-setting {
+  .custom-dialog {
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .dialog-header,
+  .dialog-body {
     padding: 16px;
   }
-
-  .setting-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .quick-buttons {
-    justify-content: center;
-  }
-
-  .quick-btn {
-    flex: 1;
-    min-width: 60px;
-  }
-
-  .preview-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+  
+  .spending-limit-setting {
+    padding: 0;
   }
 }
 
 /* 深色模式适配 */
 @media (prefers-color-scheme: dark) {
-  .spending-limit-setting {
-    background: rgba(30, 30, 30, 0.7);
+  .custom-dialog-overlay {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .custom-dialog {
+    background: rgba(30, 30, 30, 0.9);
     border: 1px solid #333;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .dialog-header {
+    border-bottom-color: #444;
+  }
+  
+  .dialog-title {
+    color: #f9fafb;
+  }
+  
+  .dialog-close-btn {
+    color: #9ca3af;
+  }
+  
+  .dialog-close-btn:hover {
+    color: #e5e7eb;
+  }
+  
+  .spending-limit-setting {
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
   .setting-header {
@@ -377,150 +416,8 @@ onMounted(() => {
     color: #9ca3af;
   }
 
-  .threshold-value {
-    color: #93c5fd;
-  }
-
   .currency-symbol {
     color: #9ca3af;
-  }
-
-  .threshold-description {
-    color: #9ca3af;
-  }
-
-  .preview-card {
-    background: rgba(40, 40, 40, 0.5);
-    border: 1px solid #444;
-  }
-
-  .preview-label {
-    color: #9ca3af;
-  }
-
-  .preview-value {
-    color: #e5e7eb;
-  }
-
-  .disabled-notice {
-    color: #9ca3af;
-  }
-
-  /* Element Plus 组件深色模式适配 */
-  :deep(.el-switch__core) {
-    background-color: #444;
-  }
-
-  :deep(.el-switch__label) {
-    color: #e5e7eb;
-  }
-
-  :deep(.el-switch__label--left) {
-    color: #e5e7eb;
-  }
-
-  :deep(.el-input-number__decrease),
-  :deep(.el-input-number__increase) {
-    background-color: rgba(50, 50, 50, 0.7);
-    color: #e5e7eb;
-    border-color: #555;
-  }
-
-  :deep(.el-input-number__decrease):hover,
-  :deep(.el-input-number__increase):hover {
-    background-color: rgba(60, 60, 60, 0.7);
-  }
-
-  :deep(.el-input__wrapper) {
-    background-color: rgba(40, 40, 40, 0.5);
-    border-color: #555;
-  }
-
-  :deep(.el-input__inner) {
-    background-color: rgba(40, 40, 40, 0.5);
-    border-color: #555;
-    color: #e5e7eb;
-  }
-
-  /* el-input-number 深色模式适配 */
-  :deep(.el-input-number) {
-    background-color: rgba(40, 40, 40, 0.5);
-    border-color: #555;
-  }
-
-  :deep(.el-input-number--large) {
-    background-color: rgba(40, 40, 40, 0.5);
-    border-color: #555;
-  }
-
-  :deep(.limit-input) {
-    background-color: rgba(40, 40, 40, 0.5);
-    border-color: #555;
-  }
-
-  :deep(.el-slider__runway) {
-    background-color: #555;
-  }
-
-  :deep(.el-slider__bar) {
-    background-color: #4361ee;
-  }
-
-  :deep(.el-slider__button) {
-    background-color: #fff;
-    border-color: #4361ee;
-  }
-
-  :deep(.el-button--default) {
-    background-color: rgba(50, 50, 50, 0.7);
-    border-color: #555;
-    color: #e5e7eb;
-  }
-
-  :deep(.el-button--primary) {
-    background-color: #4361ee;
-    border-color: #4361ee;
-  }
-
-  :deep(.el-icon) {
-    color: #9ca3af;
-  }
-
-  /* 进度条深色模式适配 */
-  :deep(.el-progress-bar__outer) {
-    background-color: rgba(75, 85, 99, 0.3);
-    border-radius: 4px;
-  }
-
-  :deep(.el-progress-bar__inner) {
-    background-color: #4361ee;
-  }
-
-  /* 调整输入框和按钮文字颜色，确保区分度 */
-  :deep(.el-input__inner) {
-    color: #e5e7eb;
-  }
-
-  :deep(.el-input-number__decrease),
-  :deep(.el-input-number__increase) {
-    color: #e5e7eb;
-  }
-
-  /* 月度预算相关元素颜色区分 */
-  .spending-amount {
-    color: #fcd34d;
-  }
-
-  .limit-amount {
-    color: #93c5fd;
-  }
-
-  .positive-amount {
-    color: #6ee7b7;
-  }
-
-  .warning-amount {
-    color: #fcd34d;
   }
 
   .negative-amount {
