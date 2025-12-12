@@ -49,7 +49,7 @@ class OfflineDataSync {
           });
           // 创建索引以支持快速查询
           expenseStore.createIndex('date', 'date', { unique: false });
-          expenseStore.createIndex('category', 'category', { unique: false });
+          expenseStore.createIndex('type', 'type', { unique: false });
           expenseStore.createIndex('amount', 'amount', { unique: false });
         }
       };
@@ -336,11 +336,12 @@ class OfflineDataSync {
         
         // 按分类统计
         const categoryStats = expenses.reduce((stats, expense) => {
-          if (!stats[expense.category]) {
-            stats[expense.category] = { amount: 0, count: 0 };
+          const type = expense.type || '未分类';
+          if (!stats[type]) {
+            stats[type] = { amount: 0, count: 0 };
           }
-          stats[expense.category].amount += parseFloat(expense.amount);
-          stats[expense.category].count += 1;
+          stats[type].amount += parseFloat(expense.amount);
+          stats[type].count += 1;
           return stats;
         }, {});
         

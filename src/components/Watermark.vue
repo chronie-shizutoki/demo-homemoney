@@ -61,15 +61,15 @@ const getWatermarkStyle = (index) => {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 999; /* 确保水印在最上层但不影响用户交互 */
+  z-index: 9999; /* 确保水印在最上层但不影响用户交互 */
   overflow: hidden;
 }
 
 .watermark-text {
   position: absolute;
   font-size: 18px;
-  font-weight: 300;
-  opacity: 0.12;
+  font-weight: 400;
+  opacity: 0.3;
   color: var(--text-primary);
   white-space: nowrap;
   transform-origin: center;
@@ -81,7 +81,6 @@ const getWatermarkStyle = (index) => {
 @media (prefers-color-scheme: dark) {
   .watermark-text {
     color: var(--dark-text-primary, #e0e0e0);
-    opacity: 0.08;
   }
 }
 
