@@ -7,7 +7,7 @@
 class OfflineDataSync {
   constructor () {
     this.dbName = 'HomeMoneyDB';
-    this.dbVersion = 2; // 增加版本号以支持新的存储结构
+    this.dbVersion = 20251213; // 增加版本号以支持新的存储结构
     this.stores = {
       cache: 'keyValueCache', // 键值对缓存存储
       syncQueue: 'syncQueue', // 待同步请求队列

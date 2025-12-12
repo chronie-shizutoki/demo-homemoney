@@ -24,7 +24,7 @@ const watermarkCount = 20;
 const watermarkText = computed(() => {
   // 根据当前语言选择不同的水印文本
   const currentLocale = t('app.locale');
-  if (currentLocale.includes('zh')) {
+  if (currentLocale.includes('中文')) {
     return '演示版本 Demo Version';
   } else {
     return 'Demo Version 演示版本';
