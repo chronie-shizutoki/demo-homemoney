@@ -322,17 +322,63 @@ class OfflineDataSync {
         
         // 应用搜索条件
         if (searchParams) {
+          // 日期范围过滤
           if (searchParams.startDate) {
             expenses = expenses.filter(expense => expense.date >= searchParams.startDate);
           }
           if (searchParams.endDate) {
             expenses = expenses.filter(expense => expense.date <= searchParams.endDate);
           }
+          
+          // 分类过滤
+          if (searchParams.type) {
+            expenses = expenses.filter(expense => expense.type === searchParams.type);
+          }
+          
+          // 关键词搜索
+          if (searchParams.keyword) {
+            const keyword = searchParams.keyword.toLowerCase();
+            expenses = expenses.filter(expense => {
+              return (expense.remark && expense.remark.toLowerCase().includes(keyword)) ||
+                     (expense.type && expense.type.toLowerCase().includes(keyword));
+            });
+          }
+          
+          // 金额范围过滤
+          const minAmount = parseFloat(searchParams.minAmount);
+          const maxAmount = parseFloat(searchParams.maxAmount);
+          if (!isNaN(minAmount)) {
+            expenses = expenses.filter(expense => parseFloat(expense.amount) >= minAmount);
+          }
+          if (!isNaN(maxAmount)) {
+            expenses = expenses.filter(expense => parseFloat(expense.amount) <= maxAmount);
+          }
         }
         
         // 计算统计数据
         const totalAmount = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-        const totalCount = expenses.length;
+        const count = expenses.length;
+        
+        // 计算中位数
+        let medianAmount = 0;
+        if (count > 0) {
+          const sortedAmounts = expenses
+            .map(expense => parseFloat(expense.amount))
+            .sort((a, b) => a - b);
+          const mid = Math.floor(sortedAmounts.length / 2);
+          medianAmount = sortedAmounts.length % 2 !== 0 
+            ? sortedAmounts[mid] 
+            : (sortedAmounts[mid - 1] + sortedAmounts[mid]) / 2;
+        }
+        
+        // 计算金额范围
+        let minAmount = 0;
+        let maxAmount = 0;
+        if (count > 0) {
+          const amounts = expenses.map(expense => parseFloat(expense.amount));
+          minAmount = Math.min(...amounts);
+          maxAmount = Math.max(...amounts);
+        }
         
         // 按分类统计
         const categoryStats = expenses.reduce((stats, expense) => {
@@ -358,10 +404,14 @@ class OfflineDataSync {
         
         resolve({
           totalAmount,
-          totalCount,
+          count, // 使用前端期望的count属性名
+          totalCount: count, // 保持向后兼容性
           categoryStats,
           dateStats,
-          averageAmount: totalCount > 0 ? totalAmount / totalCount : 0
+          averageAmount: count > 0 ? totalAmount / count : 0,
+          medianAmount,
+          minAmount,
+          maxAmount
         });
       };
       request.onerror = () => reject(request.error);
