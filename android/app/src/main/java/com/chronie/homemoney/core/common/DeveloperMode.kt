@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
-import com.chronie.homemoney.demo.core.error.ErrorReporterTest
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,8 +20,7 @@ private val Context.developerDataStore: DataStore<Preferences> by preferencesDat
  */
 @Singleton
 class DeveloperMode @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val errorReporterTest: ErrorReporterTest
+    @ApplicationContext private val context: Context
 ) {
     private val developerModeKey = booleanPreferencesKey("developer_mode_enabled")
     
@@ -60,27 +58,5 @@ class DeveloperMode @Inject constructor(
             val current = preferences[developerModeKey] ?: false
             preferences[developerModeKey] = !current
         }
-    }
-    
-    /**
-     * 测试错误收集：记录普通错误
-     */
-    fun testErrorLogging() {
-        errorReporterTest.testLogError()
-    }
-    
-    /**
-     * 测试错误收集：记录网络错误
-     */
-    fun testNetworkErrorLogging() {
-        errorReporterTest.testNetworkError()
-    }
-    
-    /**
-     * 测试错误收集：触发未捕获异常
-     * 警告：此方法会导致应用崩溃，请谨慎使用
-     */
-    fun testUncaughtException() {
-        errorReporterTest.testUncaughtException()
     }
 }
