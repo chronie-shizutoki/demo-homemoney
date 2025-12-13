@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui
+package com.chronie.homemoney.demo.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

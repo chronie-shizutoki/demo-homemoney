@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.test
+package com.chronie.homemoney.demo.ui.test
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.expense
+package com.chronie.homemoney.demo.ui.expense
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
@@ -28,9 +28,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chronie.homemoney.R
-import com.chronie.homemoney.domain.model.Expense
-import com.chronie.homemoney.ui.budget.BudgetCard
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.domain.model.Expense
+import com.chronie.homemoney.demo.ui.budget.BudgetCard
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.flow.collect
@@ -337,7 +337,7 @@ fun ExpenseDateHeader(
  */
 @Composable
 fun ExpenseStatisticsCard(
-    statistics: com.chronie.homemoney.domain.model.ExpenseStatistics,
+    statistics: com.chronie.homemoney.demo.domain.model.ExpenseStatistics,
     context: android.content.Context,
     modifier: Modifier = Modifier
 ) {

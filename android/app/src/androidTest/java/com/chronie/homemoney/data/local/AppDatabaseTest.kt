@@ -1,11 +1,11 @@
-package com.chronie.homemoney.data.local
+package com.chronie.homemoney.demo.data.local
 
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.chronie.homemoney.data.local.dao.ExpenseDao
-import com.chronie.homemoney.data.local.entity.ExpenseEntity
+import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
+import com.chronie.homemoney.demo.data.local.entity.ExpenseEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After

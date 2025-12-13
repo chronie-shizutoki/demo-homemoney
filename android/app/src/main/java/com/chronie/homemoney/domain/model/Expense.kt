@@ -1,4 +1,4 @@
-package com.chronie.homemoney.domain.model
+package com.chronie.homemoney.demo.domain.model
 
 /**
  * 支出领域模型

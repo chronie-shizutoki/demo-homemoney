@@ -1,4 +1,4 @@
-package com.chronie.homemoney.data.remote.dto
+package com.chronie.homemoney.demo.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 

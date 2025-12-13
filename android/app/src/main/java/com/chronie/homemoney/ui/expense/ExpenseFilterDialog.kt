@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.expense
+package com.chronie.homemoney.demo.ui.expense
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,10 +15,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.chronie.homemoney.R
-import com.chronie.homemoney.domain.model.ExpenseFilters
-import com.chronie.homemoney.domain.model.ExpenseType
-import com.chronie.homemoney.domain.model.SortOption
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.domain.model.ExpenseFilters
+import com.chronie.homemoney.demo.domain.model.ExpenseType
+import com.chronie.homemoney.demo.domain.model.SortOption
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

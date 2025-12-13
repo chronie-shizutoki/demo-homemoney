@@ -1,11 +1,11 @@
-package com.chronie.homemoney.ui.test
+package com.chronie.homemoney.demo.ui.test
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chronie.homemoney.demo.R
-import com.chronie.homemoney.data.local.dao.ExpenseDao
-import com.chronie.homemoney.data.local.entity.ExpenseEntity
+import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
+import com.chronie.homemoney.demo.data.local.entity.ExpenseEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

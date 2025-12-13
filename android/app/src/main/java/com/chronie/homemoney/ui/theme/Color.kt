@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.theme
+package com.chronie.homemoney.demo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

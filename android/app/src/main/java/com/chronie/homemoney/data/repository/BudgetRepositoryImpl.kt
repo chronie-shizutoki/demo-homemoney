@@ -1,11 +1,11 @@
-package com.chronie.homemoney.data.repository
+package com.chronie.homemoney.demo.data.repository
 
-import com.chronie.homemoney.data.local.dao.BudgetDao
-import com.chronie.homemoney.data.local.dao.ExpenseDao
-import com.chronie.homemoney.data.local.entity.BudgetEntity
-import com.chronie.homemoney.domain.model.Budget
-import com.chronie.homemoney.domain.model.BudgetUsage
-import com.chronie.homemoney.domain.repository.BudgetRepository
+import com.chronie.homemoney.demo.data.local.dao.BudgetDao
+import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
+import com.chronie.homemoney.demo.data.local.entity.BudgetEntity
+import com.chronie.homemoney.demo.domain.model.Budget
+import com.chronie.homemoney.demo.domain.model.BudgetUsage
+import com.chronie.homemoney.demo.domain.repository.BudgetRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate

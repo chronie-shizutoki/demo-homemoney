@@ -1,13 +1,13 @@
-package com.chronie.homemoney.ui.charts
+package com.chronie.homemoney.demo.ui.charts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chronie.homemoney.domain.model.Expense
-import com.chronie.homemoney.domain.model.ExpenseFilters
-import com.chronie.homemoney.domain.model.ExpenseStatistics
-import com.chronie.homemoney.domain.model.TimeRange
-import com.chronie.homemoney.domain.repository.ExpenseRepository
-import com.chronie.homemoney.domain.usecase.GetStatisticsUseCase
+import com.chronie.homemoney.demo.domain.model.Expense
+import com.chronie.homemoney.demo.domain.model.ExpenseFilters
+import com.chronie.homemoney.demo.domain.model.ExpenseStatistics
+import com.chronie.homemoney.demo.domain.model.TimeRange
+import com.chronie.homemoney.demo.domain.repository.ExpenseRepository
+import com.chronie.homemoney.demo.domain.usecase.GetStatisticsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

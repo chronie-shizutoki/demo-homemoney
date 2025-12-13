@@ -1,16 +1,16 @@
-package com.chronie.homemoney.data.repository
+package com.chronie.homemoney.demo.data.repository
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.chronie.homemoney.data.local.dao.ExpenseDao
-import com.chronie.homemoney.data.local.entity.ExpenseEntity
-import com.chronie.homemoney.data.mapper.ExpenseMapper
-import com.chronie.homemoney.domain.model.Expense
-import com.chronie.homemoney.domain.model.ExpenseFilters
-import com.chronie.homemoney.domain.model.ExpenseStatistics
-import com.chronie.homemoney.domain.model.SortOption
-import com.chronie.homemoney.domain.repository.ExpenseRepository
+import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
+import com.chronie.homemoney.demo.data.local.entity.ExpenseEntity
+import com.chronie.homemoney.demo.data.mapper.ExpenseMapper
+import com.chronie.homemoney.demo.domain.model.Expense
+import com.chronie.homemoney.demo.domain.model.ExpenseFilters
+import com.chronie.homemoney.demo.domain.model.ExpenseStatistics
+import com.chronie.homemoney.demo.domain.model.SortOption
+import com.chronie.homemoney.demo.domain.repository.ExpenseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -244,29 +244,29 @@ class ExpenseRepositoryImpl @Inject constructor(
         }
     }
     
-    private fun getChineseTypeName(type: com.chronie.homemoney.domain.model.ExpenseType): String {
+    private fun getChineseTypeName(type: com.chronie.homemoney.demo.domain.model.ExpenseType): String {
         return when (type) {
-            com.chronie.homemoney.domain.model.ExpenseType.DAILY_GOODS -> "日常用品"
-            com.chronie.homemoney.domain.model.ExpenseType.LUXURY -> "奢侈品"
-            com.chronie.homemoney.domain.model.ExpenseType.COMMUNICATION -> "通讯费用"
-            com.chronie.homemoney.domain.model.ExpenseType.FOOD -> "食品"
-            com.chronie.homemoney.domain.model.ExpenseType.SNACKS -> "零食糖果"
-            com.chronie.homemoney.domain.model.ExpenseType.COLD_DRINKS -> "冷饮"
-            com.chronie.homemoney.domain.model.ExpenseType.CONVENIENCE_FOOD -> "方便食品"
-            com.chronie.homemoney.domain.model.ExpenseType.TEXTILES -> "纺织品"
-            com.chronie.homemoney.domain.model.ExpenseType.BEVERAGES -> "饮品"
-            com.chronie.homemoney.domain.model.ExpenseType.CONDIMENTS -> "调味品"
-            com.chronie.homemoney.domain.model.ExpenseType.TRANSPORTATION -> "交通出行"
-            com.chronie.homemoney.domain.model.ExpenseType.DINING -> "餐饮"
-            com.chronie.homemoney.domain.model.ExpenseType.MEDICAL -> "医疗费用"
-            com.chronie.homemoney.domain.model.ExpenseType.FRUITS -> "水果"
-            com.chronie.homemoney.domain.model.ExpenseType.OTHER -> "其他"
-            com.chronie.homemoney.domain.model.ExpenseType.SEAFOOD -> "水产品"
-            com.chronie.homemoney.domain.model.ExpenseType.DAIRY -> "乳制品"
-            com.chronie.homemoney.domain.model.ExpenseType.GIFTS -> "礼物人情"
-            com.chronie.homemoney.domain.model.ExpenseType.TRAVEL -> "旅行度假"
-            com.chronie.homemoney.domain.model.ExpenseType.GOVERNMENT -> "政务"
-            com.chronie.homemoney.domain.model.ExpenseType.UTILITIES -> "水电煤气"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.DAILY_GOODS -> "日常用品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.LUXURY -> "奢侈品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.COMMUNICATION -> "通讯费用"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.FOOD -> "食品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.SNACKS -> "零食糖果"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.COLD_DRINKS -> "冷饮"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.CONVENIENCE_FOOD -> "方便食品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.TEXTILES -> "纺织品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.BEVERAGES -> "饮品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.CONDIMENTS -> "调味品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.TRANSPORTATION -> "交通出行"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.DINING -> "餐饮"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.MEDICAL -> "医疗费用"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.FRUITS -> "水果"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.OTHER -> "其他"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.SEAFOOD -> "水产品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.DAIRY -> "乳制品"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.GIFTS -> "礼物人情"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.TRAVEL -> "旅行度假"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.GOVERNMENT -> "政务"
+            com.chronie.homemoney.demo.domain.model.ExpenseType.UTILITIES -> "水电煤气"
         }
     }
     

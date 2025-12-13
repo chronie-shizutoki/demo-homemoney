@@ -1,13 +1,13 @@
-package com.chronie.homemoney.di
+package com.chronie.homemoney.demo.di
 
 import android.content.Context
 import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.chronie.homemoney.data.local.AppDatabase
-import com.chronie.homemoney.data.local.DatabaseMigrations
-import com.chronie.homemoney.data.local.dao.ExpenseDao
-import com.chronie.homemoney.data.local.dao.MemberDao
+import com.chronie.homemoney.demo.data.local.AppDatabase
+import com.chronie.homemoney.demo.data.local.DatabaseMigrations
+import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
+import com.chronie.homemoney.demo.data.local.dao.MemberDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -110,7 +110,7 @@ object DatabaseModule {
      * 提供 BudgetDao
      */
     @Provides
-    fun provideBudgetDao(database: AppDatabase): com.chronie.homemoney.data.local.dao.BudgetDao {
+    fun provideBudgetDao(database: AppDatabase): com.chronie.homemoney.demo.data.local.dao.BudgetDao {
         return database.budgetDao()
     }
 }

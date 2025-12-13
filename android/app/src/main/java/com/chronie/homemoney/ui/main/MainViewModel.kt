@@ -1,7 +1,7 @@
-package com.chronie.homemoney.ui.main
+package com.chronie.homemoney.demo.ui.main
 
 import androidx.lifecycle.ViewModel
-import com.chronie.homemoney.core.common.DeveloperMode
+import com.chronie.homemoney.demo.core.common.DeveloperMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

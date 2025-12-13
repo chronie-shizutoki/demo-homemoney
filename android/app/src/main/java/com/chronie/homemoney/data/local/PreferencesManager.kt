@@ -1,4 +1,4 @@
-package com.chronie.homemoney.data.local
+package com.chronie.homemoney.demo.data.local
 
 import android.content.Context
 import android.content.SharedPreferences

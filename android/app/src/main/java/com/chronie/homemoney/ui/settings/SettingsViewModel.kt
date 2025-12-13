@@ -1,14 +1,14 @@
-package com.chronie.homemoney.ui.settings
+package com.chronie.homemoney.demo.ui.settings
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chronie.homemoney.demo.R
-import com.chronie.homemoney.core.common.DeveloperMode
-import com.chronie.homemoney.core.common.Language
-import com.chronie.homemoney.core.common.LanguageManager
-import com.chronie.homemoney.domain.usecase.ExportExpensesUseCase
-import com.chronie.homemoney.domain.usecase.ImportExpensesUseCase
+import com.chronie.homemoney.demo.core.common.DeveloperMode
+import com.chronie.homemoney.demo.core.common.Language
+import com.chronie.homemoney.demo.core.common.LanguageManager
+import com.chronie.homemoney.demo.domain.usecase.ExportExpensesUseCase
+import com.chronie.homemoney.demo.domain.usecase.ImportExpensesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

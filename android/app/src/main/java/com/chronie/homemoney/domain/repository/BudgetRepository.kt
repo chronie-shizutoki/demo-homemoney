@@ -1,7 +1,7 @@
-package com.chronie.homemoney.domain.repository
+package com.chronie.homemoney.demo.domain.repository
 
-import com.chronie.homemoney.domain.model.Budget
-import com.chronie.homemoney.domain.model.BudgetUsage
+import com.chronie.homemoney.demo.domain.model.Budget
+import com.chronie.homemoney.demo.domain.model.BudgetUsage
 import kotlinx.coroutines.flow.Flow
 
 /**

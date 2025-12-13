@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.budget
+package com.chronie.homemoney.demo.ui.budget
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
@@ -15,8 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chronie.homemoney.R
-import com.chronie.homemoney.domain.model.BudgetStatus
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.domain.model.BudgetStatus
 import java.util.Locale
 
 /**
@@ -142,7 +142,7 @@ fun BudgetEnablePrompt(
 @Composable
 fun BudgetUsageCard(
     context: android.content.Context,
-    usage: com.chronie.homemoney.domain.model.BudgetUsage,
+    usage: com.chronie.homemoney.demo.domain.model.BudgetUsage,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {

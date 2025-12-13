@@ -1,7 +1,7 @@
-package com.chronie.homemoney.data.local.dao
+package com.chronie.homemoney.demo.data.local.dao
 
 import androidx.room.*
-import com.chronie.homemoney.data.local.entity.BudgetEntity
+import com.chronie.homemoney.demo.data.local.entity.BudgetEntity
 import kotlinx.coroutines.flow.Flow
 
 /**

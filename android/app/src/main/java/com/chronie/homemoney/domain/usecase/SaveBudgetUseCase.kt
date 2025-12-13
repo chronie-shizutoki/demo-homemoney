@@ -1,7 +1,7 @@
-package com.chronie.homemoney.domain.usecase
+package com.chronie.homemoney.demo.domain.usecase
 
-import com.chronie.homemoney.domain.model.Budget
-import com.chronie.homemoney.domain.repository.BudgetRepository
+import com.chronie.homemoney.demo.domain.model.Budget
+import com.chronie.homemoney.demo.domain.repository.BudgetRepository
 import javax.inject.Inject
 
 /**

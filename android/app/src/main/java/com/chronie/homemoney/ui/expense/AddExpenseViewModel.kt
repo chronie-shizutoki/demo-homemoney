@@ -1,10 +1,10 @@
-package com.chronie.homemoney.ui.expense
+package com.chronie.homemoney.demo.ui.expense
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chronie.homemoney.domain.model.Expense
-import com.chronie.homemoney.domain.model.ExpenseType
-import com.chronie.homemoney.domain.repository.ExpenseRepository
+import com.chronie.homemoney.demo.domain.model.Expense
+import com.chronie.homemoney.demo.domain.model.ExpenseType
+import com.chronie.homemoney.demo.domain.repository.ExpenseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

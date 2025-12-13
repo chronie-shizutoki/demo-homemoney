@@ -1,11 +1,11 @@
-package com.chronie.homemoney.data.local
+package com.chronie.homemoney.demo.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.chronie.homemoney.data.local.dao.BudgetDao
-import com.chronie.homemoney.data.local.dao.ExpenseDao
-import com.chronie.homemoney.data.local.entity.BudgetEntity
-import com.chronie.homemoney.data.local.entity.ExpenseEntity
+import com.chronie.homemoney.demo.data.local.dao.BudgetDao
+import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
+import com.chronie.homemoney.demo.data.local.entity.BudgetEntity
+import com.chronie.homemoney.demo.data.local.entity.ExpenseEntity
 
 /**
  * 应用数据库

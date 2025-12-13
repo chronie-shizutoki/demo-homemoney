@@ -1,4 +1,4 @@
-package com.chronie.homemoney
+package com.chronie.homemoney.demo
 
 import android.content.Context
 import android.content.res.Configuration
@@ -27,16 +27,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.chronie.homemoney.demo.R
-import com.chronie.homemoney.core.common.LanguageManager
+import com.chronie.homemoney.demo.core.common.LanguageManager
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.chronie.homemoney.ui.expense.AddExpenseScreen
-import com.chronie.homemoney.ui.main.MainScreen
-import com.chronie.homemoney.ui.settings.SettingsScreen
-import com.chronie.homemoney.ui.test.DatabaseTestScreen
-import com.chronie.homemoney.ui.theme.HomeMoneyTheme
-import com.chronie.homemoney.ui.Watermark
+import com.chronie.homemoney.demo.ui.expense.AddExpenseScreen
+import com.chronie.homemoney.demo.ui.main.MainScreen
+import com.chronie.homemoney.demo.ui.settings.SettingsScreen
+import com.chronie.homemoney.demo.ui.test.DatabaseTestScreen
+import com.chronie.homemoney.demo.ui.theme.HomeMoneyTheme
+import com.chronie.homemoney.demo.ui.Watermark
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import javax.inject.Inject

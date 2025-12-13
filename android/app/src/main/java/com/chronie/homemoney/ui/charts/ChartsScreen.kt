@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.charts
+package com.chronie.homemoney.demo.ui.charts
 
 import android.content.Context
 import androidx.compose.foundation.Canvas
@@ -21,9 +21,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chronie.homemoney.R
-import com.chronie.homemoney.domain.model.TimeRange
-import com.chronie.homemoney.ui.expense.ExpenseTypeLocalizer
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.domain.model.TimeRange
+import com.chronie.homemoney.demo.ui.expense.ExpenseTypeLocalizer
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -206,7 +206,7 @@ private fun TimeRangeCard(
 @Composable
 private fun StatisticsSummaryCard(
     context: Context,
-    statistics: com.chronie.homemoney.domain.model.ExpenseStatistics,
+    statistics: com.chronie.homemoney.demo.domain.model.ExpenseStatistics,
     currencyFormat: NumberFormat
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {

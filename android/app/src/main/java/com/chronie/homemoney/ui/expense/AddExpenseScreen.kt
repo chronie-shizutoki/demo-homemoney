@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.expense
+package com.chronie.homemoney.demo.ui.expense
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chronie.homemoney.R
-import com.chronie.homemoney.domain.model.ExpenseType
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.domain.model.ExpenseType
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner

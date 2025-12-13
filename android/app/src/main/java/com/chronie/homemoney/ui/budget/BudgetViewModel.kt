@@ -1,13 +1,13 @@
-package com.chronie.homemoney.ui.budget
+package com.chronie.homemoney.demo.ui.budget
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chronie.homemoney.domain.model.Budget
-import com.chronie.homemoney.domain.model.BudgetStatus
-import com.chronie.homemoney.domain.model.BudgetUsage
-import com.chronie.homemoney.domain.usecase.GetBudgetUseCase
-import com.chronie.homemoney.domain.usecase.GetBudgetUsageUseCase
-import com.chronie.homemoney.domain.usecase.SaveBudgetUseCase
+import com.chronie.homemoney.demo.domain.model.Budget
+import com.chronie.homemoney.demo.domain.model.BudgetStatus
+import com.chronie.homemoney.demo.domain.model.BudgetUsage
+import com.chronie.homemoney.demo.domain.usecase.GetBudgetUseCase
+import com.chronie.homemoney.demo.domain.usecase.GetBudgetUsageUseCase
+import com.chronie.homemoney.demo.domain.usecase.SaveBudgetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

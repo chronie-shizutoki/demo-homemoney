@@ -1,4 +1,4 @@
-package com.chronie.homemoney.data.local.entity
+package com.chronie.homemoney.demo.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

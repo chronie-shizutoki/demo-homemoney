@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.settings
+package com.chronie.homemoney.demo.ui.settings
 
 import android.content.Context
 import androidx.compose.foundation.clickable
@@ -18,9 +18,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
-import com.chronie.homemoney.core.common.Language
-import com.chronie.homemoney.ui.theme.LocalThemeSettings
-import com.chronie.homemoney.ui.theme.ThemeSettings
+import com.chronie.homemoney.demo.core.common.Language
+import com.chronie.homemoney.demo.ui.theme.LocalThemeSettings
+import com.chronie.homemoney.demo.ui.theme.ThemeSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -357,7 +357,7 @@ fun LanguageItem(
 @Composable
 fun BudgetSettingsSection(
     context: Context,
-    budgetViewModel: com.chronie.homemoney.ui.budget.BudgetViewModel = hiltViewModel()
+    budgetViewModel: com.chronie.homemoney.demo.ui.budget.BudgetViewModel = hiltViewModel()
 ) {
     val uiState by budgetViewModel.uiState.collectAsState()
     var showBudgetDialog by remember { mutableStateOf(false) }
@@ -425,7 +425,7 @@ fun BudgetSettingsSection(
     
     // 预算设置对话框
     if (showBudgetDialog) {
-        com.chronie.homemoney.ui.budget.BudgetSettingsDialog(
+        com.chronie.homemoney.demo.ui.budget.BudgetSettingsDialog(
             context = context,
             currentBudget = uiState.budget,
             onDismiss = { showBudgetDialog = false },

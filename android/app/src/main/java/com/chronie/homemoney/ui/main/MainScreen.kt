@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.main
+package com.chronie.homemoney.demo.ui.main
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
@@ -11,9 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chronie.homemoney.R
-import com.chronie.homemoney.ui.expense.ExpenseListScreen
-import com.chronie.homemoney.ui.settings.SettingsScreen
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.ui.expense.ExpenseListScreen
+import com.chronie.homemoney.demo.ui.settings.SettingsScreen
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -91,7 +91,7 @@ fun MainScreen(
                     }
                     1 -> {
                         // 图表界面
-                        com.chronie.homemoney.ui.charts.ChartsScreen(
+                        com.chronie.homemoney.demo.ui.charts.ChartsScreen(
                             context = context,
                             onRequireLogin = onRequireLogin,
                             onRequireMembership = onRequireMembership

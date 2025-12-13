@@ -1,4 +1,4 @@
-package com.chronie.homemoney.core.error
+package com.chronie.homemoney.demo.core.error
 
 import retrofit2.Response
 import retrofit2.http.Body

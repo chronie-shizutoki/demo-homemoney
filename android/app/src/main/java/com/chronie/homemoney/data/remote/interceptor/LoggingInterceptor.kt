@@ -1,4 +1,4 @@
-package com.chronie.homemoney.data.remote.interceptor
+package com.chronie.homemoney.demo.data.remote.interceptor
 
 import android.util.Log
 import okhttp3.Interceptor

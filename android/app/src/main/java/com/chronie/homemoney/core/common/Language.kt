@@ -1,4 +1,4 @@
-package com.chronie.homemoney.core.common
+package com.chronie.homemoney.demo.core.common
 
 import java.util.Locale
 

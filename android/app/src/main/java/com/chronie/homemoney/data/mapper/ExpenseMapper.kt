@@ -1,8 +1,8 @@
-package com.chronie.homemoney.data.mapper
+package com.chronie.homemoney.demo.data.mapper
 
-import com.chronie.homemoney.data.local.entity.ExpenseEntity
-import com.chronie.homemoney.domain.model.Expense
-import com.chronie.homemoney.domain.model.ExpenseType
+import com.chronie.homemoney.demo.data.local.entity.ExpenseEntity
+import com.chronie.homemoney.demo.domain.model.Expense
+import com.chronie.homemoney.demo.domain.model.ExpenseType
 
 /**
  * 支出数据映射器

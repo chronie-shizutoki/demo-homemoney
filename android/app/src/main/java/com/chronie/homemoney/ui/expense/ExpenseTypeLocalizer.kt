@@ -1,8 +1,8 @@
-package com.chronie.homemoney.ui.expense
+package com.chronie.homemoney.demo.ui.expense
 
 import android.content.Context
-import com.chronie.homemoney.R
-import com.chronie.homemoney.domain.model.ExpenseType
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.domain.model.ExpenseType
 
 /**
  * 支出类型本地化工具

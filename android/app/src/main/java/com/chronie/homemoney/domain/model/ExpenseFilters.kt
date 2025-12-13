@@ -1,4 +1,4 @@
-package com.chronie.homemoney.domain.model
+package com.chronie.homemoney.demo.domain.model
 
 import java.time.LocalDate
 

@@ -1,8 +1,8 @@
-package com.chronie.homemoney
+package com.chronie.homemoney.demo
 
 import android.app.Application
 import android.util.Log
-import com.chronie.homemoney.core.error.ErrorReporter
+import com.chronie.homemoney.demo.core.error.ErrorReporter
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 

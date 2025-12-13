@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.budget
+package com.chronie.homemoney.demo.ui.budget
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.chronie.homemoney.R
-import com.chronie.homemoney.domain.model.Budget
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.domain.model.Budget
 
 /**
  * 预算设置对话框

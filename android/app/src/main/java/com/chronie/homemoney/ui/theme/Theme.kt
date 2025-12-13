@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.theme
+package com.chronie.homemoney.demo.ui.theme
 
 import android.app.Activity
 import android.content.Context

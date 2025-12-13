@@ -1,4 +1,4 @@
-package com.chronie.homemoney.ui.charts
+package com.chronie.homemoney.demo.ui.charts
 
 import android.content.Context
 import androidx.compose.foundation.Canvas
@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.chronie.homemoney.R
-import com.chronie.homemoney.ui.expense.ExpenseTypeLocalizer
+import com.chronie.homemoney.demo.R
+import com.chronie.homemoney.demo.ui.expense.ExpenseTypeLocalizer
 import java.text.NumberFormat
 import java.util.*
 import kotlin.math.cos

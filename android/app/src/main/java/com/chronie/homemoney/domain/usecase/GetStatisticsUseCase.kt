@@ -1,8 +1,8 @@
-package com.chronie.homemoney.domain.usecase
+package com.chronie.homemoney.demo.domain.usecase
 
-import com.chronie.homemoney.domain.model.ExpenseFilters
-import com.chronie.homemoney.domain.model.ExpenseStatistics
-import com.chronie.homemoney.domain.repository.ExpenseRepository
+import com.chronie.homemoney.demo.domain.model.ExpenseFilters
+import com.chronie.homemoney.demo.domain.model.ExpenseStatistics
+import com.chronie.homemoney.demo.domain.repository.ExpenseRepository
 import javax.inject.Inject
 
 /**

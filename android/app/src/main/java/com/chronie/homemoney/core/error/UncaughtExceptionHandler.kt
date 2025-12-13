@@ -1,4 +1,4 @@
-package com.chronie.homemoney.core.error
+package com.chronie.homemoney.demo.core.error
 
 import android.content.Context
 import android.os.Handler
