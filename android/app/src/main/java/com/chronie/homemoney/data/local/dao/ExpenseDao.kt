@@ -1,0 +1,51 @@
+package com.chronie.homemoney.data.local.dao
+
+import androidx.room.*
+import com.chronie.homemoney.data.local.entity.ExpenseEntity
+import kotlinx.coroutines.flow.Flow
+
+/**
+ * 支出记录数据访问对象
+ */
+@Dao
+interface ExpenseDao {
+    
+    @Query("SELECT * FROM expenses ORDER BY date DESC")
+    fun getAllExpenses(): Flow<List<ExpenseEntity>>
+    
+    @Query("SELECT * FROM expenses WHERE id = :id")
+    suspend fun getExpenseById(id: String): ExpenseEntity?
+    
+    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    fun getExpensesByDateRange(startDate: String, endDate: String): Flow<List<ExpenseEntity>>
+    
+    @Query("SELECT * FROM expenses WHERE type = :type ORDER BY date DESC")
+    fun getExpensesByType(type: String): Flow<List<ExpenseEntity>>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExpense(expense: ExpenseEntity)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExpenses(expenses: List<ExpenseEntity>)
+    
+    @Update
+    suspend fun updateExpense(expense: ExpenseEntity)
+    
+    @Delete
+    suspend fun deleteExpense(expense: ExpenseEntity)
+    
+    @Query("DELETE FROM expenses WHERE id = :id")
+    suspend fun deleteExpenseById(id: String)
+    
+    @Query("DELETE FROM expenses")
+    suspend fun deleteAllExpenses()
+    
+    @Query("SELECT COUNT(*) FROM expenses")
+    suspend fun getExpenseCount(): Int
+    
+    @Query("SELECT SUM(amount) FROM expenses WHERE date BETWEEN :startDate AND :endDate")
+    suspend fun getTotalAmountByDateRange(startDate: String, endDate: String): Double?
+    
+    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    suspend fun getExpensesByDateRangeSync(startDate: String, endDate: String): List<ExpenseEntity>
+}
