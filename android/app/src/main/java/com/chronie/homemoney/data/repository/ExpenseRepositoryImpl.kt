@@ -32,7 +32,7 @@ class ExpenseRepositoryImpl @Inject constructor(
         limit: Int,
         filters: ExpenseFilters
     ): Flow<PagingData<Expense>> {
-        return Pager<Int, Expense>(
+        return Pager<Int, ExpenseEntity>(
             config = PagingConfig(
                 pageSize = limit,
                 enablePlaceholders = false
@@ -41,7 +41,9 @@ class ExpenseRepositoryImpl @Inject constructor(
                 // TODO: 实现 PagingSource
                 throw NotImplementedError("PagingSource not implemented yet")
             }
-        ).flow
+        ).flow.map { pagingData ->
+            pagingData.map { entity -> ExpenseMapper.toDomain(entity) }
+        }
     }
     
     override suspend fun getExpensesList(
@@ -75,23 +77,23 @@ class ExpenseRepositoryImpl @Inject constructor(
             }
             
             if (filters.startDate != null) {
-                filteredExpenses = filteredExpenses.filter { 
-                    LocalDate.parse(it.date) >= filters.startDate 
+                filteredExpenses = filteredExpenses.filter { expense ->
+                    LocalDate.parse(expense.date) >= filters.startDate
                 }
             }
             
             if (filters.endDate != null) {
-                filteredExpenses = filteredExpenses.filter { 
-                    LocalDate.parse(it.date) <= filters.endDate 
+                filteredExpenses = filteredExpenses.filter { expense ->
+                    LocalDate.parse(expense.date) <= filters.endDate
                 }
             }
             
             // 应用排序
             filteredExpenses = when (filters.sortBy) {
-                SortOption.DATE_ASC -> filteredExpenses.sortedBy { it.date }
-                SortOption.DATE_DESC -> filteredExpenses.sortedByDescending { it.date }
-                SortOption.AMOUNT_ASC -> filteredExpenses.sortedBy { it.amount }
-                SortOption.AMOUNT_DESC -> filteredExpenses.sortedByDescending { it.amount }
+                SortOption.DATE_ASC -> filteredExpenses.sortedBy { expense -> expense.date }
+                SortOption.DATE_DESC -> filteredExpenses.sortedByDescending { expense -> expense.date }
+                SortOption.AMOUNT_ASC -> filteredExpenses.sortedBy { expense -> expense.amount }
+                SortOption.AMOUNT_DESC -> filteredExpenses.sortedByDescending { expense -> expense.amount }
             }
             
             // 应用分页

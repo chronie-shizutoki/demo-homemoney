@@ -56,7 +56,7 @@ class DatabaseTestViewModel @Inject constructor(
                                     remark = expense.remark ?: "",
                                     amount = expense.amount,
                                     timeFormatted = expense.date,
-                                    isSynced = expense.isSynced
+                                    isSynced = false
                                 )
                             },
                             expenseCount = count,
@@ -91,9 +91,7 @@ class DatabaseTestViewModel @Inject constructor(
                     type = types.random(),
                     remark = remarks.random(),
                     amount = (10..200).random().toDouble(),
-                    date = currentDate,
-                    isSynced = false,
-                    serverId = null
+                    date = currentDate
                 )
                 
                 expenseDao.insertExpense(expense)

@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.chronie.homemoney.R
 import com.chronie.homemoney.core.common.LanguageManager
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
@@ -117,69 +119,69 @@ fun HomeMoneyApp(
             navController = navController,
             startDestination = startDestination
         ) {
-        composable("settings") {
-            SettingsScreen(
-                context = context,
-                onNavigateToDatabaseTest = {
-                    navController.navigate("database_test")
-                }
-            )
-        }
-        
-        composable("main") {
-            MainScreen(
-                context = context,
-                shouldRefreshExpenses = shouldRefreshExpenses,
-                onRefreshHandled = { shouldRefreshExpenses = false },
-                onNavigateToSettings = {
-                    navController.navigate("settings")
-                },
-                onNavigateToDatabaseTest = {
-                    navController.navigate("database_test")
-                },
-                onNavigateToAddExpense = {
-                    navController.navigate("add_expense")
-                },
-                onNavigateToEditExpense = { expenseId ->
+            composable("settings") {
+                SettingsScreen(
+                    context = context,
+                    onNavigateToDatabaseTest = {
+                        navController.navigate("database_test")
+                    }
+                )
+            }
+            
+            composable("main") {
+                MainScreen(
+                    context = context,
+                    shouldRefreshExpenses = shouldRefreshExpenses,
+                    onRefreshHandled = { shouldRefreshExpenses = false },
+                    onNavigateToSettings = {
+                        navController.navigate("settings")
+                    },
+                    onNavigateToDatabaseTest = {
+                        navController.navigate("database_test")
+                    },
+                    onNavigateToAddExpense = {
+                        navController.navigate("add_expense")
+                    },
+                    onNavigateToEditExpense = { expenseId ->
                         navController.navigate(
                             route = "add_expense?expenseId=$expenseId"
                         )
                     }
-            )
+                )
+            }
+            
+            composable(
+                "add_expense?expenseId={expenseId}",
+                arguments = listOf(
+                    navArgument("expenseId") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) { backStackEntry ->
+                val expenseId = backStackEntry.arguments?.getString("expenseId")
+                AddExpenseScreen(
+                    context = context,
+                    expenseId = expenseId,
+                    onNavigateBack = {
+                        shouldRefreshExpenses = true
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable("database_test") {
+                DatabaseTestScreen(
+                    context = context,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
         
-        composable(
-            "add_expense?expenseId={expenseId}",
-            arguments = listOf(
-                navArgument("expenseId") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
-        ) { backStackEntry ->
-            val expenseId = backStackEntry.arguments?.getString("expenseId")
-            AddExpenseScreen(
-                context = context,
-                expenseId = expenseId,
-                onNavigateBack = {
-                    shouldRefreshExpenses = true
-                    navController.popBackStack()
-                }
-            )
-        }
-        
-        composable("database_test") {
-            DatabaseTestScreen(
-                context = context,
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-    }
-    
-    // 添加水印组件
-    Watermark(locale = context.resources.configuration.locale)
+        // 添加水印组件
+        Watermark(locale = context.resources.configuration.locale)
     }
 }
