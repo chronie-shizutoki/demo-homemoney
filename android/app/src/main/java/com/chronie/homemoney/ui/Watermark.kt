@@ -68,15 +68,15 @@ fun Watermark(
             val xPercent = colIndex * 20f + (0..5).random().toFloat() // 20% 间距 + 随机偏移
             val yPercent = rowIndex * 25f + (0..5).random().toFloat() // 25% 间距 + 随机偏移
             
-            // 将百分比转换为实际像素偏移
-            val xOffset = with(density) { ((xPercent / 100f) * configuration.screenWidthDp).dp.toPx() }
-            val yOffset = with(density) { ((yPercent / 100f) * configuration.screenHeightDp).dp.toPx() }
+            // 将百分比转换为Dp偏移
+            val xOffsetDp = with(density) { ((xPercent / 100f) * configuration.screenWidthDp).dp }
+            val yOffsetDp = with(density) { ((yPercent / 100f) * configuration.screenHeightDp).dp }
             
             // 水印文本组件
             Text(
                 text = watermarkText,
                 modifier = Modifier
-                    .offset(x = xOffset, y = yOffset)
+                    .offset(x = xOffsetDp, y = yOffsetDp)
                     .rotate(-25f) // 固定左倾斜25度
                     .zIndex(9999f),
                 color = Color.Black.copy(alpha = alpha), // 半透明黑色
