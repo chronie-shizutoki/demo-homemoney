@@ -1,10 +1,8 @@
 package com.chronie.homemoney.demo.domain.repository
 
-import androidx.paging.PagingData
 import com.chronie.homemoney.demo.domain.model.Expense
 import com.chronie.homemoney.demo.domain.model.ExpenseFilters
 import com.chronie.homemoney.demo.domain.model.ExpenseStatistics
-import kotlinx.coroutines.flow.Flow
 
 /**
  * 支出记录 Repository 接口
@@ -13,15 +11,6 @@ interface ExpenseRepository {
     
     /**
      * 获取支出记录列表（分页）
-     */
-    fun getExpenses(
-        page: Int,
-        limit: Int,
-        filters: ExpenseFilters
-    ): Flow<PagingData<Expense>>
-    
-    /**
-     * 获取支出记录列表（简单版本，用于初始实现）
      */
     suspend fun getExpensesList(
         page: Int,

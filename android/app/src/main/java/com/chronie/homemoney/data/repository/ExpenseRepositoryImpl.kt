@@ -1,8 +1,5 @@
 package com.chronie.homemoney.demo.data.repository
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
 import com.chronie.homemoney.demo.data.local.entity.ExpenseEntity
 import com.chronie.homemoney.demo.data.mapper.ExpenseMapper
@@ -11,9 +8,7 @@ import com.chronie.homemoney.demo.domain.model.ExpenseFilters
 import com.chronie.homemoney.demo.domain.model.ExpenseStatistics
 import com.chronie.homemoney.demo.domain.model.SortOption
 import com.chronie.homemoney.demo.domain.repository.ExpenseRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 import java.time.LocalDate
@@ -26,15 +21,6 @@ import kotlin.math.min
 class ExpenseRepositoryImpl @Inject constructor(
     private val expenseDao: ExpenseDao
 ) : ExpenseRepository {
-    
-    override fun getExpenses(
-        page: Int,
-        limit: Int,
-        filters: ExpenseFilters
-    ): Flow<PagingData<Expense>> {
-        // 返回空的 PagingData 流，避免构建错误
-        return kotlinx.coroutines.flow.flowOf(PagingData.empty())
-    }
     
     override suspend fun getExpensesList(
         page: Int,
