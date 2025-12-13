@@ -33,9 +33,9 @@ fun Watermark(
     }
     
     // 水印数量
-    val watermarkCount = 20
+    val watermarkCount = 36
     // 列数
-    val colCount = 5
+    val colCount = 12
     
     // 获取当前屏幕配置
     val configuration = LocalConfiguration.current
@@ -50,8 +50,8 @@ fun Watermark(
     
     // 根据屏幕宽度确定透明度
     val alpha = when {
-        configuration.screenWidthDp < 480 -> 0.08f // 小屏幕透明度低
-        else -> 0.3f // 大屏幕透明度正常
+        configuration.screenWidthDp < 480 -> 0.15f // 小屏幕透明度适中
+        else -> 0.4f // 大屏幕透明度正常
     }
     
     Box(
@@ -65,8 +65,8 @@ fun Watermark(
             val colIndex = index % colCount
             
             // 计算每个水印的位置 (百分比)
-            val xPercent = colIndex * 20f + (0..5).random().toFloat() // 20% 间距 + 随机偏移
-            val yPercent = rowIndex * 25f + (0..5).random().toFloat() // 25% 间距 + 随机偏移
+            val xPercent = colIndex * 25f + (0..3).random().toFloat() // 25% 间距 + 小范围随机偏移
+            val yPercent = rowIndex * 33f + (0..3).random().toFloat() // 33% 间距 + 小范围随机偏移
             
             // 将百分比转换为Dp偏移
             val xOffsetDp = with(density) { ((xPercent / 100f) * configuration.screenWidthDp).dp }
@@ -79,7 +79,7 @@ fun Watermark(
                     .offset(x = xOffsetDp, y = yOffsetDp)
                     .rotate(-25f) // 固定左倾斜25度
                     .zIndex(9999f),
-                color = Color.Black.copy(alpha = alpha), // 半透明黑色
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha), // 使用主题颜色，自动适应深色/浅色模式
                 fontSize = fontSize,
                 fontWeight = FontWeight.Normal
             )
