@@ -92,26 +92,14 @@ fun MainScreen(
                     1 -> {
                         // 图表界面
                         com.chronie.homemoney.demo.ui.charts.ChartsScreen(
-                            context = context,
-                            onRequireLogin = onRequireLogin,
-                            onRequireMembership = onRequireMembership
+                            context = context
                         )
                     }
                     2 -> {
                         // 设置界面
                         SettingsScreen(
                             context = context,
-                            onNavigateToDatabaseTest = onNavigateToDatabaseTest,
-                            onNavigateToMembership = {
-                                android.util.Log.d("MainScreen", "收到 onNavigateToMembership 回调")
-                                onRequireMembership()
-                            },
-                            onLogout = {
-                                android.util.Log.d("MainScreen", "收到 onLogout 回调")
-                                onRequireLogin()
-                            },
-                            onRequireLogin = onRequireLogin,
-                            onRequireMembership = onRequireMembership
+                            onNavigateToDatabaseTest = onNavigateToDatabaseTest
                         )
                     }
                 }

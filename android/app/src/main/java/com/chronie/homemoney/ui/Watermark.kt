@@ -69,8 +69,8 @@ fun Watermark(
             val yPercent = rowIndex * 25f + (0..5).random().toFloat() // 25% 间距 + 随机偏移
             
             // 将百分比转换为实际像素偏移
-            val xOffset = (xPercent / 100f) * configuration.screenWidthDp.dp
-            val yOffset = (yPercent / 100f) * configuration.screenHeightDp.dp
+            val xOffset = with(density) { ((xPercent / 100f) * configuration.screenWidthDp).dp.toPx() }
+            val yOffset = with(density) { ((yPercent / 100f) * configuration.screenHeightDp).dp.toPx() }
             
             // 水印文本组件
             Text(

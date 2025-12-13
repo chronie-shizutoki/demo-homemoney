@@ -7,7 +7,6 @@ import androidx.security.crypto.MasterKey
 import com.chronie.homemoney.demo.data.local.AppDatabase
 import com.chronie.homemoney.demo.data.local.DatabaseMigrations
 import com.chronie.homemoney.demo.data.local.dao.ExpenseDao
-import com.chronie.homemoney.demo.data.local.dao.MemberDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -98,13 +97,7 @@ object DatabaseModule {
         return database.expenseDao()
     }
     
-    /**
-     * 提供 MemberDao
-     */
-    @Provides
-    fun provideMemberDao(database: AppDatabase): MemberDao {
-        return database.memberDao()
-    }
+    
     
     /**
      * 提供 BudgetDao
