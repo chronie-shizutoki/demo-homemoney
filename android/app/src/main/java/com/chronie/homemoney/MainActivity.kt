@@ -26,7 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.chronie.homemoney.R
+import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.core.common.LanguageManager
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay

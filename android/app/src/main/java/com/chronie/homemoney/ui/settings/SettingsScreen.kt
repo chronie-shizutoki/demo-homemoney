@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chronie.homemoney.R
+import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.core.common.Language
 import com.chronie.homemoney.ui.theme.LocalThemeSettings
 import com.chronie.homemoney.ui.theme.ThemeSettings

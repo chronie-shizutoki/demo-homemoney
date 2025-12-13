@@ -3,7 +3,7 @@ package com.chronie.homemoney.ui.test
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chronie.homemoney.R
+import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.data.local.dao.ExpenseDao
 import com.chronie.homemoney.data.local.entity.ExpenseEntity
 import dagger.hilt.android.lifecycle.HiltViewModel

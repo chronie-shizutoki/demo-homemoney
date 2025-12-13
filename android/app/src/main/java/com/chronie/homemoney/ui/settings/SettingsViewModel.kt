@@ -3,7 +3,7 @@ package com.chronie.homemoney.ui.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chronie.homemoney.R
+import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.core.common.DeveloperMode
 import com.chronie.homemoney.core.common.Language
 import com.chronie.homemoney.core.common.LanguageManager
@@ -36,9 +36,6 @@ class SettingsViewModel @Inject constructor(
     
     val isDeveloperMode: Flow<Boolean> = developerMode.isDeveloperModeEnabled
     
-    private val _aiApiKey = MutableStateFlow("")
-    val aiApiKey: StateFlow<String> = _aiApiKey.asStateFlow()
-    
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
     
@@ -49,7 +46,6 @@ class SettingsViewModel @Inject constructor(
     val importInProgress: StateFlow<Boolean> = _importInProgress.asStateFlow()
 
     init {
-        loadAIApiKey()
         loadDynamicColorSettings()
     }
 
@@ -65,22 +61,6 @@ class SettingsViewModel @Inject constructor(
     
     fun clearMessage() {
         _message.value = null
-    }
-    
-    fun setAIApiKey(apiKey: String) {
-        viewModelScope.launch {
-            val prefs = context.getSharedPreferences("ai_settings", android.content.Context.MODE_PRIVATE)
-            prefs.edit().putString("siliconflow_api_key", apiKey).apply()
-            _aiApiKey.value = apiKey
-            _message.value = context.getString(R.string.settings_ai_api_key_saved)
-        }
-    }
-    
-    private fun loadAIApiKey() {
-        viewModelScope.launch {
-            val prefs = context.getSharedPreferences("ai_settings", android.content.Context.MODE_PRIVATE)
-            _aiApiKey.value = prefs.getString("siliconflow_api_key", "") ?: ""
-        }
     }
 
     // 加载动态颜色设置
