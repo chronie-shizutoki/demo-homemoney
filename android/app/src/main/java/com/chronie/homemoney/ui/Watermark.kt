@@ -32,14 +32,16 @@ fun Watermark(
         "Demo Version 演示版本"
     }
     
-    // 水印数量
-    val watermarkCount = 36
-    // 列数
-    val colCount = 12
-    
     // 获取当前屏幕配置
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
+    
+    // 根据屏幕宽度确定水印数量和列数 (响应式)
+    val (watermarkCount, colCount) = when {
+        configuration.screenWidthDp < 480 -> Pair(24, 6) // 小屏幕：24个水印，6列
+        configuration.screenWidthDp < 768 -> Pair(36, 9) // 中等屏幕：36个水印，9列
+        else -> Pair(48, 12) // 大屏幕：48个水印，12列
+    }
     
     // 根据屏幕宽度确定字体大小 (响应式)
     val fontSize = when {
@@ -50,7 +52,8 @@ fun Watermark(
     
     // 根据屏幕宽度确定透明度
     val alpha = when {
-        configuration.screenWidthDp < 480 -> 0.15f // 小屏幕透明度适中
+        configuration.screenWidthDp < 480 -> 0.3f // 小屏幕提高透明度
+        configuration.screenWidthDp < 768 -> 0.35f // 中等屏幕
         else -> 0.4f // 大屏幕透明度正常
     }
     
