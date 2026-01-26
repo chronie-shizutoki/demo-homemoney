@@ -8,7 +8,10 @@
 -->
 <template>
   <div class="export-section">
-    <GlassButton type="primary" @click="handleExport" class="btn btn-primary">{{ $t('app.export') }}</GlassButton>
+    <GlassButton type="primary" @click="handleExport" class="btn btn-primary">
+      <FontAwesomeIcon icon="file-export" />
+      {{ $t('app.export') }}
+    </GlassButton>
   </div>
 </template>
 

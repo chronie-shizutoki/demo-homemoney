@@ -1485,9 +1485,10 @@ body.donation-modal-open {
   transition: all 0.3s ease;
 }
 
-.custom-dialog.dark-theme {
-  background: #2d3748;
-  color: #e2e8f0;
+@media (prefers-color-scheme: dark) {
+  .custom-dialog {
+    background: #1f1f1f;
+  }
 }
 
 /* 对话框动画 */
@@ -1608,16 +1609,14 @@ body.donation-modal-open {
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.2s ease;
-  background-color: #ffffff;
-  color: #1a202c;
+  background: transparent;
 }
 
 .custom-dialog.dark-theme .form-select,
 .custom-dialog.dark-theme .form-input,
 .custom-dialog.dark-theme .form-textarea {
-  background-color: #4a5568;
   border-color: #718096;
-  color: #e2e8f0;
+  color: white;
 }
 
 .form-select:hover,

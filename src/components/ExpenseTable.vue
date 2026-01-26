@@ -41,9 +41,11 @@
             <td>
               <div class="action-buttons">
                 <button class="edit-btn" @click="handleEdit(expense)">
+                  <FontAwesomeIcon icon="edit" />
                   {{ $t('common.edit') }}
                 </button>
                 <button class="delete-btn" @click="handleDelete(expense.id)">
+                  <FontAwesomeIcon icon="trash-alt" />
                   {{ $t('common.delete') }}
                 </button>
               </div>
@@ -74,9 +76,11 @@
             </div>
             <div class="card-actions">
               <GlassButton type="primary" class="card-edit-btn" @click="handleEdit(expense)">
+                <FontAwesomeIcon icon="edit" />
                 {{ $t('common.edit') }}
               </GlassButton>
               <GlassButton type="danger" class="card-delete-btn" @click="handleDelete(expense.id)">
+                <FontAwesomeIcon icon="trash-alt" />
                 {{ $t('common.delete') }}
               </GlassButton>
             </div>
@@ -193,11 +197,11 @@ export default {
 }
 
 .expense-table th {
-  background-color: #4361ee;
-  color: white;
+  color: black;
   text-align: left;
   padding: 12px 15px;
   font-weight: 600;
+  font-size: 15px;
 }
 
 .expense-table td {
@@ -293,6 +297,9 @@ export default {
     font-size: 12px;
     font-weight: 500;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .card-edit-btn {
@@ -354,6 +361,9 @@ export default {
   cursor: pointer;
   font-size: 12px;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .edit-btn {
@@ -451,7 +461,6 @@ export default {
   }
 
   .expense-table th {
-    background-color: #333;
     color: #e0e0e0;
   }
 
