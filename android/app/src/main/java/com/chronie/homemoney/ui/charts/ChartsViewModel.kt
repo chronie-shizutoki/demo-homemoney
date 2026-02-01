@@ -136,6 +136,12 @@ class ChartsViewModel @Inject constructor(
                 val endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth())
                 Pair(startOfMonth, endOfMonth)
             }
+            TimeRange.LAST_MONTH -> {
+                val lastMonth = today.minusMonths(1)
+                val startOfLastMonth = lastMonth.with(TemporalAdjusters.firstDayOfMonth())
+                val endOfLastMonth = lastMonth.with(TemporalAdjusters.lastDayOfMonth())
+                Pair(startOfLastMonth, endOfLastMonth)
+            }
             TimeRange.THIS_QUARTER -> {
                 val currentMonth = today.monthValue
                 val quarterStartMonth = ((currentMonth - 1) / 3) * 3 + 1

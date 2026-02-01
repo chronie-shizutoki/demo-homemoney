@@ -74,9 +74,6 @@
     "noDataForExport": "No data available for export",
     "exportMonthData": "Export Current Month Data"
   },
-  "feedback": {
-    "title": "Feedback"
-  },
   "expense.noRecords": "No expenses found",
   "expense.record": "Expense Record",
   "common.selectAll": "Select All",

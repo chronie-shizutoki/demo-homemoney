@@ -8,6 +8,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -25,6 +28,7 @@ import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.domain.model.TimeRange
 import com.chronie.homemoney.demo.ui.expense.ExpenseTypeLocalizer
 import java.text.NumberFormat
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -38,6 +42,7 @@ fun ChartsScreen(
     val selectedTimeRange by viewModel.selectedTimeRange.collectAsState()
     
     var showTimeRangeDialog by remember { mutableStateOf(false) }
+    var showCustomDateDialog by remember { mutableStateOf(false) }
     
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -114,8 +119,24 @@ fun ChartsScreen(
                 selectedTimeRange = selectedTimeRange,
                 onDismiss = { showTimeRangeDialog = false },
                 onTimeRangeSelected = { timeRange ->
-                    viewModel.selectTimeRange(timeRange)
-                    showTimeRangeDialog = false
+                    if (timeRange == TimeRange.CUSTOM) {
+                        showTimeRangeDialog = false
+                        showCustomDateDialog = true
+                    } else {
+                        viewModel.selectTimeRange(timeRange)
+                        showTimeRangeDialog = false
+                    }
+                }
+            )
+        }
+        
+        if (showCustomDateDialog) {
+            CustomDateRangeDialog(
+                context = context,
+                onDismiss = { showCustomDateDialog = false },
+                onDateRangeSelected = { startDate, endDate ->
+                    viewModel.setCustomDateRange(startDate, endDate)
+                    showCustomDateDialog = false
                 }
             )
         }
@@ -528,22 +549,24 @@ private fun TimeRangeDialog(
         onDismissRequest = onDismiss,
         title = { Text(context.getString(R.string.select_time_range)) },
         text = {
-            Column {
-                listOf(
-                    TimeRange.THIS_WEEK,
-                    TimeRange.THIS_MONTH,
-                    TimeRange.THIS_QUARTER,
-                    TimeRange.THIS_YEAR
-                ).forEach { timeRange ->
-                    TimeRangeOption(
-                        context = context,
-                        timeRange = timeRange,
-                        isSelected = selectedTimeRange == timeRange,
-                        onClick = { onTimeRangeSelected(timeRange) }
-                    )
+                Column {
+                    listOf(
+                        TimeRange.THIS_WEEK,
+                        TimeRange.THIS_MONTH,
+                        TimeRange.LAST_MONTH,
+                        TimeRange.THIS_QUARTER,
+                        TimeRange.THIS_YEAR,
+                        TimeRange.CUSTOM
+                    ).forEach { timeRange ->
+                        TimeRangeOption(
+                            context = context,
+                            timeRange = timeRange,
+                            isSelected = selectedTimeRange == timeRange,
+                            onClick = { onTimeRangeSelected(timeRange) }
+                        )
+                    }
                 }
-            }
-        },
+            },
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text(context.getString(R.string.close))
@@ -578,8 +601,150 @@ private fun getTimeRangeText(context: Context, timeRange: TimeRange): String {
     return when (timeRange) {
         TimeRange.THIS_WEEK -> context.getString(R.string.this_week)
         TimeRange.THIS_MONTH -> context.getString(R.string.this_month)
+        TimeRange.LAST_MONTH -> context.getString(R.string.last_month)
         TimeRange.THIS_QUARTER -> context.getString(R.string.this_quarter)
         TimeRange.THIS_YEAR -> context.getString(R.string.this_year)
         TimeRange.CUSTOM -> context.getString(R.string.custom_range)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CustomDateRangeDialog(
+    context: Context,
+    onDismiss: () -> Unit,
+    onDateRangeSelected: (LocalDate, LocalDate) -> Unit
+) {
+    var startDate by remember { mutableStateOf(LocalDate.now().minusMonths(1)) }
+    var endDate by remember { mutableStateOf(LocalDate.now()) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(context.getString(R.string.custom_range)) },
+        text = {
+            Column {
+                // 开始日期
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = context.getString(R.string.expense_list_filter_start_date),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Button(onClick = { showStartDatePicker = true }) {
+                        Text(startDate.format(DateTimeFormatter.ISO_LOCAL_DATE))
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // 结束日期
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = context.getString(R.string.expense_list_filter_end_date),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Button(onClick = { showEndDatePicker = true }) {
+                        Text(endDate.format(DateTimeFormatter.ISO_LOCAL_DATE))
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // 日期范围验证
+                if (startDate > endDate) {
+                    Text(
+                        text = context.getString(R.string.error),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (startDate <= endDate) {
+                        onDateRangeSelected(startDate, endDate)
+                    }
+                },
+                enabled = startDate <= endDate
+            ) {
+                Text(context.getString(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(context.getString(R.string.close))
+            }
+        }
+    )
+    
+    // 开始日期选择器
+    if (showStartDatePicker) {
+        val startDatePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = startDate.toEpochDay() * 24 * 60 * 60 * 1000
+        )
+        
+        DatePickerDialog(
+            onDismissRequest = { showStartDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        startDatePickerState.selectedDateMillis?.let { millis ->
+                            startDate = LocalDate.ofEpochDay(millis / (24 * 60 * 60 * 1000))
+                            showStartDatePicker = false
+                        }
+                    }
+                ) {
+                    Text(context.getString(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartDatePicker = false }) {
+                    Text(context.getString(R.string.close))
+                }
+            }
+        ) {
+            DatePicker(state = startDatePickerState)
+        }
+    }
+    
+    // 结束日期选择器
+    if (showEndDatePicker) {
+        val endDatePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = endDate.toEpochDay() * 24 * 60 * 60 * 1000
+        )
+        
+        DatePickerDialog(
+            onDismissRequest = { showEndDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        endDatePickerState.selectedDateMillis?.let { millis ->
+                            endDate = LocalDate.ofEpochDay(millis / (24 * 60 * 60 * 1000))
+                            showEndDatePicker = false
+                        }
+                    }
+                ) {
+                    Text(context.getString(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndDatePicker = false }) {
+                    Text(context.getString(R.string.close))
+                }
+            }
+        ) {
+            DatePicker(state = endDatePickerState)
+        }
     }
 }

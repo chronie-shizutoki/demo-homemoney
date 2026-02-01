@@ -75,9 +75,6 @@
     "noDataForExport": "暫無資料可匯出",
     "exportMonthData": "匯出本月資料"
   },
-  "feedback": {
-    "title": "意見回饋"
-  },
   "expense.noRecords": "暫無支出記錄",
   "expense.record": "支出記錄",
   "common.selectAll": "全選",

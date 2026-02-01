@@ -186,6 +186,7 @@
     <string name="this_month">本月</string>
     <string name="this_quarter">本季度</string>
     <string name="this_year">今年</string>
+    <string name="last_month">上月</string>
     <string name="custom_range">自訂</string>
     <string name="close">關閉</string>
     <string name="retry">重試</string>
@@ -233,9 +234,4 @@
     <string name="excel_header_remark">備註</string>
     <string name="permission_storage_required">需要存儲許可權才能匯出/導入檔</string>
     <string name="no_records_to_export">沒有可匯出的記錄</string>
-
-    <!-- 意見回饋 -->
-    <string name="feedback_title">意見回饋</string>
-    <string name="feedback_description">分享您的建議，幫助我們改進</string>
-
 </resources>

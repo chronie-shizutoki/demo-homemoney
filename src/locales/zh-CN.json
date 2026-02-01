@@ -77,9 +77,6 @@
     "noDataForExport": "暂无数据可导出",
     "exportMonthData": "导出本月数据"
   },
-  "feedback": {
-    "title": "意见反馈"
-  },
   "expense.noRecords": "暂无支出记录",
   "expense.record": "支出记录",
   "common.selectAll": "全选",
