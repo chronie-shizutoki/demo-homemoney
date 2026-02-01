@@ -65,18 +65,67 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text(
-                text = context.getString(R.string.select_language),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Language.values().forEach { language ->
-                LanguageItem(
-                    language = language,
-                    isSelected = language == currentLanguage,
-                    onClick = { viewModel.setLanguage(language) }
-                )
+            var expanded by remember { mutableStateOf(false) }
+            
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = it }
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = context.getString(R.string.select_language),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = currentLanguage.displayName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    Language.values().forEach { language ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = language.displayName)
+                                    if (language == currentLanguage) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                            },
+                            onClick = {
+                                viewModel.setLanguage(language)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -209,45 +258,6 @@ fun SettingsScreen(
     }
 }
 
-@Composable
-fun LanguageItem(
-    language: Language,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
-        color = if (isSelected) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            MaterialTheme.colorScheme.surface
-        },
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = language.displayName,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            if (isSelected) {
-                Text(
-                    text = "✓",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun BudgetSettingsSection(
