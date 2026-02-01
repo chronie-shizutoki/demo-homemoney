@@ -2,21 +2,15 @@ package com.chronie.homemoney.demo.ui.main
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.InsertChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.ui.expense.ExpenseListScreen
 import com.chronie.homemoney.demo.ui.settings.SettingsScreen
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
+import com.chronie.homemoney.demo.ui.main.BottomNavigationBar
 
 @Composable
 fun MainScreen(
@@ -33,49 +27,15 @@ fun MainScreen(
     val isDeveloperMode by viewModel.isDeveloperMode.collectAsState(initial = false)
     var selectedTab by remember { mutableStateOf(0) }
     
-    // 原生界面（带底部 Tab 栏）
     Scaffold(
-            bottomBar = {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                        label = { Text(context.getString(R.string.expense_list_title)) },
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0 },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                            selectedTextColor = MaterialTheme.colorScheme.onPrimary,
-                            indicatorColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.InsertChart, contentDescription = null) },
-                        label = { Text(context.getString(R.string.charts_title)) },
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1 },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                            selectedTextColor = MaterialTheme.colorScheme.onPrimary,
-                            indicatorColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                        label = { Text(context.getString(R.string.settings)) },
-                        selected = selectedTab == 2,
-                        onClick = { selectedTab = 2 },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                            selectedTextColor = MaterialTheme.colorScheme.onPrimary,
-                            indicatorColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-                }
-            }
-        ) { paddingValues ->
+        bottomBar = {
+            BottomNavigationBar(
+                context = context,
+                selectedTab = selectedTab,
+                onTabChange = { selectedTab = it }
+            )
+        }
+    ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
                 when (selectedTab) {
                     0 -> {
