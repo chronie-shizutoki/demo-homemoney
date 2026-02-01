@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">家庭记账本 Demo</string>
-    <string name="title_activity_main">家庭记账本 Demo</string>
+    <string name="app_name">家庭记账本演示版</string>
+    <string name="title_activity_main">家庭记账本演示版</string>
     <string name="package_name">com.chronie.homemoney.demo</string>
     <string name="custom_url_scheme">com.chronie.homemoney.demo</string>
     
@@ -10,14 +10,6 @@
     <string name="language_settings">语言设置</string>
     <string name="select_language">选择语言</string>
     <string name="developer_tools">开发者工具</string>
-    <string name="theme_settings">主题设置</string>
-    <string name="dynamic_color">动态颜色</string>
-    <string name="dynamic_color_description">使用壁纸颜色（Android 12+）</string>
-    <string name="manual_color_selection">手动颜色选择</string>
-    <string name="primary_color">主色调</string>
-    <string name="dynamic_color_enabled">已启用动态颜色</string>
-    <string name="dynamic_color_disabled">已禁用动态颜色</string>
-    <string name="primary_color_updated">主色调已更新</string>
     
     <!-- Common -->
     <string name="back">返回</string>
