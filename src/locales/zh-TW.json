@@ -72,7 +72,8 @@
     "dailyTrend": "每日支出",
     "dailyDescending": "高消費日期",
     "noData": "暫無支出記錄",
-    "noDataForExport": "暫無資料可匯出"
+    "noDataForExport": "暫無資料可匯出",
+    "exportMonthData": "匯出本月資料"
   },
   "feedback": {
     "title": "意見回饋"
@@ -108,6 +109,7 @@
   "expense.stats.averageAmount": "平均值",
   "expense.stats.medianAmount": "中位數",
   "expense.stats.amountRange": "金額範圍",
+  "expense.exportFilename": "支出記錄",
   "function.support": "關於我們",
   "howToUse.title": "使用說明",
   "expense": {

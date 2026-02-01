@@ -1,6 +1,15 @@
 <!-- ExpenseTable.vue -->
 <template>
   <div class="expense-container">
+    <!-- 渐变定义 SVG -->
+    <svg class="gradient-defs" width="0" height="0">
+      <defs>
+        <linearGradient id="gradient-arrow" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ff7eb3" stop-opacity="1" />
+          <stop offset="100%" stop-color="#ff758c" stop-opacity="1" />
+        </linearGradient>
+      </defs>
+    </svg>
     <!-- 大屏幕表格视图 -->
     <div class="table-view">
       <table class="expense-table">
@@ -9,19 +18,16 @@
             <th @click="$emit('sort', 'date')" class="sortable">
               {{ $t('expense.date') }}
               <span v-if="sortField && sortField === 'date'" class="sort-indicator">
-                {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                <FontAwesomeIcon :icon="sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'" />
               </span>
             </th>
-            <th @click="$emit('sort', 'type')" class="sortable">
+            <th>
               {{ $t('expense.type') }}
-              <span v-if="sortField && sortField === 'type'" class="sort-indicator">
-                {{ sortOrder === 'asc' ? '↑' : '↓' }}
-              </span>
             </th>
             <th @click="$emit('sort', 'amount')" class="sortable">
               {{ $t('expense.amount') }}
               <span v-if="sortField && sortField === 'amount'" class="sort-indicator">
-                {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                <FontAwesomeIcon :icon="sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'" />
               </span>
             </th>
             <th>{{ $t('expense.remark') }}</th>
@@ -29,28 +35,41 @@
           </tr>
         </thead>
         <transition-group name="row-fade" tag="tbody">
-          <tr v-for="(expense, index) in expenses" :key="expense.id" :data-index="index">
-            <td>{{ formatDate(expense.date) }}</td>
-            <td>
-              <span class="type-tag" :style="{ '--tag-color': getTypeColor(expense.type, isDarkMode) }">
-                {{ expense.type }}
-              </span>
-            </td>
-            <td class="amount-cell">¥{{ expense.amount.toFixed(2) }}</td>
-            <td>{{ expense.remark || '-' }}</td>
-            <td>
-              <div class="action-buttons">
-                <button class="edit-btn" @click="handleEdit(expense)">
-                  <FontAwesomeIcon icon="edit" />
-                  {{ $t('common.edit') }}
-                </button>
-                <button class="delete-btn" @click="handleDelete(expense.id)">
-                  <FontAwesomeIcon icon="trash-alt" />
-                  {{ $t('common.delete') }}
-                </button>
-              </div>
-            </td>
-          </tr>
+          <template v-for="(expenses, date) in groupedExpenses" :key="date">
+            <!-- 日期标题行 -->
+            <tr class="date-header-row">
+              <td colspan="5">
+                <div class="date-header">
+                  <div class="date-info">
+                    <span class="date-text">{{ date }}</span>
+                    <span class="count-text">{{ $t('expense.stats.rowCount') }}: {{ expenses.length }}</span>
+                  </div>
+                  <div class="total-amount">-¥{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
+                </div>
+              </td>
+            </tr>
+            <!-- 该日期下的支出项 -->
+            <tr v-for="(expense, index) in expenses" :key="expense.id" :data-index="index">
+              <td>{{ formatDate(expense.date) }}</td>
+              <td>
+                <span class="type-tag" :style="{ '--tag-color': getTypeColor(expense.type) }">
+                  {{ expense.type }}
+                </span>
+              </td>
+              <td class="amount-cell">¥{{ expense.amount.toFixed(2) }}</td>
+              <td class="remark-cell">{{ expense.remark || '-' }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="edit-btn" @click="handleEdit(expense)">
+                    <FontAwesomeIcon icon="edit" /> 
+                  </button>
+                  <button class="delete-btn" @click="handleDelete(expense.id)">
+                    <FontAwesomeIcon icon="trash-alt" /> 
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </template>
         </transition-group>
       </table>
     </div>
@@ -58,39 +77,87 @@
     <!-- 小屏幕卡片视图 -->
     <div class="card-view">
       <transition-group name="row-fade" tag="div">
-        <div v-for="(expense, index) in expenses" :key="expense.id" class="expense-card" :data-index="index">
-          <div class="card-header">
-            <div class="date">{{ formatDate(expense.date) }}</div>
-            <div class="amount">¥{{ expense.amount.toFixed(2) }}</div>
+        <template v-for="(expenses, date) in groupedExpenses" :key="date">
+          <!-- 日期标题卡片 -->
+          <div class="date-header-card">
+            <div class="date-info">
+              <span class="date-text">{{ date }}</span>
+              <span class="count-text">{{ $t('expense.stats.rowCount') }}: {{ expenses.length }}</span>
+            </div>
+            <div class="total-amount">-¥{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
           </div>
-          <div class="card-body">
-            <div class="type-section">
-              <span class="type-label">{{ $t('expense.type') }}:</span>
-              <span class="type-tag" :style="{ '--tag-color': getTypeColor(expense.type, isDarkMode) }">
-                  {{ expense.type }}
-              </span>
+          <!-- 该日期下的支出卡片 -->
+          <div 
+            v-for="(expense, index) in expenses" 
+            :key="expense.id" 
+            class="expense-card" 
+            :data-index="index"
+            @touchstart="startLongPress(expense, $event)"
+            @touchend="endLongPress"
+            @touchcancel="endLongPress"
+            @mousedown="startLongPress(expense, $event)"
+            @mouseup="endLongPress"
+            @mouseleave="endLongPress"
+          >
+            <div class="card-header">
+              <div class="date">{{ formatDate(expense.date) }}</div>
+              <div class="amount">¥{{ expense.amount.toFixed(2) }}</div>
             </div>
-            <div v-if="expense.remark" class="remark-section">
-              <span class="remark-label">{{ $t('expense.remark') }}:</span>
-              <span class="remark-text">{{ expense.remark }}</span>
+            <div class="card-body">
+              <div class="type-section">
+                <span class="type-label">{{ $t('expense.type') }}:</span>
+                <span class="type-tag" :style="{ '--tag-color': getTypeColor(expense.type) }">
+                    {{ expense.type }}
+                </span>
+              </div>
+              <div v-if="expense.remark" class="remark-section">
+                <span class="remark-label">{{ $t('expense.remark') }}:</span>
+                <span class="remark-text">{{ expense.remark }}</span>
+              </div>
             </div>
-            <div class="card-actions">
-              <GlassButton type="primary" class="card-edit-btn" @click="handleEdit(expense)">
-                <FontAwesomeIcon icon="edit" />
+          </div>
+        
+        <!-- 长按菜单 -->
+        <transition 
+          name="menu-fade"
+          mode="out-in"
+        >
+          <div 
+            v-if="showMenu && currentMenuExpense" 
+            key="menu"
+            class="long-press-menu"
+            :style="menuStyle"
+          >
+            <div class="menu-content">
+              <GlassButton 
+                type="primary" 
+                class="menu-btn menu-edit-btn" 
+                @click.stop="() => { handleEdit(currentMenuExpense); closeMenu() }"
+              >
+                <template #icon>
+                  <FontAwesomeIcon icon="edit" />
+                </template>
                 {{ $t('common.edit') }}
               </GlassButton>
-              <GlassButton type="danger" class="card-delete-btn" @click="handleDelete(expense.id)">
-                <FontAwesomeIcon icon="trash-alt" />
+              <GlassButton 
+                type="danger" 
+                class="menu-btn menu-delete-btn" 
+                @click.stop="() => { handleDelete(currentMenuExpense.id); closeMenu() }"
+              >
+                <template #icon>
+                  <FontAwesomeIcon icon="trash-alt" />
+                </template>
                 {{ $t('common.delete') }}
               </GlassButton>
             </div>
           </div>
-        </div>
+        </transition>
+        </template>
       </transition-group>
     </div>
 
     <!-- 空数据状态 -->
-    <div v-if="expenses.length === 0" class="no-data">
+    <div v-if="Object.keys(groupedExpenses).length === 0" class="no-data">
       <div class="no-data-icon"></div>
       <h3>{{ $t('expense.noDataTitle') }}</h3>
       <p>{{ $t('expense.noDataMessage') }}</p>
@@ -100,9 +167,13 @@
 
 <script>
 import { getTypeColor } from '../utils/expenseUtils';
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, toRefs } from 'vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 export default {
+  components: {
+    FontAwesomeIcon
+  },
   props: {
     expenses: {
       type: Array,
@@ -120,36 +191,116 @@ export default {
   },
 
   setup (props, { emit }) {
-    const isDarkMode = ref(false);
+    // 使用 toRefs 保持 props 的响应性
+    const { sortField, sortOrder, expenses } = toRefs(props);
     
-    // 检测当前系统主题
-    const checkDarkMode = () => {
-      const newMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (newMode !== isDarkMode.value) {
-        console.log('Dark mode changed:', { from: isDarkMode.value, to: newMode });
-        isDarkMode.value = newMode;
-      }
-    };
-    
-    // 初始化检测
-    checkDarkMode();
-    
-    // 监听主题变化
-    onMounted(() => {
-      console.log('ExpenseTable component mounted:', { initialDarkMode: isDarkMode.value });
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkDarkMode);
-    });
-    
-    // 清理监听器
-    onUnmounted(() => {
-      window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', checkDarkMode);
-    });
-
     const formatDate = (dateString) => {
       // 直接返回YYYY-MM-DD格式的日期字符串，不再需要转换
       return dateString || '';
     };
+
+    // 计算每日总金额
+    const calculateDailyTotal = (expenses) => {
+      return expenses.reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
+    };
     
+    // 将expenses数组按日期分组
+    const groupedExpenses = computed(() => {
+      const grouped = {};
+      (props.expenses || []).forEach(expense => {
+        const date = expense.date;
+        if (date) {
+          if (!grouped[date]) {
+            grouped[date] = [];
+          }
+          grouped[date].push(expense);
+        }
+      });
+      return grouped;
+    });
+
+    // 长按相关状态
+    const showMenu = ref(false);
+    const menuExpenseId = ref('');
+    const currentMenuExpense = ref(null);
+    const menuPosition = ref({ x: 0, y: 0 });
+    const longPressTimer = ref(null);
+    const LONG_PRESS_DURATION = 500; // 长按触发时间
+
+    // 菜单样式计算
+    const menuStyle = computed(() => {
+      return {
+        top: `${menuPosition.value.y}px`,
+        right: `${menuPosition.value.x}px`
+      };
+    });
+
+    // 开始长按
+    const startLongPress = (expense, event) => {
+      // 清除之前的定时器
+      if (longPressTimer.value) {
+        clearTimeout(longPressTimer.value);
+      }
+      
+      // 保存target引用，避免在异步回调中丢失
+      const target = event.currentTarget;
+      
+      // 设置新的定时器
+      longPressTimer.value = setTimeout(() => {
+        // 计算菜单位置
+        // 添加空值检查，确保target存在
+        if (!target) {
+          console.warn('Long press target is null or undefined');
+          return;
+        }
+        
+        const rect = target.getBoundingClientRect();
+        // 获取触摸或鼠标事件的坐标
+        const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+        const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+        
+        // 计算菜单位置，从长按位置附近弹出
+        menuPosition.value = {
+          x: window.innerWidth - clientX - 110, // 调整菜单宽度
+          y: clientY + 10
+        };
+        
+        // 先设置菜单数据，再显示菜单
+        menuExpenseId.value = expense.id;
+        currentMenuExpense.value = expense;
+        
+        // 确保DOM更新后再显示菜单，触发动画
+        setTimeout(() => {
+          showMenu.value = true;
+          
+          console.log('Long press detected, showing menu for expense:', expense.id);
+          console.log('Menu state:', { showMenu: showMenu.value, menuExpenseId: menuExpenseId.value, menuPosition: menuPosition.value, currentMenuExpense: currentMenuExpense.value });
+        }, 10);
+      }, LONG_PRESS_DURATION);
+    };
+
+    // 结束长按
+    const endLongPress = () => {
+      if (longPressTimer.value) {
+        clearTimeout(longPressTimer.value);
+        longPressTimer.value = null;
+      }
+    };
+
+    // 关闭菜单
+    const closeMenu = () => {
+      showMenu.value = false;
+      menuExpenseId.value = '';
+      currentMenuExpense.value = null;
+    };
+
+    // 点击外部关闭菜单
+    const handleClickOutside = (event) => {
+      if (showMenu.value && !event.target.closest('.long-press-menu')) {
+        closeMenu();
+      }
+    };
+
     // 处理编辑事件
     const handleEdit = (expense) => {
       console.log('Edit expense clicked:', expense);
@@ -162,17 +313,41 @@ export default {
       emit('delete', id);
     };
 
+    // 添加全局点击事件监听
+    onMounted(() => {
+      document.addEventListener('click', handleClickOutside);
+    });
+
+    // 移除全局点击事件监听
+    onUnmounted(() => {
+      document.removeEventListener('click', handleClickOutside);
+      if (longPressTimer.value) {
+        clearTimeout(longPressTimer.value);
+      }
+    });
+
     // 监听数据变化
     watch(() => props.expenses, (newVal) => {
-      console.log('Expense data updated:', { recordCount: newVal?.length || 0 });
+      const totalExpenses = (newVal || []).length;
+      console.log('Expense data updated:', { recordCount: totalExpenses });
     }, { deep: true });
 
     return {
       getTypeColor,
       formatDate,
-      isDarkMode,
+      calculateDailyTotal,
       handleEdit,
-      handleDelete
+      handleDelete,
+      showMenu,
+      menuExpenseId,
+      currentMenuExpense,
+      menuStyle,
+      startLongPress,
+      endLongPress,
+      closeMenu,
+      sortField,
+      sortOrder,
+      groupedExpenses
     };
   }
 };
@@ -197,7 +372,14 @@ export default {
 }
 
 .expense-table th {
-  color: black;
+  background: linear-gradient(90deg, #ff7eb3, #ff758c);
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -ms-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+  -ms-text-fill-color: transparent;
   text-align: left;
   padding: 12px 15px;
   font-weight: 600;
@@ -213,9 +395,84 @@ export default {
   background-color: rgba(67, 97, 238, 0.03);
 }
 
+/* 日期标题行样式 */
+.date-header-row {
+  background-color: #f8f9fa;
+}
+
+.date-header-row td {
+  padding: 8px 15px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.date-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.date-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.count-text {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.total-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e63946;
+}
+
 /* 卡片视图样式 */
 .card-view {
   display: none;
+}
+
+/* 日期标题卡片样式 */
+.date-header-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.date-header-card .date-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-header-card .date-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.date-header-card .count-text {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.date-header-card .total-amount {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e63946;
 }
 
 .expense-card {
@@ -282,6 +539,15 @@ export default {
     color: #333;
     flex: 1;
     word-break: break-word;
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+
+  .remark-cell {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+    min-height: 40px;
   }
 
   .card-actions {
@@ -297,9 +563,6 @@ export default {
     font-size: 12px;
     font-weight: 500;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 4px;
   }
 
   .card-edit-btn {
@@ -320,6 +583,107 @@ export default {
     background-color: #c1121f;
   }
 
+/* 长按菜单样式 */
+.long-press-menu {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.menu-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  min-width: 120px;
+  width: 120px;
+  overflow: hidden;
+  z-index: 10000;
+  transform-origin: top right;
+}
+
+.menu-btn {
+  width: 100%;
+  margin-bottom: 8px;
+  font-size: 12px;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.menu-btn:last-child {
+  margin-bottom: 0;
+}
+
+.menu-edit-btn {
+  background-color: #4361ee;
+  color: white;
+}
+
+.menu-edit-btn:hover {
+  background-color: #3a56d4;
+}
+
+.menu-delete-btn {
+  background-color: #e63946;
+  color: white;
+}
+
+.menu-delete-btn:hover {
+  background-color: #c1121f;
+}
+
+/* 菜单动画效果 */
+.menu-fade-enter-active,
+.menu-fade-leave-active {
+  transition: all 0.3s ease-out !important;
+  transform-origin: top right !important;
+  will-change: transform, opacity !important;
+}
+
+.menu-fade-enter-from {
+  opacity: 0 !important;
+  transform: scale(0.8) rotate(-10deg) !important;
+}
+
+.menu-fade-leave-to {
+  opacity: 0 !important;
+  transform: scale(0.8) rotate(10deg) !important;
+}
+
+/* 兼容Vue 2的动画类名 */
+.menu-fade-enter {
+  opacity: 0 !important;
+  transform: scale(0.8) rotate(-10deg) !important;
+}
+
+.menu-fade-leave-active {
+  opacity: 1 !important;
+  transform: scale(1) rotate(0deg) !important;
+}
+
+.menu-fade-leave-to {
+  opacity: 0 !important;
+  transform: scale(0.8) rotate(10deg) !important;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .menu-content {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .menu-btn {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .menu-btn:hover {
+    opacity: 0.9;
+  }
+}
+
 /* 通用样式 */
 .sortable {
   cursor: pointer;
@@ -330,7 +694,33 @@ export default {
 .sort-indicator {
   position: absolute;
   right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  margin-left: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
+
+:deep(.sort-indicator svg) {
+  width: 14px;
+  height: 14px;
+}
+
+:deep(.sort-indicator svg path) {
+  fill: url(#gradient-arrow);
+}
+
+/* 渐变定义 */
+.gradient-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+
 
 .type-tag {
   display: inline-block;
@@ -361,9 +751,6 @@ export default {
   cursor: pointer;
   font-size: 12px;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .edit-btn {
@@ -460,10 +847,6 @@ export default {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
-  .expense-table th {
-    color: #e0e0e0;
-  }
-
   .expense-table td {
     color: #e0e0e0;
     border-bottom: 1px solid #444;
@@ -474,6 +857,10 @@ export default {
   }
 
   .amount-cell {
+    color: #e0e0e0;
+  }
+
+  .remark-cell {
     color: #e0e0e0;
   }
 
@@ -529,6 +916,45 @@ export default {
   .card-edit-btn:hover,
   .card-delete-btn:hover {
     opacity: 0.9;
+  }
+
+  /* 深色模式下的日期标题样式 */
+  .date-header-row {
+    background-color: #2a2a2a;
+  }
+
+  .date-header-row td {
+    border-bottom: 2px solid #444;
+  }
+
+  .date-text {
+    color: #e0e0e0;
+  }
+
+  .count-text {
+    color: #aaa;
+  }
+
+  .total-amount {
+    color: #f87171;
+  }
+
+  .date-header-card {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .date-header-card .date-text {
+    color: #e0e0e0;
+  }
+
+  .date-header-card .count-text {
+    color: #aaa;
+  }
+
+  .date-header-card .total-amount {
+    color: #f87171;
   }
 }
 </style>

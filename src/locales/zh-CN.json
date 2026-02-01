@@ -74,7 +74,8 @@
     "dailyTrend": "每日支出",
     "dailyDescending": "高消费日期",
     "noData": "暂无支出记录",
-    "noDataForExport": "暂无数据可导出"
+    "noDataForExport": "暂无数据可导出",
+    "exportMonthData": "导出本月数据"
   },
   "feedback": {
     "title": "意见反馈"
@@ -110,6 +111,7 @@
   "expense.stats.averageAmount": "平均值",
   "expense.stats.medianAmount": "中位数",
   "expense.stats.amountRange": "金额范围",
+  "expense.exportFilename": "支出记录",
   "expense": {
     "search": {
       "month": "月份",

@@ -71,7 +71,8 @@
     "dailyTrend": "Daily Spending",
     "dailyDescending": "Highest Spending Days",
     "noData": "No expenses recorded",
-    "noDataForExport": "No data available for export"
+    "noDataForExport": "No data available for export",
+    "exportMonthData": "Export Current Month Data"
   },
   "feedback": {
     "title": "Feedback"
@@ -114,6 +115,7 @@
   "expense.stats.averageAmount": "Average",
   "expense.stats.medianAmount": "Median",
   "expense.stats.amountRange": "Amount Range",
+  "expense.exportFilename": "expense_records",
   "expense": {
     "search": {
       "month": "Month",

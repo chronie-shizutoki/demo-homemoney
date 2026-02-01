@@ -7,79 +7,33 @@
     <MessageTip v-model:message="errorMessage" type="error" />
 
     <Header :title="$t('app.title')" />
-   
-    <!-- 当前日期时间显示 -->
-    <div class="datetime-container">
-      <div class="date-part">{{ formattedDate }}</div>
-      <div class="time-part">{{ formattedTime }}</div>
-    </div>
 
     <!-- 功能组网格布局 -->
     <div class="function-section">
-      <!-- 手机端选单 -->
-      <div class="mobile-selector">
-        <CustomSelect
-          v-model="selectedFunctionGroup"
-          :options="functionGroups"
-          :include-empty-option="false"
-          style="width: 100%;"
-        />
-      </div>
       
       <!-- 桌面端网格布局 -->
       <div class="card-grid">
-        <!-- 主要功能组 -->
-        <GlassCard :dark-theme="isDarkMode" :title="t('function.primary')">
-          <div class="card-content">
             <GlassButton type="primary" @click="showAddDialog = true" :dark-theme="isDarkMode">
               <template #icon><FontAwesomeIcon icon="plus" /></template>
               {{ t('expense.addRecord') }}
-            </GlassButton>
-            <GlassButton type="primary" @click="exportMonthData" :dark-theme="isDarkMode">
-              <template #icon><FontAwesomeIcon icon="download" /></template>
-              导出本月数据
-            </GlassButton>
-          </div>
-        </GlassCard>
-
-        <!-- 支持与帮助组 -->
-        <GlassCard :dark-theme="isDarkMode" :title="t('function.support')">
-          <div class="card-content">
-            <GlassButton type="primary" @click="handleFeedback" :dark-theme="isDarkMode">
-              <template #icon><FontAwesomeIcon icon="envelope" /></template>
-              {{ t('feedback.title') }}
             </GlassButton>
             <GlassButton type="primary" @click="goToHowToUse" :dark-theme="isDarkMode">
               <template #icon><FontAwesomeIcon icon="question-circle" /></template>
               {{ t('howToUse.title') }}
             </GlassButton>
-          </div>
-        </GlassCard>
       </div>
       
       <!-- 手机端按钮显示 -->
       <div class="mobile-buttons">
         <!-- 主要功能组按钮 -->
-        <div v-if="selectedFunctionGroup === 'primary'" class="mobile-button-group">
+        <div class="mobile-button-group">
           <GlassButton type="primary" @click="showAddDialog = true" size="large" class="mobile-btn" :dark-theme="isDarkMode">
             <template #icon><FontAwesomeIcon icon="plus" /></template>
             {{ t('expense.addRecord') }}
           </GlassButton>
-          <GlassButton type="primary" @click="exportMonthData" size="large" class="mobile-btn" :dark-theme="isDarkMode">
-            <template #icon><FontAwesomeIcon icon="download" /></template>
-            导出本月数据
-          </GlassButton>
-        </div>
-        
-        <!-- 关于我们组按钮 -->
-        <div v-else-if="selectedFunctionGroup === 'about'" class="mobile-button-group">
-          <GlassButton type="primary" @click="handleFeedback" :dark-theme="isDarkMode" class="mobile-btn">
-            <template #icon><FontAwesomeIcon icon="envelope" /></template>
-            {{ t('feedback.title') }}
-          </GlassButton>
           <GlassButton type="primary" @click="goToHowToUse" :dark-theme="isDarkMode" class="mobile-btn">
             <template #icon><FontAwesomeIcon icon="question-circle" /></template>
-            使用方法
+            {{ t('howToUse.title') }}
           </GlassButton>
         </div>
       </div>
@@ -102,13 +56,19 @@
       @delete="handleDeleteExpense"
     />
     <div :class="['header']"></div>
-    <Transition name="button">
-      <ExportButton
-        v-if="Expenses.length > 0"
-        @export-excel="() => exportToExcel(Expenses)"
-      />
-      <div v-else class="no-data">{{ t('home.noDataForExport') }}</div>
-    </Transition>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 20px;">
+      <Transition name="button">
+        <ExportButton
+          v-if="Expenses.length > 0"
+          @export-excel="() => exportToExcel(Expenses)"
+        />
+       <div v-else class="no-data">{{ t('home.noDataForExport') }}</div>
+      </Transition>
+      <GlassButton type="primary" @click="exportMonthData" :dark-theme="isDarkMode">
+        <template #icon><FontAwesomeIcon icon="download" /></template>
+        {{ t('home.exportMonthData') }}
+      </GlassButton>
+    </div>
   </div>
 
   <!-- 悬浮刷新按钮 -->
@@ -623,67 +583,6 @@ onBeforeUnmount(() => {
   }
 });
 
-// 当前日期时间状态
-const currentDateTime = ref('');
-const formattedDate = ref('');
-const formattedTime = ref('');
-let dateTimeTimer = null;
-
-onMounted(async () => {
-  
-  // 初始化并启动日期时间更新
-  updateDateTime();
-  dateTimeTimer = setInterval(updateDateTime, 1000);
-  
-  try {
-    await fetchData(false);
-  } catch (err) {
-    console.error('Failed to initialize data:', err);
-    error.value = t('error.dataInitializationFailed');
-  }
-});
-
-// 清理定时器和事件监听器
-onBeforeUnmount(() => {
-  if (dateTimeTimer) {
-    clearInterval(dateTimeTimer);
-  }
-});
-
-// 更新日期时间函数
-const updateDateTime = () => {
-  const now = new Date();
-  // 根据当前语言环境和设备时区格式化日期时间
-  const fullOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    weekday: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  };
-  
-  const dateOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    weekday: 'long'
-  };
-  
-  const timeOptions = {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  };
-  
-  currentDateTime.value = now.toLocaleString(locale.value, fullOptions);
-  formattedDate.value = now.toLocaleDateString(locale.value, dateOptions);
-  formattedTime.value = now.toLocaleTimeString(locale.value, timeOptions);
-};
-
 // 对话框相关数据
 const expenseTypes = ['日常用品', '奢侈品', '通讯费用', '食品', '零食糖果', '冷饮', '方便食品', '纺织品', '饮品', '调味品', '交通出行', '餐饮', '医疗费用', '水果', '其他', '水产品', '乳制品', '礼物人情', '旅行度假', '政务', '水电煤气'];
 const form = reactive({
@@ -946,6 +845,11 @@ const refreshPage = () => {
     window.location.reload(true);
   }
 }
+
+// 组件挂载时加载数据
+onMounted(() => {
+  fetchData();
+});
 
 
 </script>
@@ -1784,10 +1688,6 @@ body.donation-modal-open {
     display: none; /* 隐藏桌面端网格布局 */
   }
   
-  .mobile-selector {
-    margin-bottom: 20px;
-  }
-  
   .mobile-buttons {
     display: block;
   }
@@ -1819,10 +1719,6 @@ body.donation-modal-open {
 
 /* 桌面端样式 */
 @media (min-width: 641px) {
-  .mobile-selector {
-    display: none; /* 隐藏手机端选单 */
-  }
-  
   .mobile-buttons {
     display: none; /* 隐藏手机端按钮 */
   }
