@@ -38,9 +38,9 @@ fun Watermark(
     
     // 根据屏幕宽度确定水印数量和列数 (响应式)
     val (watermarkCount, colCount) = when {
-        configuration.screenWidthDp < 480 -> Pair(24, 6) // 小屏幕：24个水印，6列
-        configuration.screenWidthDp < 768 -> Pair(36, 9) // 中等屏幕：36个水印，9列
-        else -> Pair(48, 12) // 大屏幕：48个水印，12列
+        configuration.screenWidthDp < 480 -> Pair(48, 6) // 小屏幕：48个水印，6列
+        configuration.screenWidthDp < 768 -> Pair(72, 9) // 中等屏幕：72个水印，9列
+        else -> Pair(96, 12) // 大屏幕：96个水印，12列
     }
     
     // 根据屏幕宽度确定字体大小 (响应式)
@@ -68,8 +68,8 @@ fun Watermark(
             val colIndex = index % colCount
             
             // 计算每个水印的位置 (百分比)
-            val xPercent = colIndex * 25f + (0..3).random().toFloat() // 25% 间距 + 小范围随机偏移
-            val yPercent = rowIndex * 33f + (0..3).random().toFloat() // 33% 间距 + 小范围随机偏移
+            val xPercent = colIndex * 30f + (0..3).random().toFloat() // 30% 间距 + 小范围随机偏移
+            val yPercent = rowIndex * 15f + (0..3).random().toFloat() // 15% 间距 + 小范围随机偏移
             
             // 将百分比转换为Dp偏移
             val xOffsetDp = with(density) { ((xPercent / 100f) * configuration.screenWidthDp).dp }
