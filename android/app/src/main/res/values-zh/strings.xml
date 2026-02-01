@@ -9,7 +9,6 @@
     <string name="settings">设置</string>
     <string name="language_settings">语言设置</string>
     <string name="select_language">选择语言</string>
-    <string name="developer_tools">开发者工具</string>
     
     <!-- Common -->
     <string name="back">返回</string>
@@ -22,16 +21,6 @@
     <string name="error">错误</string>
     <string name="success">成功</string>
     
-    <!-- Developer Options -->
-    <string name="developer_options">开发者选项</string>
-    <string name="developer_mode">开发者模式</string>
-    <string name="developer_mode_description">启用后可访问数据库测试等开发功能</string>
-    
-    <!-- Database Test -->
-    <string name="database_test">数据库测试</string>
-    <string name="add_test_data">添加测试数据</string>
-    <string name="clear_data">清空数据</string>
-    <string name="database_statistics">数据库统计</string>
     <string name="record_count">记录数: %d</string>
     <string name="total_amount">总金额</string>
     <string name="expense_records">支出记录</string>

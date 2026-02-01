@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chronie.homemoney.demo.R
-import com.chronie.homemoney.demo.core.common.DeveloperMode
 import com.chronie.homemoney.demo.core.common.Language
 import com.chronie.homemoney.demo.core.common.LanguageManager
 import com.chronie.homemoney.demo.domain.usecase.ExportExpensesUseCase
@@ -18,15 +17,12 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val languageManager: LanguageManager,
-    private val developerMode: DeveloperMode,
     private val exportExpensesUseCase: ExportExpensesUseCase,
     private val importExpensesUseCase: ImportExpensesUseCase,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
     val currentLanguage: StateFlow<Language> = languageManager.currentLanguage
-    
-    val isDeveloperMode: Flow<Boolean> = developerMode.isDeveloperModeEnabled
     
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
@@ -39,12 +35,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setLanguage(language: Language) {
         languageManager.setLanguage(language)
-    }
-    
-    fun toggleDeveloperMode() {
-        viewModelScope.launch {
-            developerMode.toggleDeveloperMode()
-        }
     }
     
     fun clearMessage() {

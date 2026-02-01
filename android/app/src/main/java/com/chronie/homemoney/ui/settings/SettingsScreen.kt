@@ -24,8 +24,7 @@ import com.chronie.homemoney.demo.core.common.Language
 @Composable
 fun SettingsScreen(
     context: Context,
-    viewModel: SettingsViewModel = hiltViewModel(),
-    onNavigateToDatabaseTest: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val currentLanguage by viewModel.currentLanguage.collectAsState()
     val scrollState = androidx.compose.foundation.rememberScrollState()
@@ -147,86 +146,6 @@ fun SettingsScreen(
             DataImportExportSection(viewModel = viewModel, context = context)
             
             Spacer(modifier = Modifier.height(32.dp))
-            
-            // 开发者模式开关
-            val isDeveloperMode by viewModel.isDeveloperMode.collectAsState(initial = false)
-            
-            Divider()
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                text = context.getString(R.string.developer_options),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = context.getString(R.string.developer_mode),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = context.getString(R.string.developer_mode_description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = isDeveloperMode,
-                        onCheckedChange = { viewModel.toggleDeveloperMode() }
-                    )
-                }
-            }
-            
-            // 开发者工具（仅在开发者模式下显示）
-            if (isDeveloperMode) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = context.getString(R.string.developer_tools),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                
-                // 数据库测试按钮
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onNavigateToDatabaseTest),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = context.getString(R.string.database_test),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = ">",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                }
-            }
             
             Spacer(modifier = Modifier.height(32.dp))
             

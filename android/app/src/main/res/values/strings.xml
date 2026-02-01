@@ -9,7 +9,6 @@
     <string name="settings">Settings</string>
     <string name="language_settings">Language</string>
     <string name="select_language">Select Language</string>
-    <string name="developer_tools">Developer Tools</string>
     
     <!-- Common -->
     <string name="back">Back</string>
@@ -22,20 +21,11 @@
     <string name="error">Error</string>
     <string name="success">Success</string>
     
-    <!-- Developer Options -->
-    <string name="developer_options">Developer Options</string>
-    <string name="developer_mode">Developer Mode</string>
-    <string name="developer_mode_description">Enable database testing and development features</string>
-    
-    <!-- Database Test -->
-    <string name="database_test">Database Test</string>
-    <string name="add_test_data">Add Test Data</string>
-    <string name="clear_data">Clear Data</string>
-    <string name="database_statistics">Database Stats</string>
     <string name="record_count">Records: %d</string>
     <string name="total_amount">Total</string>
     <string name="expense_records">Expenses</string>
     <string name="no_data">No data</string>
+    
     <!-- Delete Confirmation Dialog -->
     <string name="delete_confirm_title">Delete Confirmation</string>
     <string name="delete_confirm_message">Are you sure you want to delete this expense record?</string>

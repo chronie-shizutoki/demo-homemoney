@@ -34,7 +34,6 @@ import kotlinx.coroutines.launch
 import com.chronie.homemoney.demo.ui.expense.AddExpenseScreen
 import com.chronie.homemoney.demo.ui.main.MainScreen
 import com.chronie.homemoney.demo.ui.settings.SettingsScreen
-import com.chronie.homemoney.demo.ui.test.DatabaseTestScreen
 import com.chronie.homemoney.demo.ui.theme.HomeMoneyTheme
 import com.chronie.homemoney.demo.ui.Watermark
 import dagger.hilt.android.AndroidEntryPoint
@@ -121,10 +120,7 @@ fun HomeMoneyApp(
         ) {
             composable("settings") {
                 SettingsScreen(
-                    context = context,
-                    onNavigateToDatabaseTest = {
-                        navController.navigate("database_test")
-                    }
+                    context = context
                 )
             }
             
@@ -135,9 +131,6 @@ fun HomeMoneyApp(
                     onRefreshHandled = { shouldRefreshExpenses = false },
                     onNavigateToSettings = {
                         navController.navigate("settings")
-                    },
-                    onNavigateToDatabaseTest = {
-                        navController.navigate("database_test")
                     },
                     onNavigateToAddExpense = {
                         navController.navigate("add_expense")
@@ -166,15 +159,6 @@ fun HomeMoneyApp(
                     expenseId = expenseId,
                     onNavigateBack = {
                         shouldRefreshExpenses = true
-                        navController.popBackStack()
-                    }
-                )
-            }
-
-            composable("database_test") {
-                DatabaseTestScreen(
-                    context = context,
-                    onNavigateBack = {
                         navController.popBackStack()
                     }
                 )

@@ -18,13 +18,11 @@ fun MainScreen(
     shouldRefreshExpenses: Boolean = false,
     onRefreshHandled: () -> Unit = {},
     onNavigateToSettings: () -> Unit,
-    onNavigateToDatabaseTest: () -> Unit = {},
     onNavigateToAddExpense: () -> Unit = {},
     onNavigateToEditExpense: (expenseId: String) -> Unit = {},
     onNavigateToMoreFunctions: () -> Unit = {},
     viewModel: MainViewModel = hiltViewModel()
 ) {
-    val isDeveloperMode by viewModel.isDeveloperMode.collectAsState(initial = false)
     var selectedTab by remember { mutableStateOf(0) }
     
     Scaffold(
@@ -58,8 +56,7 @@ fun MainScreen(
                     2 -> {
                         // 设置界面
                         SettingsScreen(
-                            context = context,
-                            onNavigateToDatabaseTest = onNavigateToDatabaseTest
+                            context = context
                         )
                     }
                 }
