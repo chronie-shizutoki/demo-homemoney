@@ -1,12 +1,10 @@
 import { createApp } from 'vue';
 
-import './styles/common.css'; // 导入公共样式文件
-import './styles/fonts.css'; // 导入自定义字体
+import './styles/common.css';
+import './styles/fonts.css';
 
 import router from './router';
 import i18n from './locales/i18n.js';
-import 'dayjs/locale/en'; // 正确命名导出i18n实例供其他模块使用
-// 使用locales目录下已配置的i18n实例（包含完整语言包）
 import { createPinia } from 'pinia';
 
 // 导入Font Awesome

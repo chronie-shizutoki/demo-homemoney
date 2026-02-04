@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import dayjs from 'dayjs';
+import DateUtils from '@/utils/dateUtils';
 import offlineSync from '@/utils/offlineDataSync';
 
 export const useSpendingStore = defineStore('spending', {
@@ -56,7 +56,7 @@ export const useSpendingStore = defineStore('spending', {
 
     // 当前月份字符串
     currentMonth: () => {
-      return dayjs().format('YYYY-MM');
+      return DateUtils.format(null, 'YYYY-MM');
     }
   },
 
@@ -101,7 +101,7 @@ export const useSpendingStore = defineStore('spending', {
           // 同时保持向后兼容性，先检查date字段，再检查time字段
           const expenseDate = expense.date || expense.time;
           if (!expenseDate) return false;
-          const expenseMonth = dayjs(expenseDate).format('YYYY-MM');
+          const expenseMonth = DateUtils.format(expenseDate, 'YYYY-MM');
           return expenseMonth === currentMonth;
         })
         .reduce((total, expense) => {

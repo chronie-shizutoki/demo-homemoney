@@ -11,7 +11,6 @@
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/vue-fontawesome": "^3.1.2",
-    "dayjs": "^1.11.13",
     "vue": "^3.5.17",
     "vue-router": "^5.0.2",
     "xlsx": "file:xlsx-latest.tgz"

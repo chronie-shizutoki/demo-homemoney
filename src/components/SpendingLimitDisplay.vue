@@ -114,7 +114,7 @@ import MessageTip from './MessageTip.vue';
 import SpendingLimitSetting from './SpendingLimitSetting.vue';
 import GlassAlert from './GlassAlert.vue';
 import CustomProgress from './CustomProgress.vue';
-import dayjs from 'dayjs';
+import DateUtils from '@/utils/dateUtils';
 
 const { t } = useI18n();
 const spendingStore = useSpendingStore();
@@ -127,7 +127,7 @@ const showSettings = ref(false);
 
 // 计算属性
 const currentMonthName = computed(() => {
-  return dayjs().format('YYYY-MM');
+  return DateUtils.format(null, 'YYYY-MM');
 });
 
 const percentageClass = computed(() => {
@@ -179,14 +179,14 @@ const statusAlert = computed(() => {
 
 // 计算日均消费
 const dailyAverage = computed(() => {
-  const currentDay = dayjs().date();
+  const currentDay = DateUtils.date(null);
   return currentDay > 0 ? spendingStore.currentMonthSpending / currentDay : 0;
 });
 
 // 计算建议日均消费
 const recommendedDaily = computed(() => {
-  const daysInMonth = dayjs().daysInMonth();
-  const currentDay = dayjs().date();
+  const daysInMonth = DateUtils.daysInMonth(null);
+  const currentDay = DateUtils.date(null);
   const remainingDays = daysInMonth - currentDay;
 
   if (remainingDays <= 0) return 0;
