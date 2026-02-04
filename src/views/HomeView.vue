@@ -17,10 +17,10 @@
               <template #icon><FontAwesomeIcon icon="plus" /></template>
               {{ t('expense.addRecord') }}
             </GlassButton>
-            <GlassButton type="primary" @click="goToHowToUse" :dark-theme="isDarkMode">
-              <template #icon><FontAwesomeIcon icon="question-circle" /></template>
-              {{ t('howToUse.title') }}
-            </GlassButton>
+            <GlassButton type="primary" @click="goToCharts" :dark-theme="isDarkMode">
+        <template #icon><FontAwesomeIcon icon="chart-pie" /></template>
+        {{ t('chart.title') }}
+      </GlassButton>
       </div>
       
       <!-- 手机端按钮显示 -->
@@ -31,24 +31,16 @@
             <template #icon><FontAwesomeIcon icon="plus" /></template>
             {{ t('expense.addRecord') }}
           </GlassButton>
-          <GlassButton type="primary" @click="goToHowToUse" :dark-theme="isDarkMode" class="mobile-btn">
-            <template #icon><FontAwesomeIcon icon="question-circle" /></template>
-            {{ t('howToUse.title') }}
-          </GlassButton>
+          <GlassButton type="primary" @click="goToCharts" :dark-theme="isDarkMode">
+        <template #icon><FontAwesomeIcon icon="chart-pie" /></template>
+        {{ t('chart.title') }}
+      </GlassButton>
         </div>
       </div>
     </div>
 
     <!-- 月度消费限制显示 -->
     <SpendingLimitDisplay :expenses="Expenses" :dark-theme="isDarkMode" />
-    
-    <!-- 图表分析按钮 -->
-    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-      <GlassButton type="primary" @click="goToCharts" :dark-theme="isDarkMode">
-        <template #icon><FontAwesomeIcon icon="chart-pie" /></template>
-        {{ t('chart.title') }}
-      </GlassButton>
-    </div>
     
     <ExpenseList 
       :refresh-trigger="refreshTrigger" 
@@ -818,11 +810,6 @@ const loadExpenses = async () => {
   } finally {
     isLoading.value = false;
   }
-};
-
-// 跳转到如何使用页面
-const goToHowToUse = () => {
-  window.open('/how-to-use/how-to-use.html', '_blank');
 };
 
 // Function to force the browser to re-fetch new frontend data
@@ -1619,11 +1606,6 @@ body.donation-modal-open {
 
 .custom-dialog.dark-theme .btn-primary:hover {
   background-color: #2c5282;
-}
-
-/* 功能组样式 */
-.function-section {
-  margin-bottom: 20px;
 }
 
 .card-grid {
