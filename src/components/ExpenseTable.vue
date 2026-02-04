@@ -41,7 +41,7 @@
               <td colspan="5">
                 <div class="date-header">
                   <div class="date-info">
-                    <span class="date-text">{{ date }}</span>
+                    <span class="date-text">{{ formatRelativeDate(date, $t) }}</span>
                     <span class="count-text">{{ $t('expense.stats.rowCount') }}: {{ expenses.length }}</span>
                   </div>
                   <div class="total-amount">-¥{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
@@ -50,7 +50,7 @@
             </tr>
             <!-- 该日期下的支出项 -->
             <tr v-for="(expense, index) in expenses" :key="expense.id" :data-index="index">
-              <td>{{ formatDate(expense.date) }}</td>
+              <td>{{ formatDateByLocale(expense.date, $i18n.locale) }}</td>
               <td>
                 <span class="type-tag" :style="{ '--tag-color': getTypeColor(expense.type) }">
                   {{ expense.type }}
@@ -81,7 +81,7 @@
           <!-- 日期标题卡片 -->
           <div class="date-header-card">
             <div class="date-info">
-              <span class="date-text">{{ date }}</span>
+              <span class="date-text">{{ formatRelativeDate(date, $t) }}</span>
               <span class="count-text">{{ $t('expense.stats.rowCount') }}: {{ expenses.length }}</span>
             </div>
             <div class="total-amount">-¥{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
@@ -100,7 +100,7 @@
             @mouseleave="endLongPress"
           >
             <div class="card-header">
-              <div class="date">{{ formatDate(expense.date) }}</div>
+              <div class="date">{{ formatDateByLocale(expense.date, $i18n.locale) }}</div>
               <div class="amount">¥{{ expense.amount.toFixed(2) }}</div>
             </div>
             <div class="card-body">
@@ -167,6 +167,8 @@
 
 <script>
 import { getTypeColor } from '../utils/expenseUtils';
+import { formatRelativeDate } from '../utils/date-utils';
+import { formatDateByLocale } from '../utils/dateFormatter';
 import { ref, computed, onMounted, onUnmounted, watch, toRefs } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
@@ -194,12 +196,6 @@ export default {
     // 使用 toRefs 保持 props 的响应性
     const { sortField, sortOrder, expenses } = toRefs(props);
     
-    const formatDate = (dateString) => {
-      // 直接返回YYYY-MM-DD格式的日期字符串，不再需要转换
-      return dateString || '';
-    };
-
-    // 计算每日总金额
     const calculateDailyTotal = (expenses) => {
       return expenses.reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
     };
@@ -334,7 +330,8 @@ export default {
 
     return {
       getTypeColor,
-      formatDate,
+      formatRelativeDate,
+      formatDateByLocale,
       calculateDailyTotal,
       handleEdit,
       handleDelete,

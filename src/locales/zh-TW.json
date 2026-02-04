@@ -1,5 +1,4 @@
 {
-  "app.welcome": "歡迎回來，尊貴的會員{username}！",
   "common.loadFailed": "資料載入失敗，請稍後重試",
   "common.edit": "編輯",
   "common.delete": "刪除",
@@ -33,6 +32,9 @@
   "common.friday": "週五",
   "common.saturday": "週六",
   "common.date": "日期",
+  "common.date_today": "今天",
+  "common.date_yesterday": "昨天",
+  "common.date_days_ago": "{days}天前",
   "expense.dailyExpense": "每日支出",
   "import.title": "導入資料",
   "import.success": "資料導入成功",

@@ -1,19 +1,20 @@
 <template>
-  <div class="charts-container">
-    <div class="chart-controls">
+  <div class="charts-container glass-card">
+    <div class="chart-controls glass-panel">
       <CustomSelect 
         v-model="activeChart" 
         :options="chartTypes"
         @change="renderChart"
         :include-empty-option="false"
+        class="glass-select"
       />
-      <div class="date-range-picker">
+      <div class="date-range-picker glass-input-group">
         <input
           type="date"
           v-model="startDate"
           @change="handleStartDateChange"
           :max="endDate"
-          class="date-input"
+          class="date-input glass-input"
         />
         <span class="range-separator">{{ t('common.to') }}</span>
         <input
@@ -21,11 +22,11 @@
           v-model="endDate"
           @change="handleEndDateChange"
           :min="startDate"
-          class="date-input"
+          class="date-input glass-input"
         />
       </div>
     </div>
-    <div class="chart-wrapper">
+    <div class="chart-wrapper glass-chart-container">
       <canvas id="expenseChart"></canvas>
     </div>
   </div>
@@ -34,8 +35,35 @@
 <script>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
-import dayjs from 'dayjs';
 import { useI18n } from 'vue-i18n';
+
+const isValidDate = (date) => {
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
+const formatDate = (date) => {
+  if (!isValidDate(date)) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const parseDate = (dateString) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  return isValidDate(date) ? date : null;
+};
+
+const getStartOfMonth = () => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+};
+
+const getEndOfMonth = () => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+};
 
 export default {
   name: 'ExpenseCharts',
@@ -47,8 +75,8 @@ export default {
   },
   setup(props) {
     const activeChart = ref('bar');
-    const startDate = ref(dayjs().startOf('month').format('YYYY-MM-DD'));
-    const endDate = ref(dayjs().endOf('month').format('YYYY-MM-DD'));
+    const startDate = ref(formatDate(getStartOfMonth()));
+    const endDate = ref(formatDate(getEndOfMonth()));
     const chartInstances = ref({});
 // 事件处理函数引用，用于组件卸载时移除监听器
 const windowResizeHandler = ref(null);
@@ -71,7 +99,6 @@ const debounce = (func, wait) => {
 };
     const chartTypes = [
       { value: 'bar', label: t('chart.bar') },
-      { value: 'pie', label: t('chart.pie') },
       { value: 'line', label: t('chart.line') },
       { value: 'doughnut', label: t('chart.doughnut') },
       { value: 'radar', label: t('chart.radar') }
@@ -111,10 +138,16 @@ const debounce = (func, wait) => {
         return;
       }
       
-      const startDateObj = dayjs(startDate.value);
-      const endDateObj = dayjs(endDate.value);
+      const startDateObj = parseDate(startDate.value);
+      const endDateObj = parseDate(endDate.value);
       
-      console.log('Date range filter:', startDateObj.format('YYYY-MM-DD'), 'to', endDateObj.format('YYYY-MM-DD'));
+      if (!startDateObj || !endDateObj) {
+        console.warn('Invalid date range parsing');
+        filteredExpenses.value = [];
+        return;
+      }
+      
+      console.log('Date range filter:', formatDate(startDateObj), 'to', formatDate(endDateObj));
 
       filteredExpenses.value = props.expenses.filter(expense => {
         // 确保expense.date有效
@@ -123,18 +156,18 @@ const debounce = (func, wait) => {
           return false;
         }
         
-        const expenseDate = dayjs(expense.date);
+        const expenseDate = parseDate(expense.date);
         // 检查日期解析是否成功
-        if (!expenseDate.isValid()) {
+        if (!expenseDate) {
           console.warn('Invalid expense date format:', expense.date);
           return false;
         }
         
         // 正确处理日期边界，包含开始和结束日期
-        const isAfterStart = expenseDate.isAfter(startDateObj.subtract(1, 'day'));
-        const isBeforeEnd = expenseDate.isBefore(endDateObj.add(1, 'day'));
+        const isAfterStart = expenseDate >= startDateObj;
+        const isBeforeEnd = expenseDate <= endDateObj;
         
-        console.log(`Expense date ${expenseDate.format('YYYY-MM-DD')}: isAfterStart=${isAfterStart}, isBeforeEnd=${isBeforeEnd}`);
+        console.log(`Expense date ${formatDate(expenseDate)}: isAfterStart=${isAfterStart}, isBeforeEnd=${isBeforeEnd}`);
         
         return isAfterStart && isBeforeEnd;
       });
@@ -148,12 +181,10 @@ const debounce = (func, wait) => {
       switch (type) {
         case 'bar':
           return prepareBarData();
-        case 'pie':
-          return preparePieData();
         case 'line':
           return prepareLineData();
         case 'doughnut':
-          return preparePieData(); // 环形图使用与饼图相同的数据
+          return preparePieData();
         case 'radar':
           return prepareRadarData();
         default:
@@ -181,15 +212,36 @@ const debounce = (func, wait) => {
           label: t('expense.amount'),
           data,
           backgroundColor: [
-            'rgba(255, 99, 132, 0.7)',
-            'rgba(54, 162, 235, 0.7)',
-            'rgba(255, 206, 86, 0.7)',
-            'rgba(75, 192, 192, 0.7)',
-            'rgba(153, 102, 255, 0.7)',
-            'rgba(255, 159, 64, 0.7)',
-            'rgba(199, 199, 199, 0.7)'
+            'rgba(255, 99, 132, 0.4)',
+            'rgba(54, 162, 235, 0.4)',
+            'rgba(255, 206, 86, 0.4)',
+            'rgba(75, 192, 192, 0.4)',
+            'rgba(153, 102, 255, 0.4)',
+            'rgba(255, 159, 64, 0.4)',
+            'rgba(199, 199, 199, 0.4)'
           ],
           borderColor: [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 159, 64, 0.8)',
+            'rgba(199, 199, 199, 0.8)'
+          ],
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+          hoverBackgroundColor: [
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(199, 199, 199, 0.6)'
+          ],
+          hoverBorderColor: [
             'rgba(255, 99, 132, 1)',
             'rgba(54, 162, 235, 1)',
             'rgba(255, 206, 86, 1)',
@@ -198,7 +250,7 @@ const debounce = (func, wait) => {
             'rgba(255, 159, 64, 1)',
             'rgba(199, 199, 199, 1)'
           ],
-          borderWidth: 1
+          hoverBorderWidth: 3
         }]
       };
     };
@@ -221,6 +273,25 @@ const debounce = (func, wait) => {
         datasets: [{
           data,
           backgroundColor: [
+            'rgba(255, 99, 132, 0.5)',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(255, 206, 86, 0.5)',
+            'rgba(75, 192, 192, 0.5)',
+            'rgba(153, 102, 255, 0.5)',
+            'rgba(255, 159, 64, 0.5)',
+            'rgba(199, 199, 199, 0.5)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 0.9)',
+            'rgba(54, 162, 235, 0.9)',
+            'rgba(255, 206, 86, 0.9)',
+            'rgba(75, 192, 192, 0.9)',
+            'rgba(153, 102, 255, 0.9)',
+            'rgba(255, 159, 64, 0.9)',
+            'rgba(199, 199, 199, 0.9)'
+          ],
+          borderWidth: 2,
+          hoverBackgroundColor: [
             'rgba(255, 99, 132, 0.7)',
             'rgba(54, 162, 235, 0.7)',
             'rgba(255, 206, 86, 0.7)',
@@ -229,7 +300,7 @@ const debounce = (func, wait) => {
             'rgba(255, 159, 64, 0.7)',
             'rgba(199, 199, 199, 0.7)'
           ],
-          borderColor: [
+          hoverBorderColor: [
             'rgba(255, 99, 132, 1)',
             'rgba(54, 162, 235, 1)',
             'rgba(255, 206, 86, 1)',
@@ -238,7 +309,8 @@ const debounce = (func, wait) => {
             'rgba(255, 159, 64, 1)',
             'rgba(199, 199, 199, 1)'
           ],
-          borderWidth: 1
+          hoverBorderWidth: 3,
+          hoverOffset: 10
         }]
       };
     };
@@ -250,25 +322,25 @@ const debounce = (func, wait) => {
         // 按时间排序
         const sortedExpenses = [...filteredExpenses.value].sort((a, b) => {
           // 使用date字段替代time字段，与后端数据保持一致
-          const dateA = dayjs(a.date || a.time);
-          const dateB = dayjs(b.date || b.time);
-          return dateA.diff(dateB);
+          const dateA = parseDate(a.date || a.time);
+          const dateB = parseDate(b.date || b.time);
+          return dateA - dateB;
         });
         
-        console.log('First expense time:', sortedExpenses.length > 0 ? dayjs(sortedExpenses[0].date || sortedExpenses[0].time).format('YYYY-MM-DD') : 'No data');
-        console.log('Last expense time:', sortedExpenses.length > 0 ? dayjs(sortedExpenses[sortedExpenses.length - 1].date || sortedExpenses[sortedExpenses.length - 1].time).format('YYYY-MM-DD') : 'No data');
+        console.log('First expense time:', sortedExpenses.length > 0 ? formatDate(parseDate(sortedExpenses[0].date || sortedExpenses[0].time)) : 'No data');
+        console.log('Last expense time:', sortedExpenses.length > 0 ? formatDate(parseDate(sortedExpenses[sortedExpenses.length - 1].date || sortedExpenses[sortedExpenses.length - 1].time)) : 'No data');
 
       // 按日期分组
       const dateData = {};
       sortedExpenses.forEach(expense => {
         // 再次验证日期有效性，使用date字段替代time字段
         const expenseDate = expense.date || expense.time;
-        if (!expenseDate || !dayjs(expenseDate).isValid()) {
+        if (!expenseDate || !parseDate(expenseDate)) {
           console.warn('Skipping expense with invalid date:', expense);
           return;
         }
         
-        const dateStr = dayjs(expenseDate).format('YYYY-MM-DD');
+        const dateStr = formatDate(parseDate(expenseDate));
         if (!dateData[dateStr]) {
           dateData[dateStr] = 0;
         }
@@ -291,14 +363,19 @@ const debounce = (func, wait) => {
         datasets: [{
           label: t('expense.dailyExpense'),
           data,
-          fill: false,
-          backgroundColor: 'rgba(54, 162, 235, 0.7)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 2,
-          tension: 0.3,
+          fill: true,
+          backgroundColor: 'rgba(54, 162, 235, 0.1)',
+          borderColor: 'rgba(54, 162, 235, 0.8)',
+          borderWidth: 3,
+          tension: 0.4,
           pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-          pointRadius: 4,
-          pointHoverRadius: 6
+          pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: 'rgba(54, 162, 235, 1)',
+          pointHoverBorderColor: 'rgba(255, 255, 255, 1)',
+          pointHoverBorderWidth: 3
         }]
       };
     };
@@ -323,17 +400,30 @@ const debounce = (func, wait) => {
         const values = Array(7).fill(0);
         filteredExpenses.value.forEach(expense => {
           if (expense.type === category) {
-            const weekday = dayjs(expense.date).day();
-            values[weekday] += parseFloat(expense.amount);
+            const expenseDate = parseDate(expense.date);
+            if (expenseDate) {
+              const weekday = expenseDate.getDay();
+              values[weekday] += parseFloat(expense.amount);
+            }
           }
         });
         return {
           label: category,
           data: values,
           backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`,
-          borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+          borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.8)`,
           pointBackgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
-          borderWidth: 1
+          pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          pointHoverBackgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+          pointHoverBorderColor: 'rgba(255, 255, 255, 1)',
+          pointHoverBorderWidth: 3,
+          borderWidth: 2,
+          hoverBackgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.4)`,
+          hoverBorderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+          hoverBorderWidth: 3
         };
       });
 
@@ -361,7 +451,12 @@ const debounce = (func, wait) => {
           const context = ctx.getContext('2d');
           if (context) {
             // 清除Canvas内容
-            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+            context.clearRect(0, 0, ctx.width, ctx.height);
+            // 重置Canvas的宽度和高度，强制清除所有状态
+            const width = ctx.width;
+            const height = ctx.height;
+            ctx.width = width;
+            ctx.height = height;
           }
         }
       } catch (error) {
@@ -371,19 +466,7 @@ const debounce = (func, wait) => {
 
       const chartData = prepareChartData(activeChart.value);
       
-      // 检查是否有数据点，如果没有则不渲染图表
-      if (!chartData.labels || chartData.labels.length === 0) {
-        console.log('No data to display for chart:', activeChart.value);
-        // 清空canvas
-        if (ctx && ctx.getContext) {
-          const context = ctx.getContext('2d');
-          if (context) {
-            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-          }
-        }
-        return;
-      }
-      
+      // 检查是否有数据点
       let options = {};
       
       // 通用配置，特别是针对移动设备的优化
@@ -403,7 +486,7 @@ const debounce = (func, wait) => {
         },
         // 优化性能的配置
         animation: {
-          duration: window.innerWidth < 480 ? 300 : 500, // 小屏幕设备上加快动画速度
+          duration: window.innerWidth < 480 ? 300 : 500,
           easing: 'easeOutQuart'
         },
         // 针对Canvas的事件处理优化
@@ -414,11 +497,41 @@ const debounce = (func, wait) => {
         // 优化渲染性能
         elements: {
           point: {
-            hoverRadius: window.innerWidth < 480 ? 6 : 8, // 小屏幕上使用较小的悬停半径
-            hitRadius: window.innerWidth < 480 ? 10 : 12, // 增加点击区域，提高移动端可点击性
-            radius: window.innerWidth < 480 ? 3 : 4 // 小屏幕上使用较小的点
+            hoverRadius: window.innerWidth < 480 ? 6 : 8,
+            hitRadius: window.innerWidth < 480 ? 10 : 12,
+            radius: window.innerWidth < 480 ? 3 : 4
           }
-        }
+        },
+        // 液态玻璃效果 - 通用配置
+        plugins: {
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            borderColor: 'rgba(255, 255, 255, 0.3)',
+            borderWidth: 1,
+            titleColor: '#333',
+            bodyColor: '#666',
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: true,
+            boxPadding: 4,
+            usePointStyle: true,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+          },
+          legend: {
+            labels: {
+              color: '#666',
+              font: {
+                family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              },
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 20
+            }
+          }
+        },
+        // 深色模式适配
+        isDarkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
       };
 
       // 根据图表类型设置不同的选项
@@ -427,13 +540,15 @@ const debounce = (func, wait) => {
           options = {
             ...commonOptions,
             plugins: {
+              ...commonOptions.plugins,
               legend: {
                 position: 'top',
                 labels: {
                   font: {
                     size: window.innerWidth < 480 ? 10 : 12
                   },
-                  padding: 10
+                  padding: 10,
+                  color: '#666'
                 }
               },
               title: {
@@ -441,6 +556,10 @@ const debounce = (func, wait) => {
                 text: t('chart.categoryAnalysis'),
                 font: {
                   size: window.innerWidth < 480 ? 14 : 16
+                },
+                color: '#333',
+                padding: {
+                  bottom: 20
                 }
               }
             },
@@ -452,12 +571,18 @@ const debounce = (func, wait) => {
                   text: t('expense.amount') + ' (' + t('common.currency') + ')',
                   font: {
                     size: window.innerWidth < 480 ? 10 : 12
-                  }
+                  },
+                  color: '#666'
                 },
                 ticks: {
                   font: {
                     size: window.innerWidth < 480 ? 9 : 11
-                  }
+                  },
+                  color: '#999'
+                },
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)',
+                  drawBorder: false
                 }
               },
               x: {
@@ -466,38 +591,20 @@ const debounce = (func, wait) => {
                   text: t('expense.type'),
                   font: {
                     size: window.innerWidth < 480 ? 10 : 12
-                  }
+                  },
+                  color: '#666'
                 },
                 ticks: {
                   font: {
                     size: window.innerWidth < 480 ? 9 : 11
                   },
+                  color: '#999',
                   maxRotation: 45,
                   minRotation: 45
-                }
-              }
-            }
-          };
-          break;
-        case 'pie':
-          options = {
-            ...commonOptions,
-            plugins: {
-              legend: {
-                position: window.innerWidth < 480 ? 'bottom' : 'right',
-                labels: {
-                  font: {
-                    size: window.innerWidth < 480 ? 10 : 12
-                  },
-                  padding: 10,
-                  boxWidth: window.innerWidth < 480 ? 10 : 12
-                }
-              },
-              title: {
-                display: true,
-                text: t('chart.categoryPercentage'),
-                font: {
-                  size: window.innerWidth < 480 ? 14 : 16
+                },
+                grid: {
+                  display: false,
+                  drawBorder: false
                 }
               }
             }
@@ -507,6 +614,7 @@ const debounce = (func, wait) => {
           options = {
             ...commonOptions,
             plugins: {
+              ...commonOptions.plugins,
               legend: {
                 position: window.innerWidth < 480 ? 'bottom' : 'right',
                 labels: {
@@ -514,7 +622,8 @@ const debounce = (func, wait) => {
                     size: window.innerWidth < 480 ? 10 : 12
                   },
                   padding: 10,
-                  boxWidth: window.innerWidth < 480 ? 10 : 12
+                  boxWidth: window.innerWidth < 480 ? 10 : 12,
+                  color: '#666'
                 }
               },
               title: {
@@ -522,97 +631,69 @@ const debounce = (func, wait) => {
                 text: t('chart.categoryPercentage'),
                 font: {
                   size: window.innerWidth < 480 ? 14 : 16
+                },
+                color: '#333',
+                padding: {
+                  bottom: 20
                 }
               }
             },
-            cutout: '50%' // 为环形图设置中心孔大小
+            cutout: '60%'
           };
           break;
         case 'line':
           options = {
             ...commonOptions,
-            // 折线图特定的触摸优化
             interaction: {
               ...commonOptions.interaction,
-              // 针对折线图的特殊处理
               intersect: false,
               mode: 'index',
-              // 针对小屏幕优化点击区域
               axis: 'x',
-              // 小屏幕上增加触摸敏感度
               touch: {
-                // 增加触摸事件的响应范围
                 radius: window.innerWidth < 480 ? 20 : 10,
-                // 启用触摸手势
                 enabled: true,
-                // 增加触摸滚动的敏感度
                 axis: 'x',
-                // 禁用触摸缩放以提高性能
                 zoom: false
               }
             },
-            // 优化动画性能
             animation: {
               ...commonOptions.animation,
-              // 小屏幕上禁用一些非必要的动画
               duration: window.innerWidth < 480 ? 200 : 500,
-              // 减少动画复杂度
               easing: window.innerWidth < 480 ? 'linear' : 'easeOutQuart'
             },
-            // 针对小屏幕优化性能
             elements: {
               point: {
-                // 确保point配置是完整的，避免未定义属性
                 radius: window.innerWidth < 480 ? 2 : 4,
-                // 小屏幕上增大点击区域
                 hitRadius: window.innerWidth < 480 ? 15 : 12,
-                // 确保pointHoverRadius已定义
                 hoverRadius: window.innerWidth < 480 ? 8 : 6,
-                // 禁用点悬停动画以提高性能
                 hoverAnimationDuration: window.innerWidth < 480 ? 0 : 200,
-                // 确保所有必要的point属性都有默认值
                 backgroundColor: 'rgba(54, 162, 235, 1)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+                borderWidth: 2
               },
               line: {
-                // 简化线段渲染
                 tension: window.innerWidth < 480 ? 0.1 : 0.4,
-                // 小屏幕上使用更粗的线条提高可读性
                 borderWidth: window.innerWidth < 480 ? 2 : 3
               }
             },
             plugins: {
+              ...commonOptions.plugins,
               legend: {
                 position: 'top',
                 labels: {
                   font: { size: window.innerWidth < 480 ? 10 : 12 },
-                  padding: 10
+                  padding: 10,
+                  color: '#666'
                 }
               },
               title: {
                 display: true,
                 text: t('chart.trendAnalysis'),
-                font: { size: window.innerWidth < 480 ? 14 : 16 }
-              },
-              tooltip: {
-                // 优化提示框性能
-                animationDuration: window.innerWidth < 480 ? 100 : 300,
-                // 确保提示框在移动设备上正确显示
-                caretSize: window.innerWidth < 480 ? 6 : 8,
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleFont: {
-                  size: window.innerWidth < 480 ? 12 : 14
-                },
-                bodyFont: {
-                  size: window.innerWidth < 480 ? 11 : 13
-                },
-                // 提示框最大宽度，避免在小屏幕上溢出
-                maxWidth: window.innerWidth < 480 ? 200 : 300,
-                // 禁用提示框点击事件，避免与图表点击事件冲突
-                enabled: true,
-                // 使用外部提示框以提高性能（可选）
-                usePointStyle: true
+                font: { size: window.innerWidth < 480 ? 14 : 16 },
+                color: '#333',
+                padding: {
+                  bottom: 20
+                }
               }
             },
             scales: {
@@ -621,33 +702,32 @@ const debounce = (func, wait) => {
                 title: {
                   display: true,
                   text: t('expense.amount') + ' (' + t('common.currency') + ')',
-                  font: { size: window.innerWidth < 480 ? 10 : 12 }
+                  font: { size: window.innerWidth < 480 ? 10 : 12 },
+                  color: '#666'
                 },
                 ticks: {
                   font: { size: window.innerWidth < 480 ? 9 : 11 },
-                  // 在小屏幕上显示更少的刻度线
-                  maxTicksLimit: window.innerWidth < 480 ? 4 : 6
+                  maxTicksLimit: window.innerWidth < 480 ? 4 : 6,
+                  color: '#999'
                 },
-                // 简化网格线以提高性能
                 grid: {
-                  color: 'rgba(0, 0, 0, 0.05)'
+                  color: 'rgba(0, 0, 0, 0.05)',
+                  drawBorder: false
                 }
               },
               x: {
-                type: 'category', // 明确指定为类别轴
+                type: 'category',
                 title: {
                   display: true,
                   text: t('common.date'),
-                  font: { size: window.innerWidth < 480 ? 10 : 12 }
+                  font: { size: window.innerWidth < 480 ? 10 : 12 },
+                  color: '#666'
                 },
                 ticks: {
-                  maxTicksLimit: window.innerWidth < 480 ? 5 : 10, // 在小屏幕上显示更少的标签
+                  maxTicksLimit: window.innerWidth < 480 ? 5 : 10,
                   callback: function(value, index, values) {
-                    // 在小屏幕上简化日期显示格式
                     if (window.innerWidth < 480) {
-                      // 确保value是字符串类型再调用substring
                       const valueStr = String(value);
-                      // 只显示月和日，去掉年份
                       return valueStr.length >= 5 ? valueStr.substring(5) : valueStr;
                     }
                     return value;
@@ -655,18 +735,17 @@ const debounce = (func, wait) => {
                   autoSkip: true,
                   maxRotation: 45,
                   minRotation: 45,
-                  font: { size: window.innerWidth < 480 ? 8 : 11 }
+                  font: { size: window.innerWidth < 480 ? 8 : 11 },
+                  color: '#999'
                 },
-                // 简化网格线以提高性能
                 grid: {
-                  color: 'rgba(0, 0, 0, 0.05)'
+                  color: 'rgba(0, 0, 0, 0.05)',
+                  drawBorder: false
                 }
               }
             },
-            // 禁用一些可能导致性能问题的交互功能
             responsive: true,
             maintainAspectRatio: false,
-            // 增加图表容器的padding以在小屏幕上有更好的触摸体验
             layout: {
               padding: window.innerWidth < 480 ? 15 : 25
             }
@@ -676,6 +755,7 @@ const debounce = (func, wait) => {
           options = {
             ...commonOptions,
             plugins: {
+              ...commonOptions.plugins,
               legend: {
                 position: window.innerWidth < 480 ? 'bottom' : 'top',
                 labels: {
@@ -683,7 +763,8 @@ const debounce = (func, wait) => {
                     size: window.innerWidth < 480 ? 10 : 12
                   },
                   padding: 8,
-                  boxWidth: window.innerWidth < 480 ? 10 : 12
+                  boxWidth: window.innerWidth < 480 ? 10 : 12,
+                  color: '#666'
                 }
               },
               title: {
@@ -691,25 +772,38 @@ const debounce = (func, wait) => {
                 text: t('chart.weekdayAnalysis'),
                 font: {
                   size: window.innerWidth < 480 ? 14 : 16
+                },
+                color: '#333',
+                padding: {
+                  bottom: 20
                 }
               }
             },
             scales: {
               r: {
                 angleLines: {
-                  display: true
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.05)'
                 },
-                suggestedMin: 0,
-                ticks: {
-                  font: {
-                    size: window.innerWidth < 480 ? 9 : 11
-                  }
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)',
+                  drawBorder: false
                 },
                 pointLabels: {
                   font: {
                     size: window.innerWidth < 480 ? 10 : 12
-                  }
-                }
+                  },
+                  color: '#666'
+                },
+                ticks: {
+                  font: {
+                    size: window.innerWidth < 480 ? 9 : 11
+                  },
+                  color: '#999',
+                  backdropColor: 'rgba(255, 255, 255, 0.8)',
+                  backdropPadding: 4
+                },
+                suggestedMin: 0
               }
             }
           };
@@ -734,6 +828,50 @@ const debounce = (func, wait) => {
         if (!chartData || !options) {
           console.error('Invalid chart data or options');
           return;
+        }
+        
+        // 检测深色模式
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // 根据深色模式调整颜色
+        if (isDarkMode) {
+          if (options.plugins && options.plugins.tooltip) {
+            options.plugins.tooltip.backgroundColor = 'rgba(30, 30, 30, 0.9)';
+            options.plugins.tooltip.titleColor = '#fff';
+            options.plugins.tooltip.bodyColor = '#ccc';
+            options.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.1)';
+          }
+          if (options.plugins && options.plugins.legend && options.plugins.legend.labels) {
+            options.plugins.legend.labels.color = '#ccc';
+          }
+          if (options.plugins && options.plugins.title) {
+            options.plugins.title.color = '#fff';
+          }
+          if (options.scales) {
+            if (options.scales.y) {
+              if (options.scales.y.title) options.scales.y.title.color = '#ccc';
+              if (options.scales.y.ticks) options.scales.y.ticks.color = '#999';
+            }
+            if (options.scales.x) {
+              if (options.scales.x.title) options.scales.x.title.color = '#ccc';
+              if (options.scales.x.ticks) options.scales.x.ticks.color = '#999';
+            }
+            if (options.scales.r) {
+              if (options.scales.r.ticks) {
+                options.scales.r.ticks.color = '#999';
+                options.scales.r.ticks.backdropColor = 'rgba(30, 30, 30, 0.8)';
+              }
+              if (options.scales.r.pointLabels) {
+                options.scales.r.pointLabels.color = '#ccc';
+              }
+              if (options.scales.r.grid) {
+                options.scales.r.grid.color = 'rgba(255, 255, 255, 0.05)';
+              }
+              if (options.scales.r.angleLines) {
+                options.scales.r.angleLines.color = 'rgba(255, 255, 255, 0.05)';
+              }
+            }
+          }
         }
         
         // 在小屏幕设备上，使用较小的图表配置以提高性能
@@ -923,140 +1061,259 @@ const debounce = (func, wait) => {
 
 <style scoped>
 .charts-container {
-  padding: 20px;
-  border-radius: 10px;
-  background: transparent;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   width: 100%;
   box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  position: relative;
+  overflow: hidden;
 }
 
-.chart-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-  
-  .date-range-picker {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .date-input {
-    padding: 8px 12px;
-    border: 1px solid #dcdfe6;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: #fff;
-    transition: border-color 0.3s;
-    min-width: 120px;
-  }
-  
-  .date-input:focus {
-    outline: none;
-    border-color: #409eff;
-  }
-  
-  .range-separator {
-    color: #909399;
-    font-size: 14px;
-  }
+.glass-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+  z-index: 10;
+}
 
-  .chart-wrapper {
-    height: 400px;
-    margin-bottom: 30px;
-    position: relative;
-    width: 100%;
-  }
+.glass-input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.glass-input {
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 150px;
+  color: #333;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(64, 158, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 4px 12px rgba(64, 158, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.glass-input:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.range-separator {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.glass-chart-container {
+  height: 400px;
+  margin-bottom: 30px;
+  position: relative;
+  width: 100%;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.glass-chart-container:hover {
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
 
 #expenseChart {
   max-width: 100% !important;
 }
 
+/* 确保下拉菜单显示在图表容器之上 */
+:deep(.glass-select) {
+  position: relative;
+  z-index: 100;
+}
+
+:deep(.glass-select .select-dropdown) {
+  z-index: 200 !important;
+}
+
 /* 平板设备响应式设计 */
-  @media (max-width: 768px) {
-    .charts-container {
-      padding: 15px;
-    }
-    
-    .chart-controls {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    .chart-wrapper {
-      height: 350px;
-    }
-    
-    .date-range-picker {
-      width: 100%;
-    }
-    
-    .date-input {
-      width: 100%;
-    }
+@media (max-width: 768px) {
+  .charts-container {
+    padding: 20px;
+    border-radius: 16px;
   }
+  
+  .glass-panel {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+  
+  .glass-chart-container {
+    height: 350px;
+    padding: 16px;
+  }
+  
+  .glass-input-group {
+    width: 100%;
+  }
+  
+  .glass-input {
+    width: 100%;
+  }
+}
 
 /* 手机设备响应式设计 */
 @media (max-width: 480px) {
   .charts-container {
-    padding: 10px;
+    padding: 16px;
+    border-radius: 14px;
   }
   
-  .chart-wrapper {
+  .glass-chart-container {
     height: 300px;
+    padding: 12px;
   }
   
-  .chart-controls {
-    margin-bottom: 15px;
+  .glass-panel {
+    margin-bottom: 16px;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .glass-input-group {
     gap: 10px;
   }
   
-  .date-range-picker {
-    width: 50%;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .date-input {
-    width: 70%;
+  .glass-input {
     min-width: auto;
-  }
-  
-  .range-separator {
-    display: none; /* 在垂直布局中隐藏分隔符 */
+    padding: 8px 12px;
+    font-size: 13px;
   }
 }
 
 /* 超小屏幕设备响应式设计 */
 @media (max-width: 360px) {
-  .chart-wrapper {
+  .glass-chart-container {
     height: 250px;
+    padding: 10px;
   }
   
-  .date-range-picker {
+  .glass-input-group {
     width: 50%;
     flex-direction: column;
     gap: 8px;
   }
   
-  .date-input {
+  .glass-input {
     width: 100%;
     min-width: auto;
-    font-size: 12px; /* 更小的字体以适应超小屏幕 */
-    padding: 6px 8px; /* 更小的内边距 */
+    font-size: 12px;
+    padding: 6px 10px;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .charts-container {
-    background: rgba(30, 30, 30, 0.7);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    color: #fff !important;
+    background: rgba(20, 20, 20, 0.6);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+  
+  .glass-panel {
+    background: rgba(30, 30, 30, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .glass-input {
+    background: rgba(40, 40, 40, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-input:focus {
+    border-color: rgba(64, 158, 255, 0.6);
+    background: rgba(50, 50, 50, 0.7);
+    box-shadow: 
+      0 4px 12px rgba(64, 158, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-input:hover {
+    background: rgba(45, 45, 45, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  .glass-chart-container {
+    background: rgba(30, 30, 30, 0.4);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-chart-container:hover {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .range-separator {
+    color: #aaa;
   }
 }
 </style>
