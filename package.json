@@ -1,7 +1,7 @@
 {
   "name": "client",
   "type": "module",
-  "version": "2025.8.30",
+  "version": "2026",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,7 +13,7 @@
     "@fortawesome/vue-fontawesome": "^3.1.2",
     "dayjs": "^1.11.13",
     "vue": "^3.5.17",
-    "vue-router": "^4.2.5",
+    "vue-router": "^5.0.2",
     "xlsx": "file:xlsx-latest.tgz"
   },
   "devDependencies": {
@@ -21,8 +21,8 @@
     "@vitejs/plugin-vue": "^6.0.0",
     "chart.js": "^4.5.0",
     "pinia": "^3.0.3",
-    "unplugin-auto-import": "^19.3.0",
-    "unplugin-vue-components": "^28.8.0",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-vue-components": "^31.0.0",
     "vite": "^7.1.11",
     "vite-plugin-pwa": "^1.0.1",
     "vue-i18n": "^11.1.10"
