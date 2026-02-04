@@ -53,26 +53,12 @@
   "app": {
     "title": "Home Finance Tracker",
     "locale": "English",
-    "addRecord": "Add Expense",
-    "statistics": "Spending Insights",
     "export": "Export Data",
     "recordList": "All Records",
-    "record": "Expense Records",
-    "consumptionTrend": "Spending Trends",
-    "notFound": "Page Not Found",
     "pageNotFound": "The page you're looking for doesn't exist",
     "backToHome": "Back to Home"
   },
   "home": {
-    "closeButton": "× Close",
-    "expenseAnalysisReportTitle": "Spending Report",
-    "goToAddExpenseRecord": "Add New Expense",
-    "viewExpenseAnalysisReport": "View Report",
-    "prevMonth": "Previous Month",
-    "nextMonth": "Next Month",
-    "dailyTrend": "Daily Spending",
-    "dailyDescending": "Highest Spending Days",
-    "noData": "No expenses recorded",
     "noDataForExport": "No data available for export",
     "exportMonthData": "Export Current Month Data"
   },
@@ -118,7 +104,6 @@
   "expense": {
     "search": {
       "month": "Month",
-      "monthPlaceholder": "Select month",
       "allMonth": "All",
       "type": "Category",
       "allType": "All",
@@ -127,16 +112,12 @@
       "minAmountPlaceholder": "Min",
       "maxAmountPlaceholder": "Max",
       "keyword": "Search",
-      "keywordPlaceholder": "Search in notes...",
-      "button": "Apply"
+      "keywordPlaceholder": "Search in notes..."
     },
     "type": "Category",
-    "pasteSuccess": "Data imported successfully",
     "amount": "Amount",
     "date": "Date",
     "remark": "Notes",
-    "note": "Notes",
-    "addFailed": "Failed to add expense: {error}",
     "addSuccess": "Successfully added {count} expenses",
     "columns": {
       "type": "Category",
@@ -148,29 +129,11 @@
       "warning": "Large expense detected. Please confirm this is correct.",
       "confirm": "I Understand"
     },
-    "emptyText": "No expenses yet. Add your first expense to get started!",
-    "common": {
-      "requestCanceled": "Request cancelled",
-      "networkError": "Network error. Please check your connection",
-      "requestTimeout": "Request timeout. Please try again"
-    }
-  },
-  "pagination": {
-    "firstPage": "First",
-    "prevPage": "Previous",
-    "pageInfo": "Page {current} of {total}",
-    "nextPage": "Next",
-    "lastPage": "Last",
-    "perPage": "per page"
+    "common": {}
   },
   "common": {
-    "index": "#",
     "action": "Actions",
-    "cancel": "Cancel",
-    "submit": "Submit",
-    "requestCanceled": "Request cancelled",
-    "networkError": "Network error. Please try again",
-    "requestTimeout": "Request timeout"
+    "cancel": "Cancel"
   },
   "common.total": "Total",
   "common.perPage": "per page",
@@ -178,36 +141,8 @@
   "common.next": "Next",
   "function.support": "About Us",
   "howToUse.title": "How to Use",
-  "donation": {
-    "title": "Support Us",
-    "description": "Thank you for using Home Finance Tracker! Your support helps us improve and maintain this app.",
-    "username": "Your Name",
-    "amount": "Amount",
-    "enterUsername": "Enter your name",
-    "enterCustomAmount": "Or enter custom amount",
-    "submitDonation": "Donate",
-    "usernameRequired": "Please enter your name",
-    "amountRequired": "Please enter amount",
-    "amountMustBeNumber": "Amount must be a number",
-    "amountMustBePositive": "Amount must be positive",
-    "amountMustBeAtLeast": "Amount must be at least 0.01",
-    "amountMaxTwoDecimals": "Amount can have up to 2 decimal places",
-    "feeNoticeTitle": "Payment Fee Notice",
-    "feeNoticeContent": "Payment processor may charge up to 15% fee. Amount shown is before fees.",
-    "successTitle": "Thank You!",
-    "failureTitle": "Donation Failed",
-    "successMessage": "Thank you for your ${amount} donation! Your support helps us improve the app.",
-    "donationSuccess": "Donation successful",
-    "donationFailure": "Donation failed. Please try again later.",
-    "transactionId": "Transaction ID"
-  },
   "spending": {
-    "title": "Monthly Budget",
     "monthlyProgress": "Monthly Spending Progress",
-    "currentMonth": "Current Month",
-    "currentSpending": "Current Spending",
-    "monthlyLimit": "Monthly Budget",
-    "remaining": "Remaining",
     "exceeded": "Over Budget",
     "dailyAverage": "Daily Average",
     "recommendedDaily": "Recommended Daily",
@@ -220,31 +155,18 @@
       "enterLimit": "Enter monthly budget",
       "warningThreshold": "Warning Threshold",
       "enterThreshold": "Enter warning threshold",
-      "thresholdDescription": "Get notified when you reach this percentage of your budget",
-      "quickSet": "Quick Set",
-      "preview": "Current Status",
       "disabledNotice": "Enable budget to track your monthly spending",
-      "pleaseSetLimit": "Please set your monthly budget",
-      "limitUpdated": "Monthly budget updated to ¥{amount}"
-    },
-    "status": {
-      "disabled": "Budget disabled",
-      "normal": "On track",
-      "nearLimit": "Approaching budget",
-      "overLimit": "Over budget"
+      "pleaseSetLimit": "Please set your monthly budget"
     },
     "alert": {
       "normal": {
-        "title": "On Track",
-        "description": "Remaining: ¥{remaining} ({percentage}% used)"
+        "title": "On Track"
       },
       "nearLimit": {
-        "title": "Approaching Budget",
-        "description": "Remaining: ¥{remaining} ({percentage}% used). Consider slowing down."
+        "title": "Approaching Budget"
       },
       "overLimit": {
-        "title": "Over Budget",
-        "description": "Over budget by ¥{amount}. Please review your spending."
+        "title": "Over Budget"
       }
     },
     "enablePrompt": {
@@ -256,33 +178,6 @@
   },
   "function": {
     "primary": "Main Features",
-    "aiFeatures": "AI Features",
-    "other": "Other",
     "aboutus": "About Us"
-  },
-  "membership": {
-    "title": "Membership",
-    "userInfo": "Account Info",
-    "username": "Username",
-    "currentPlan": "Current Plan",
-    "expiresOn": "Expires On",
-    "noActiveSubscription": "No Active Subscription",
-    "cancelSubscription": "Cancel Subscription",
-    "selectPlan": "Choose a Plan",
-    "subscribe": "Subscribe",
-    "feature1": "Complete data storage and search",
-    "feature2": "Advanced analytics and statistics",
-    "feature3": "Multiple export formats and backup",
-    "feature4": "Priority support",
-    "subscriptionHistory": "Subscription History",
-    "plan": "Plan",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "status": "Status",
-    "statusActive": "Active",
-    "statusExpired": "Expired",
-    "statusCanceled": "Canceled",
-    "loginOrRegister": "Login / Register",
-    "logout": "Logout"
   }
 }

@@ -56,26 +56,12 @@
   "app": {
     "title": "家庭记账本",
     "locale": "中文简体",
-    "addRecord": "记一笔",
-    "statistics": "统计报表",
     "export": "导出数据",
     "recordList": "所有记录",
-    "record": "支出记录",
-    "consumptionTrend": "消费趋势",
-    "notFound": "页面不存在",
     "pageNotFound": "您访问的页面不存在",
     "backToHome": "返回首页"
   },
   "home": {
-    "closeButton": "× 关闭",
-    "expenseAnalysisReportTitle": "支出分析报告",
-    "goToAddExpenseRecord": "记一笔",
-    "viewExpenseAnalysisReport": "查看报表",
-    "prevMonth": "上月",
-    "nextMonth": "下月",
-    "dailyTrend": "每日支出",
-    "dailyDescending": "高消费日期",
-    "noData": "暂无支出记录",
     "noDataForExport": "暂无数据可导出",
     "exportMonthData": "导出本月数据"
   },
@@ -114,7 +100,6 @@
   "expense": {
     "search": {
       "month": "月份",
-      "monthPlaceholder": "选择月份",
       "allMonth": "全部月份",
       "type": "分类",
       "allType": "全部分类",
@@ -123,21 +108,14 @@
       "minAmountPlaceholder": "最小值",
       "maxAmountPlaceholder": "最大值",
       "keyword": "搜索",
-      "keywordPlaceholder": "搜索备注...",
-      "button": "搜索"
+      "keywordPlaceholder": "搜索备注..."
     },
     "type": "分类",
     "amount": "金额",
     "date": "日期",
     "remark": "备注",
-    "note": "备注",
-    "addFailed": "添加失败：{error}",
     "addSuccess": "成功添加{count}条记录",
-    "inputValidContent": "请输入有效的消费记录",
     "addRecord": "添加记录",
-    "addNewEntry": "添加新记录",
-    "totalRecords": "总记录数",
-    "totalAmount": "总金额",
     "addDialogTitle": "添加支出",
     "exportFilename": "消费记录_{date}",
     "columns": {
@@ -146,68 +124,22 @@
       "date": "日期",
       "remark": "备注"
     },
-    "emptyText": "暂无支出记录",
-    "common": {
-      "requestCanceled": "请求已取消",
-      "networkError": "网络错误，请检查网络连接",
-      "requestTimeout": "请求超时，请重试"
-    },
+    "common": {},
     "largeExpense": {
       "warning": "检测到大额支出，请确认是否准确",
       "confirm": "确认"
     }
   },
-  "pagination": {
-    "firstPage": "首页",
-    "prevPage": "上一页",
-    "pageInfo": "第 {current} 页，共 {total} 页",
-    "nextPage": "下一页",
-    "lastPage": "末页",
-    "perPage": "条/页"
-  },
   "common": {
-    "index": "序号",
     "action": "操作",
-    "cancel": "取消",
-    "submit": "提交",
-    "requestCanceled": "请求已取消",
-    "networkError": "网络错误，请稍后重试",
-    "requestTimeout": "请求超时"
+    "cancel": "取消"
   },
   "common.total": "总计",
   "common.perPage": "条/页",
   "common.prev": "上一页",
   "common.next": "下一页",
-  "donation": {
-    "title": "支持我们",
-    "description": "感谢使用家庭记账本！您的支持帮助我们持续改进和维护这个应用。",
-    "username": "您的姓名",
-    "amount": "金额",
-    "enterUsername": "请输入您的姓名",
-    "enterCustomAmount": "或输入自定义金额",
-    "submitDonation": "捐赠",
-    "usernameRequired": "请输入您的姓名",
-    "amountRequired": "请输入金额",
-    "amountMustBeNumber": "金额必须为数字",
-    "amountMustBePositive": "金额必须大于0",
-    "amountMustBeAtLeast": "金额不能小于0.01",
-    "amountMaxTwoDecimals": "金额最多保留两位小数",
-    "feeNoticeTitle": "支付手续费说明",
-    "feeNoticeContent": "支付渠道可能收取最高15%的手续费，此处显示金额为税前金额",
-    "successTitle": "感谢支持！",
-    "failureTitle": "捐赠失败",
-    "successMessage": "感谢您的{amount}元捐赠！您的支持帮助我们改进应用",
-    "donationSuccess": "捐赠成功",
-    "donationFailure": "捐赠失败，请稍后重试",
-    "transactionId": "交易ID"
-  },
   "spending": {
-    "title": "月度预算",
     "monthlyProgress": "月度支出进度",
-    "currentMonth": "本月",
-    "currentSpending": "当前支出",
-    "monthlyLimit": "月度预算",
-    "remaining": "剩余预算",
     "exceeded": "超出预算",
     "dailyAverage": "日均支出",
     "recommendedDaily": "建议日均",
@@ -220,31 +152,18 @@
       "enterLimit": "输入月度预算",
       "warningThreshold": "预警阈值",
       "enterThreshold": "输入预警阈值",
-      "thresholdDescription": "达到预算指定百分比时发出提醒",
-      "quickSet": "快速设置",
-      "preview": "当前状态",
       "disabledNotice": "启用预算功能来追踪月度支出",
-      "pleaseSetLimit": "请设置您的月度预算",
-      "limitUpdated": "月度预算已更新为¥{amount}"
-    },
-    "status": {
-      "disabled": "预算未启用",
-      "normal": "预算正常",
-      "nearLimit": "接近预算",
-      "overLimit": "超出预算"
+      "pleaseSetLimit": "请设置您的月度预算"
     },
     "alert": {
       "normal": {
-        "title": "预算正常",
-        "description": "剩余预算：¥{remaining}（已使用{percentage}%）"
+        "title": "预算正常"
       },
       "nearLimit": {
-        "title": "接近预算",
-        "description": "剩余预算：¥{remaining}（已使用{percentage}%）。请注意控制支出"
+        "title": "接近预算"
       },
       "overLimit": {
-        "title": "超出预算",
-        "description": "已超出预算¥{amount}，请检查您的支出"
+        "title": "超出预算"
       }
     },
     "enablePrompt": {
@@ -256,33 +175,6 @@
   },
   "function": {
     "primary": "主要功能",
-    "aiFeatures": "AI功能",
-    "other": "其他",
     "aboutus": "关于我们"
-  },
-  "membership": {
-    "title": "会员订阅",
-    "userInfo": "账户信息",
-    "username": "用户名",
-    "currentPlan": "当前套餐",
-    "expiresOn": "到期时间",
-    "noActiveSubscription": "暂无有效订阅",
-    "cancelSubscription": "取消订阅",
-    "selectPlan": "选择套餐",
-    "subscribe": "立即订阅",
-    "feature1": "无限制数据记录和查询",
-    "feature2": "高级数据分析和统计",
-    "feature3": "多格式数据导出和备份",
-    "feature4": "优先技术支持",
-    "subscriptionHistory": "订阅历史",
-    "plan": "套餐",
-    "startDate": "开始日期",
-    "endDate": "结束日期",
-    "status": "状态",
-    "statusActive": "有效",
-    "statusExpired": "已过期",
-    "statusCanceled": "已取消",
-    "loginOrRegister": "登录/注册",
-    "logout": "退出登录"
   }
 }
