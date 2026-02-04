@@ -39,17 +39,8 @@ export default defineConfig({
   base: '/', // 确保构建资源路径为根目录
   assetsDir: 'assets', // 静态资源存放目录（与服务器public目录结构一致）
   server: {
-
-    host: '0.0.0.0', // 监听所有网络接口，支持局域网访问
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://192.168.0.197:3010', // 替换为后端实际局域网IP
-        secure: false,
-        changeOrigin: true
-      }
-    },
-    historyApiFallback: true
+    host: '0.0.0.0',
+    port: 5173
   },
   plugins: [
     replace({
