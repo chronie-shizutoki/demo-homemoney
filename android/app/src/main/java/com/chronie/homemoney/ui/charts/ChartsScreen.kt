@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.material3.DatePicker
@@ -545,6 +546,7 @@ private fun CategoryItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimeRangeDialog(
     context: Context,
@@ -552,58 +554,65 @@ private fun TimeRangeDialog(
     onDismiss: () -> Unit,
     onTimeRangeSelected: (TimeRange) -> Unit
 ) {
+    var expanded by remember { mutableStateOf(false) }
+    val timeRanges = listOf(
+        TimeRange.THIS_WEEK,
+        TimeRange.THIS_MONTH,
+        TimeRange.LAST_MONTH,
+        TimeRange.THIS_QUARTER,
+        TimeRange.THIS_YEAR,
+        TimeRange.CUSTOM
+    )
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(context.getString(R.string.select_time_range)) },
         text = {
-                Column {
-                    listOf(
-                        TimeRange.THIS_WEEK,
-                        TimeRange.THIS_MONTH,
-                        TimeRange.LAST_MONTH,
-                        TimeRange.THIS_QUARTER,
-                        TimeRange.THIS_YEAR,
-                        TimeRange.CUSTOM
-                    ).forEach { timeRange ->
-                        TimeRangeOption(
-                            context = context,
-                            timeRange = timeRange,
-                            isSelected = selectedTimeRange == timeRange,
-                            onClick = { onTimeRangeSelected(timeRange) }
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = it }
+            ) {
+                OutlinedTextField(
+                    value = getTimeRangeText(context, selectedTimeRange),
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    timeRanges.forEach { timeRange ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(getTimeRangeText(context, timeRange))
+                            },
+                            onClick = {
+                                onTimeRangeSelected(timeRange)
+                                expanded = false
+                            },
+                            leadingIcon = {
+                                if (selectedTimeRange == timeRange) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
                         )
                     }
                 }
-            },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(context.getString(R.string.close))
             }
-        }
+        },
+        confirmButton = {}
     )
 }
 
 @Composable
-private fun TimeRangeOption(
-    context: Context,
-    timeRange: TimeRange,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(selected = isSelected, onClick = onClick)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = getTimeRangeText(context, timeRange),
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
 private fun getTimeRangeText(context: Context, timeRange: TimeRange): String {
     return when (timeRange) {
         TimeRange.THIS_WEEK -> context.getString(R.string.this_week)

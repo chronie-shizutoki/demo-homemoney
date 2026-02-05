@@ -6,7 +6,12 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -328,6 +333,7 @@ private fun WeekdayDataItem(
 /**
  * 星期详细信息弹窗
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WeekdayDetailDialog(
     context: Context,
@@ -335,30 +341,51 @@ private fun WeekdayDetailDialog(
     currencyFormat: NumberFormat,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
-            Column {
-                Text(
-                    text = getWeekdayName(context, weekdayData.dayOfWeek),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = context.getString(R.string.expense_details),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = getWeekdayName(context, weekdayData.dayOfWeek),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = context.getString(R.string.expense_details),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null
+                    )
+                }
             }
-        },
-        text = {
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                // 总金额和占比
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -420,7 +447,6 @@ private fun WeekdayDetailDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // 类型占比
                 if (weekdayData.categoryBreakdown.isNotEmpty()) {
                     Text(
                         text = context.getString(R.string.category_breakdown),
@@ -442,14 +468,11 @@ private fun WeekdayDetailDialog(
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(context.getString(R.string.close))
+                
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
-    )
+    }
 }
 
 /**
