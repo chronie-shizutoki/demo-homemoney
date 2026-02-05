@@ -44,7 +44,7 @@
                     <span class="date-text">{{ formatRelativeDate(date, $t) }}</span>
                     <span class="count-text">{{ $t('expense.stats.rowCount') }}: {{ expenses.length }}</span>
                   </div>
-                  <div class="total-amount">-¥{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
+                  <div class="total-amount">-{{ $t('common.currency') }}{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
                 </div>
               </td>
             </tr>
@@ -56,7 +56,7 @@
                   {{ expense.type }}
                 </span>
               </td>
-              <td class="amount-cell">¥{{ expense.amount.toFixed(2) }}</td>
+              <td class="amount-cell">{{ $t('common.currency') }}{{ expense.amount.toFixed(2) }}</td>
               <td class="remark-cell">{{ expense.remark || '-' }}</td>
               <td>
                 <div class="action-buttons">
@@ -84,7 +84,7 @@
               <span class="date-text">{{ formatRelativeDate(date, $t) }}</span>
               <span class="count-text">{{ $t('expense.stats.rowCount') }}: {{ expenses.length }}</span>
             </div>
-            <div class="total-amount">-¥{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
+            <div class="total-amount">-{{ $t('common.currency') }}{{ calculateDailyTotal(expenses).toFixed(2) }}</div>
           </div>
           <!-- 该日期下的支出卡片 -->
           <div 
@@ -101,7 +101,7 @@
           >
             <div class="card-header">
               <div class="date">{{ formatDateByLocale(expense.date, $i18n.locale) }}</div>
-              <div class="amount">¥{{ expense.amount.toFixed(2) }}</div>
+              <div class="amount">{{ $t('common.currency') }}{{ expense.amount.toFixed(2) }}</div>
             </div>
             <div class="card-body">
               <div class="type-section">

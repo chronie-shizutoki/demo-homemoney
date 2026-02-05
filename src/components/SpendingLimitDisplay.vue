@@ -24,11 +24,11 @@
     <div class="progress-section">
       <div class="progress-info">
         <span class="current-spending">
-          ¥{{ formatAmount(spendingStore.currentMonthSpending) }}
+          {{ $t('common.currency') }}{{ formatAmount(spendingStore.currentMonthSpending) }}
         </span>
         <span class="progress-separator">/</span>
         <span class="limit-amount">
-          ¥{{ formatAmount(spendingStore.monthlyLimit) }}
+          {{ $t('common.currency') }}{{ formatAmount(spendingStore.monthlyLimit) }}
         </span>
         <span class="percentage" :class="percentageClass">
           ({{ Math.round(spendingStore.spendingPercentage) }}%)
@@ -61,19 +61,19 @@
       <div class="detail-item" v-if="spendingStore.isOverLimit">
         <span class="detail-label">{{ $t('spending.exceeded') }}:</span>
         <span class="detail-value exceeded-amount">
-          ¥{{ formatAmount(spendingStore.currentMonthSpending - spendingStore.monthlyLimit) }}
+          {{ $t('common.currency') }}{{ formatAmount(spendingStore.currentMonthSpending - spendingStore.monthlyLimit) }}
         </span>
       </div>
       <div class="detail-item">
         <span class="detail-label">{{ $t('spending.dailyAverage') }}:</span>
         <span class="detail-value">
-          ¥{{ formatAmount(dailyAverage) }}
+          {{ $t('common.currency') }}{{ formatAmount(dailyAverage) }}
         </span>
       </div>
       <div class="detail-item">
         <span class="detail-label">{{ $t('spending.recommendedDaily') }}:</span>
         <span class="detail-value" :class="recommendedDailyClass">
-          ¥{{ formatAmount(recommendedDaily) }}
+          {{ $t('common.currency') }}{{ formatAmount(recommendedDaily) }}
         </span>
       </div>
     </div>

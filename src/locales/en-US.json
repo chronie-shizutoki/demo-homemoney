@@ -23,7 +23,7 @@
   "chart.weekdayAnalysis": "Spending by Day of Week",
   "chart.mockData": "Sample Data",
   "common.to": "to",
-  "common.currency": "USD",
+  "common.currency": "$",
   "common.sunday": "Sunday",
   "common.monday": "Monday",
   "common.tuesday": "Tuesday",
@@ -159,13 +159,16 @@
     },
     "alert": {
       "normal": {
-        "title": "On Track"
+        "title": "On Track",
+        "description": "{remaining} remaining ({percentage}%)"
       },
       "nearLimit": {
-        "title": "Approaching Budget"
+        "title": "Approaching Budget",
+        "description": "{remaining} left ({percentage}%), watch spending"
       },
       "overLimit": {
-        "title": "Over Budget"
+        "title": "Over Budget",
+        "description": "Over by {amount}, adjust spending"
       }
     },
     "enablePrompt": {

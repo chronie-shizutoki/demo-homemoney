@@ -26,7 +26,7 @@ export function useExcelExport () {
     const data = expenses.map(expense => [
       expense.date || expense.time,
       expense.type,
-      `¥${expense.amount}`,
+      `${i18n.global.t('common.currency')}${expense.amount}`,
       expense.remark || '-'
     ]);
     return XLSX.utils.aoa_to_sheet([header, ...data]);

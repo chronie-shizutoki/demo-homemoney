@@ -23,7 +23,7 @@
   "chart.weekdayAnalysis": "每周支出分析",
   "chart.mockData": "示例数据",
   "common.to": "至",
-  "common.currency": "元",
+  "common.currency": "￥",
   "common.sunday": "周日",
   "common.monday": "周一",
   "common.tuesday": "周二",
@@ -156,13 +156,16 @@
     },
     "alert": {
       "normal": {
-        "title": "预算正常"
+        "title": "预算正常",
+        "description": "剩余 {remaining}，还有 {percentage}% 可用"
       },
       "nearLimit": {
-        "title": "接近预算"
+        "title": "接近预算",
+        "description": "剩余 {remaining}（{percentage}%），请注意控制支出"
       },
       "overLimit": {
-        "title": "超出预算"
+        "title": "超出预算",
+        "description": "已超支 {amount}，请合理规划支出"
       }
     },
     "enablePrompt": {
