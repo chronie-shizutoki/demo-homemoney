@@ -18,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.domain.model.BudgetStatus
 import java.util.Locale
+import java.text.NumberFormat
 
 /**
  * 预算管理卡片
@@ -147,6 +148,7 @@ fun BudgetUsageCard(
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     
     val status = when {
         usage.isOverLimit -> BudgetStatus.OVER_LIMIT
@@ -191,7 +193,7 @@ fun BudgetUsageCard(
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            text = "¥${String.format(Locale.getDefault(), "%.0f", usage.currentSpending)}/¥${String.format(Locale.getDefault(), "%.0f", usage.monthlyLimit)}",
+                            text = "${currencyFormat.format(usage.currentSpending)}/${currencyFormat.format(usage.monthlyLimit)}",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = progressColor
@@ -247,13 +249,13 @@ fun BudgetUsageCard(
                         verticalAlignment = Alignment.Bottom
                     ) {
                         Text(
-                            text = String.format(Locale.getDefault(), "¥%.2f", usage.currentSpending),
+                            text = currencyFormat.format(usage.currentSpending),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = progressColor
                         )
                         Text(
-                            text = "/ ¥${String.format(Locale.getDefault(), "%.2f", usage.monthlyLimit)}",
+                            text = "/ ${currencyFormat.format(usage.monthlyLimit)}",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
@@ -325,13 +327,13 @@ fun BudgetUsageCard(
                         DetailItem(
                             context = context,
                             label = context.getString(R.string.budget_daily_average),
-                            value = String.format(Locale.getDefault(), "¥%.2f", usage.dailyAverage)
+                            value = currencyFormat.format(usage.dailyAverage)
                         )
                         
                         DetailItem(
                             context = context,
                             label = context.getString(R.string.budget_recommended_daily),
-                            value = String.format(Locale.getDefault(), "¥%.2f", usage.recommendedDaily),
+                            value = currencyFormat.format(usage.recommendedDaily),
                             valueColor = if (usage.recommendedDaily <= 0) {
                                 MaterialTheme.colorScheme.error
                             } else if (usage.recommendedDaily < usage.dailyAverage * 0.8) {

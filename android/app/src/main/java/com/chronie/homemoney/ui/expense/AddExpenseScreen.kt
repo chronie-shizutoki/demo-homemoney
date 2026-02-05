@@ -24,6 +24,8 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import java.text.NumberFormat
 
 /**
  * 添加支出界面
@@ -243,6 +245,9 @@ fun ExpenseAmountField(
     context: android.content.Context,
     onAmountChange: (String) -> Unit
 ) {
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    val currencySymbol = currencyFormat.currency?.symbol ?: ""
+    
     Column {
         Text(
             text = context.getString(R.string.add_expense_amount_label),
@@ -254,7 +259,7 @@ fun ExpenseAmountField(
             onValueChange = onAmountChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(context.getString(R.string.add_expense_amount_hint)) },
-            prefix = { Text("¥ ") },
+            prefix = { Text("$currencySymbol ") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             isError = error != null

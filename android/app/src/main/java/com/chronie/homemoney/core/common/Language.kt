@@ -3,7 +3,7 @@ package com.chronie.homemoney.demo.core.common
 import java.util.Locale
 
 enum class Language(val code: String, val displayName: String, val locale: Locale) {
-    ENGLISH("en", "English", Locale.ENGLISH),
+    ENGLISH("en", "English", Locale.US),
     SIMPLIFIED_CHINESE("zh-CN", "简体中文", Locale.SIMPLIFIED_CHINESE),
     TRADITIONAL_CHINESE("zh-TW", "繁體中文", Locale.TRADITIONAL_CHINESE);
 

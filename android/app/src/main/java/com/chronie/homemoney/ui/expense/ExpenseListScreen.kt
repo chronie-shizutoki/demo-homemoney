@@ -38,6 +38,7 @@ import com.chronie.homemoney.demo.domain.model.Expense
 import com.chronie.homemoney.demo.ui.budget.BudgetCard
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.text.NumberFormat
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -58,6 +59,7 @@ fun ExpenseListScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showFilterDialog by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     
     // 处理刷新请求
     LaunchedEffect(shouldRefresh) {
@@ -316,6 +318,8 @@ fun ExpenseDateHeader(
     context: android.content.Context,
     modifier: Modifier = Modifier
 ) {
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -337,7 +341,7 @@ fun ExpenseDateHeader(
             )
         }
         Text(
-            text = String.format(Locale.getDefault(), "-¥%.2f", totalAmount),
+            text = "-${currencyFormat.format(totalAmount)}",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.error
@@ -354,6 +358,8 @@ fun ExpenseStatisticsCard(
     context: android.content.Context,
     modifier: Modifier = Modifier
 ) {
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -374,7 +380,7 @@ fun ExpenseStatisticsCard(
                 )
                 StatisticItem(
                     label = context.getString(R.string.expense_stats_total),
-                    value = String.format(Locale.getDefault(), "¥%.2f", statistics.totalAmount)
+                    value = currencyFormat.format(statistics.totalAmount)
                 )
             }
             Row(
@@ -383,11 +389,11 @@ fun ExpenseStatisticsCard(
             ) {
                 StatisticItem(
                     label = context.getString(R.string.expense_stats_average),
-                    value = String.format(Locale.getDefault(), "¥%.2f", statistics.averageAmount)
+                    value = currencyFormat.format(statistics.averageAmount)
                 )
                 StatisticItem(
                     label = context.getString(R.string.expense_stats_median),
-                    value = String.format(Locale.getDefault(), "¥%.2f", statistics.medianAmount)
+                    value = currencyFormat.format(statistics.medianAmount)
                 )
             }
         }
@@ -430,6 +436,8 @@ fun LongPressExpenseItem(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    
     // 底部托盘菜单显示状态
     val showBottomSheetMenu = remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
@@ -524,7 +532,7 @@ fun LongPressExpenseItem(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = String.format(Locale.getDefault(), "-¥%.2f", expense.amount),
+                                text = "-${currencyFormat.format(expense.amount)}",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.error
@@ -533,9 +541,9 @@ fun LongPressExpenseItem(
                     }
                     
                     // 操作按钮
-                    Column(
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         // 编辑按钮
                         Button(
@@ -543,7 +551,7 @@ fun LongPressExpenseItem(
                                 showBottomSheetMenu.value = false
                                 onEdit()
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -563,7 +571,7 @@ fun LongPressExpenseItem(
                             onClick = {
                                 showDeleteConfirm()
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
                                 contentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -637,6 +645,8 @@ fun ExpenseListItem(
     context: android.content.Context,
     modifier: Modifier = Modifier
 ) {
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    
     // 使用传递的context来获取本地化字符串
     val typeDisplayName = ExpenseTypeLocalizer.getLocalizedName(context, expense.type)
     
@@ -675,7 +685,7 @@ fun ExpenseListItem(
                 )
             }
             Text(
-                text = String.format(Locale.getDefault(), "-¥%.2f", expense.amount),
+                text = "-${currencyFormat.format(expense.amount)}",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error

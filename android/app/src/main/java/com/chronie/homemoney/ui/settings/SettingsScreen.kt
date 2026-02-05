@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.core.common.Language
+import java.util.Locale
+import java.text.NumberFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +30,7 @@ fun SettingsScreen(
 ) {
     val currentLanguage by viewModel.currentLanguage.collectAsState()
     val scrollState = androidx.compose.foundation.rememberScrollState()
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     
     
     Column(
@@ -185,6 +188,7 @@ fun BudgetSettingsSection(
 ) {
     val uiState by budgetViewModel.uiState.collectAsState()
     var showBudgetDialog by remember { mutableStateOf(false) }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     
     Column {
         Text(
@@ -226,7 +230,7 @@ fun BudgetSettingsSection(
                         // 显示当前预算状态
                         if (uiState.budget?.isEnabled == true) {
                             Text(
-                                text = "${context.getString(R.string.budget_enable_feature)}: ¥${String.format(java.util.Locale.getDefault(), "%.2f", uiState.budget?.monthlyLimit ?: 0.0)}",
+                                text = "${context.getString(R.string.budget_enable_feature)}: ${currencyFormat.format(uiState.budget?.monthlyLimit ?: 0.0)}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )

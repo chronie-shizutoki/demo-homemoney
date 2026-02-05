@@ -150,7 +150,7 @@ private fun ChartsContent(
     selectedTimeRange: TimeRange
 ) {
     val scrollState = rememberScrollState()
-    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.CHINA) }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     
     // 调试日志
     LaunchedEffect(state) {

@@ -139,11 +139,11 @@
     <string name="budget_expand">Show More</string>
     <string name="budget_collapse">Show Less</string>
     <string name="budget_alert_normal_title">On Track</string>
-    <string name="budget_alert_normal_message">¥%1$s remaining (%2$.0f%%)</string>
+    <string name="budget_alert_normal_message">$%1$s remaining (%2$.0f%%)</string>
     <string name="budget_alert_warning_title">Approaching Limit</string>
-    <string name="budget_alert_warning_message">¥%1$s left (%2$.0f%%), watch spending</string>
+    <string name="budget_alert_warning_message">$%1$s left (%2$.0f%%), watch spending</string>
     <string name="budget_alert_over_title">Over Budget</string>
-    <string name="budget_alert_over_message">Over by ¥%1$s, adjust spending</string>
+    <string name="budget_alert_over_message">Over by $%1$s, adjust spending</string>
     <string name="common_save">Save</string>
     <string name="common_cancel">Cancel</string>
     <string name="budget_error_invalid_limit">Enter valid amount</string>
