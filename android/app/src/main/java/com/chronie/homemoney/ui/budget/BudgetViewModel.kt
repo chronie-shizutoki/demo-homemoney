@@ -30,6 +30,10 @@ class BudgetViewModel @Inject constructor(
         loadBudget()
     }
     
+    fun refresh() {
+        loadBudgetUsage()
+    }
+    
     private fun loadBudget() {
         viewModelScope.launch {
             try {

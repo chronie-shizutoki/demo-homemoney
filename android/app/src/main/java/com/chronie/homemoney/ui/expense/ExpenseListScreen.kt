@@ -8,20 +8,19 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshotFlow
@@ -44,14 +43,12 @@ import java.text.NumberFormat
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-/**
- * 支出列表界面
- */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseListScreen(
     context: android.content.Context,
     viewModel: ExpenseListViewModel = hiltViewModel(),
+    budgetViewModel: com.chronie.homemoney.demo.ui.budget.BudgetViewModel = hiltViewModel(),
     shouldRefresh: Boolean = false,
     onRefreshHandled: () -> Unit = {},
     onNavigateToMoreFunctions: () -> Unit = {},
@@ -63,15 +60,33 @@ fun ExpenseListScreen(
     var showMoreMenu by remember { mutableStateOf(false) }
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     
-    // 处理刷新请求
+    val isRefreshing by remember { derivedStateOf { uiState.isLoading } }
+    val refreshScope = rememberCoroutineScope()
+    
+    fun onRefresh() {
+        refreshScope.launch {
+            viewModel.refresh()
+            budgetViewModel.refresh()
+        }
+    }
+    
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = ::onRefresh
+    )
+    
+    val listState = rememberLazyListState()
+    
     LaunchedEffect(shouldRefresh) {
         if (shouldRefresh) {
             viewModel.refresh()
+            budgetViewModel.refresh()
             onRefreshHandled()
         }
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
         // 顶部工具栏 - 固定在页面顶部，不随内容滚动
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -90,13 +105,6 @@ fun ExpenseListScreen(
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f).padding(start = 8.dp)
                 )
-                
-                IconButton(onClick = { viewModel.refresh() }) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = context.getString(R.string.common_refresh)
-                    )
-                }
                 
                 Box {
                     IconButton(onClick = { showMoreMenu = true }) {
@@ -214,6 +222,7 @@ fun ExpenseListScreen(
                         item(key = "budget_card") {
                             BudgetCard(
                                 context = context,
+                                viewModel = budgetViewModel,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -282,6 +291,13 @@ fun ExpenseListScreen(
                 }
             }
         }
+        }
+        
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
         
         // 浮动按钮
         FloatingActionButton(
