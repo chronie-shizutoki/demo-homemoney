@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.domain.model.TimeRange
 import com.chronie.homemoney.demo.ui.expense.ExpenseTypeLocalizer
+import com.chronie.homemoney.demo.ui.expense.formatDateByLocale
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -194,6 +195,12 @@ private fun TimeRangeCard(
     selectedTimeRange: TimeRange,
     state: ChartsUiState.Success
 ) {
+    val locale = Locale.getDefault().toString()
+    val startDateString = state.startDate.toString()
+    val endDateString = state.endDate.toString()
+    val formattedStartDate = formatDateByLocale(startDateString, locale)
+    val formattedEndDate = formatDateByLocale(endDateString, locale)
+    
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -203,7 +210,7 @@ private fun TimeRangeCard(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${state.startDate.format(DateTimeFormatter.ISO_LOCAL_DATE)} - ${state.endDate.format(DateTimeFormatter.ISO_LOCAL_DATE)}",
+                text = "$formattedStartDate - $formattedEndDate",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -619,6 +626,7 @@ private fun CustomDateRangeDialog(
     var endDate by remember { mutableStateOf(LocalDate.now()) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+    val locale = Locale.getDefault().toString()
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -636,7 +644,7 @@ private fun CustomDateRangeDialog(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Button(onClick = { showStartDatePicker = true }) {
-                        Text(startDate.format(DateTimeFormatter.ISO_LOCAL_DATE))
+                        Text(formatDateByLocale(startDate.toString(), locale))
                     }
                 }
                 
@@ -653,7 +661,7 @@ private fun CustomDateRangeDialog(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Button(onClick = { showEndDatePicker = true }) {
-                        Text(endDate.format(DateTimeFormatter.ISO_LOCAL_DATE))
+                        Text(formatDateByLocale(endDate.toString(), locale))
                     }
                 }
                 

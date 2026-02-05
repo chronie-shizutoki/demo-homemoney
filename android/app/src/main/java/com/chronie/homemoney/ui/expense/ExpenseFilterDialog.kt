@@ -19,8 +19,10 @@ import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.domain.model.ExpenseFilters
 import com.chronie.homemoney.demo.domain.model.ExpenseType
 import com.chronie.homemoney.demo.domain.model.SortOption
+import com.chronie.homemoney.demo.ui.expense.formatDateByLocale
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * 支出筛选对话框
@@ -43,7 +45,7 @@ fun ExpenseFilterDialog(
     var showTypeSelector by remember { mutableStateOf(false) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
-    
+    val locale = Locale.getDefault().toString()
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     
     Dialog(
@@ -127,7 +129,7 @@ fun ExpenseFilterDialog(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = startDate?.format(dateFormatter) 
+                                text = startDate?.let { formatDateByLocale(it.toString(), locale) }
                                     ?: context.getString(R.string.expense_list_filter_start_date)
                             )
                         }
@@ -137,7 +139,7 @@ fun ExpenseFilterDialog(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = endDate?.format(dateFormatter) 
+                                text = endDate?.let { formatDateByLocale(it.toString(), locale) }
                                     ?: context.getString(R.string.expense_list_filter_end_date)
                             )
                         }

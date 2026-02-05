@@ -215,4 +215,9 @@
     <string name="excel_header_remark">备注</string>
     <string name="permission_storage_required">需要存储权限才能导出/导入文件</string>
     <string name="no_records_to_export">没有可导出的记录</string>
+    
+    <!-- Date Formats -->
+    <string name="date_today">今天</string>
+    <string name="date_yesterday">昨天</string>
+    <string name="date_days_ago">%d天前</string>
 </resources>

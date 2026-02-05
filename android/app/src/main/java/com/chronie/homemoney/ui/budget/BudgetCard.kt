@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.domain.model.BudgetStatus
+import com.chronie.homemoney.demo.ui.expense.formatMonthLabelByLocale
 import java.util.Locale
 import java.text.NumberFormat
 
@@ -149,6 +150,13 @@ fun BudgetUsageCard(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    val integerCurrencyFormat = remember {
+        NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
+            maximumFractionDigits = 0
+        }
+    }
+    val locale = Locale.getDefault().toString()
+    val formattedMonth = formatMonthLabelByLocale("${usage.currentMonth}-01", locale)
     
     val status = when {
         usage.isOverLimit -> BudgetStatus.OVER_LIMIT
@@ -188,12 +196,12 @@ fun BudgetUsageCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = usage.currentMonth,
+                            text = formattedMonth,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            text = "${currencyFormat.format(usage.currentSpending)}/${currencyFormat.format(usage.monthlyLimit)}",
+                            text = "${integerCurrencyFormat.format(usage.currentSpending)}/${integerCurrencyFormat.format(usage.monthlyLimit)}",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = progressColor
@@ -213,7 +221,7 @@ fun BudgetUsageCard(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = usage.currentMonth,
+                            text = formattedMonth,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )

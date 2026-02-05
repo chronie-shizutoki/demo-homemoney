@@ -36,6 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.domain.model.Expense
 import com.chronie.homemoney.demo.ui.budget.BudgetCard
+import com.chronie.homemoney.demo.ui.expense.formatRelativeDate
+import com.chronie.homemoney.demo.ui.expense.formatDateByLocale
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.text.NumberFormat
@@ -319,6 +321,8 @@ fun ExpenseDateHeader(
     modifier: Modifier = Modifier
 ) {
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    val locale = Locale.getDefault().toString()
+    val formattedDate = formatRelativeDate(date, context)
     
     Row(
         modifier = modifier
@@ -329,7 +333,7 @@ fun ExpenseDateHeader(
     ) {
         Column {
             Text(
-                text = date,
+                text = formattedDate,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -474,6 +478,8 @@ fun LongPressExpenseItem(
     
     // 使用传递的context来获取本地化字符串
     val typeDisplayName = ExpenseTypeLocalizer.getLocalizedName(context, expense.type)
+    val locale = Locale.getDefault().toString()
+    val formattedDate = formatDateByLocale(expense.date, locale)
     
     Box(modifier = modifier.fillMaxWidth()) {
         // 支出列表项 - 添加长按检测
@@ -527,7 +533,7 @@ fun LongPressExpenseItem(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = expense.date,
+                                text = formattedDate,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -646,8 +652,9 @@ fun ExpenseListItem(
     modifier: Modifier = Modifier
 ) {
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
+    val locale = Locale.getDefault().toString()
+    val formattedDate = formatDateByLocale(expense.date, locale)
     
-    // 使用传递的context来获取本地化字符串
     val typeDisplayName = ExpenseTypeLocalizer.getLocalizedName(context, expense.type)
     
     
@@ -679,7 +686,7 @@ fun ExpenseListItem(
                     )
                 }
                 Text(
-                    text = expense.date,
+                    text = formattedDate,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

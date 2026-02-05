@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.domain.model.ExpenseType
+import com.chronie.homemoney.demo.ui.expense.formatDateByLocale
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -290,7 +291,9 @@ fun ExpenseDateField(
     context: android.content.Context,
     onClick: () -> Unit
 ) {
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val locale = Locale.getDefault().toString()
+    val dateString = selectedDate.toString()
+    val formattedDate = formatDateByLocale(dateString, locale)
     
     Column {
         Text(
@@ -308,7 +311,7 @@ fun ExpenseDateField(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = selectedDate.format(dateFormatter),
+                    text = formattedDate,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

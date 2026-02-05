@@ -214,4 +214,9 @@
     <string name="excel_header_remark">Notes</string>
     <string name="permission_storage_required">Storage access required</string>
     <string name="no_records_to_export">No records to export</string>
+
+    <!-- Date Formats -->
+    <string name="date_today">Today</string>
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_days_ago">%d days ago</string>
 </resources>

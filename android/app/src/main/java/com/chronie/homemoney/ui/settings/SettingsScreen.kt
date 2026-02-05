@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.chronie.homemoney.demo.R
 import com.chronie.homemoney.demo.core.common.Language
+import com.chronie.homemoney.demo.ui.expense.formatDateByLocale
 import java.util.Locale
 import java.text.NumberFormat
 
@@ -460,6 +461,7 @@ fun DataImportExportSection(
     if (showDateRangeDialog) {
         var showStartDatePicker by remember { mutableStateOf(false) }
         var showEndDatePicker by remember { mutableStateOf(false) }
+        val locale = Locale.getDefault().toString()
         
         AlertDialog(
             onDismissRequest = { showDateRangeDialog = false },
@@ -481,7 +483,7 @@ fun DataImportExportSection(
                         shape = MaterialTheme.shapes.medium
                     ) {
                         Text(
-                            text = startDate?.toString() ?: context.getString(R.string.export_start_date),
+                            text = startDate?.let { formatDateByLocale(it.toString(), locale) } ?: context.getString(R.string.export_start_date),
                             modifier = Modifier.padding(16.dp)
                         )
                     }
@@ -503,7 +505,7 @@ fun DataImportExportSection(
                         shape = MaterialTheme.shapes.medium
                     ) {
                         Text(
-                            text = endDate?.toString() ?: context.getString(R.string.export_end_date),
+                            text = endDate?.let { formatDateByLocale(it.toString(), locale) } ?: context.getString(R.string.export_end_date),
                             modifier = Modifier.padding(16.dp)
                         )
                     }
