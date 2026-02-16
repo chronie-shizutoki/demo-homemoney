@@ -5,21 +5,6 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
 # Keep line numbers for debugging
 -keepattributes SourceFile,LineNumberTable
 
@@ -28,6 +13,10 @@
 
 # Keep annotations
 -keepattributes *Annotation*
+
+# Keep R8 full mode rules
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
 
 # Kotlin
 -keep class kotlin.** { *; }
@@ -45,22 +34,32 @@
 -keep class javax.inject.** { *; }
 -keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper
 -keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$ActivityContextWrapper
+-keep class * extends androidx.hilt.work.HiltWorker
 -dontwarn dagger.hilt.**
 
 # Room
--keep class * extends androidx.room.RoomDatabase
--dontwarn androidx.room.paging.**
 -keep @androidx.room.Entity class *
--dontwarn androidx.room.paging.**
+-keep @androidx.room.Dao class *
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.**
 
 # Compose
--keep class androidx.compose.** { *; }
--keep class androidx.compose.ui.** { *; }
+-keepclassmembers class androidx.compose.** { *; }
 -dontwarn androidx.compose.**
 
 # Apache POI
 -keep class org.apache.poi.** { *; }
+-keep class org.openxmlformats.** { *; }
+-keep class schemasMicrosoftComOfficeExcel.** { *; }
+-keep class schemasMicrosoftComOfficeOffice.** { *; }
+-keep class schemasMicrosoftComOfficeWord.** { *; }
+-keep class schemasMicrosoftComVml.** { *; }
 -dontwarn org.apache.poi.**
+-dontwarn org.openxmlformats.**
+-dontwarn schemasMicrosoftComOfficeExcel.**
+-dontwarn schemasMicrosoftComOfficeOffice.**
+-dontwarn schemasMicrosoftComOfficeWord.**
+-dontwarn schemasMicrosoftComVml.**
 
 # SQLCipher
 -keep class net.sqlcipher.** { *; }
@@ -80,50 +79,8 @@
 # Keep ViewModels
 -keepclassmembers class * extends androidx.lifecycle.ViewModel {
     <init>();
-}
-
-# Keep all public methods in ViewModels
--keepclassmembers class * extends androidx.lifecycle.ViewModel {
     public <methods>;
 }
-
-# Keep Hilt generated classes
--keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper
--keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$ActivityContextWrapper
--keep class * extends androidx.hilt.work.HiltWorker
-
-# Keep Hilt generated classes
--keep class dagger.hilt.** { *; }
--keep class javax.inject.** { *; }
--keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper
--keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$ActivityContextWrapper
--dontwarn dagger.hilt.**
-
-# Keep Room entities and DAOs
--keep @androidx.room.Entity class *
--keep @androidx.room.Dao class *
--keep class * extends androidx.room.RoomDatabase
--dontwarn androidx.room.**
-
-# Keep Compose UI
--keepclassmembers class androidx.compose.** { *; }
--dontwarn androidx.compose.**
-
-# Keep Apache POI
--keep class org.apache.poi.** { *; }
--dontwarn org.apache.poi.**
-
-# Keep SQLCipher
--keep class net.sqlcipher.** { *; }
--dontwarn net.sqlcipher.**
-
-# Keep WorkManager
--keep class androidx.work.** { *; }
--dontwarn androidx.work.**
-
-# Keep DataStore
--keep class androidx.datastore.** { *; }
--dontwarn androidx.datastore.**
 
 # Keep all native methods
 -keepclasseswithmembernames class * {
@@ -151,24 +108,18 @@
   public static final android.os.Parcelable$Creator *;
 }
 
-# Keep R8 full mode rules
--keepattributes InnerClasses
--keepattributes EnclosingMethod
-
 # Keep reflection
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
 # Keep Gson
--keepattributes Signature
--keepattributes *Annotation*
--dontwarn sun.misc.**
 -keep class com.google.gson.** { *; }
 -keep class * implements com.google.gson.TypeAdapter
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+-dontwarn sun.misc.**
 
 # Keep kotlinx.coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
@@ -179,3 +130,16 @@
 
 # Keep application class
 -keep public class * extends android.app.Application
+
+# Ignore missing classes from optional dependencies
+-dontwarn aQute.bnd.annotation.**
+-dontwarn com.github.luben.zstd.**
+-dontwarn edu.umd.cs.findbugs.annotations.**
+-dontwarn java.awt.**
+-dontwarn javax.xml.stream.**
+-dontwarn net.sf.saxon.**
+-dontwarn org.apache.commons.compress.**
+-dontwarn org.apache.logging.log4j.**
+-dontwarn org.apache.xmlbeans.**
+-dontwarn com.graphbuilder.**
+-dontwarn org.apache.poi.ooxml.**
