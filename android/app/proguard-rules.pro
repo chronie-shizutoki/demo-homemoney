@@ -19,3 +19,73 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep line numbers for debugging
+-keepattributes SourceFile,LineNumberTable
+
+# Keep generic signatures
+-keepattributes Signature
+
+# Keep annotations
+-keepattributes *Annotation*
+
+# Kotlin
+-keep class kotlin.** { *; }
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**
+-keepclassmembers class **$WhenMappings {
+    <fields>;
+}
+-keepclassmembers class kotlin.Metadata {
+    public <methods>;
+}
+
+# Hilt
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$ActivityContextWrapper
+-dontwarn dagger.hilt.**
+
+# Room
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
+-keep @androidx.room.Entity class *
+-dontwarn androidx.room.paging.**
+
+# Compose
+-keep class androidx.compose.** { *; }
+-keep class androidx.compose.ui.** { *; }
+-dontwarn androidx.compose.**
+
+# Apache POI
+-keep class org.apache.poi.** { *; }
+-dontwarn org.apache.poi.**
+
+# SQLCipher
+-keep class net.sqlcipher.** { *; }
+-dontwarn net.sqlcipher.**
+
+# WorkManager
+-keep class androidx.work.** { *; }
+-dontwarn androidx.work.**
+
+# DataStore
+-keep class androidx.datastore.** { *; }
+-dontwarn androidx.datastore.**
+
+# Keep model classes
+-keep class com.chronie.homemoney.demo.domain.model.** { *; }
+
+# Keep ViewModels
+-keep class * extends androidx.lifecycle.ViewModel {
+    <init>();
+}
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    <init>();
+}
+
+# Keep Hilt generated classes
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$ActivityContextWrapper
+-keep class * extends androidx.hilt.work.HiltWorker

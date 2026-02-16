@@ -1,0 +1,106 @@
+name: Build Android Release APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - debug
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
+      - name: Decode keystore
+        if: github.event.inputs.build_type == 'release' || github.event_name != 'workflow_dispatch'
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+          echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Create keystore.properties
+        if: github.event.inputs.build_type == 'release' || github.event_name != 'workflow_dispatch'
+        run: |
+          cat > android/app/keystore.properties << EOF
+          storeFile=release.keystore
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build Release APK
+        if: github.event.inputs.build_type == 'release' || github.event_name != 'workflow_dispatch'
+        run: |
+          cd android
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Build Debug APK
+        if: github.event.inputs.build_type == 'debug'
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload Release APK
+        if: github.event.inputs.build_type == 'release' || github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 30
+
+      - name: Upload Debug APK
+        if: github.event.inputs.build_type == 'debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+      - name: Upload mapping.txt for R8
+        if: github.event.inputs.build_type == 'release' || github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mapping-files
+          path: android/app/build/outputs/mapping/release/mapping.txt
+          retention-days: 90
