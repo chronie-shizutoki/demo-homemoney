@@ -34,6 +34,11 @@ android {
     namespace "com.chronie.homemoney.demo"
     compileSdk rootProject.ext.compileSdkVersion
     
+    buildFeatures {
+        buildConfig = true
+        compose = true
+    }
+    
     defaultConfig {
         applicationId "com.chronie.homemoney.demo"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -81,16 +86,14 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+            
+            buildConfigField "boolean", "DEBUG_MODE", "false"
         }
     }
     
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-    
-    buildFeatures {
-        compose true
     }
 
     packaging {
