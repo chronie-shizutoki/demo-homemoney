@@ -1,5 +1,0 @@
-/build/*
-!/build/.npmkeep
-/schemas
-*.keystore
-keystore.properties

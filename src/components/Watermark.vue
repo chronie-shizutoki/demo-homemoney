@@ -24,10 +24,12 @@ const watermarkCount = 20;
 const watermarkText = computed(() => {
   // 根据当前语言选择不同的水印文本
   const currentLocale = t('app.locale');
-  if (currentLocale.includes('中文')) {
-    return '演示版本 Demo Version';
+  if (currentLocale.includes('中文简体')) {
+    return '演示版本，完全版本请自行本地部署使用';
+  } else if (currentLocale.includes('中文繁體')) {
+    return '示範版本，完整版本請自行本地部署使用';
   } else {
-    return 'Demo Version 演示版本';
+    return 'Demo version; please deploy locally for full';
   }
 });
 
