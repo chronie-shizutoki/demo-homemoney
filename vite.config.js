@@ -22,9 +22,15 @@ export default defineConfig({
     target: 'esnext', // 提升目标环境版本以支持现代CSS特性（如嵌套语法）
     rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['vue', 'vue-router', 'pinia'],
-            excel: ['xlsx']
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              if (id.includes('vue') || id.includes('pinia') || id.includes('vue-router')) {
+                return 'vendor';
+              }
+              if (id.includes('xlsx')) {
+                return 'excel';
+              }
+            }
           }
         }
     },

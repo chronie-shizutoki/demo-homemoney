@@ -89,7 +89,7 @@ onUnmounted(() => {
   background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(250,250,250,0.9) 100%); /* 渐变背景 */
   backdrop-filter: blur(10px); /* 毛玻璃效果 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* 底部阴影 */
-  border-bottom: 1px solid var(#e4e7ed); /* 底部边框 */
+  border-bottom: 1px solid #e4e7ed; /* 底部边框 */
   position: sticky; /* 粘性定位，使其在滚动时保持在顶部 */
   top: 0; /* 距离顶部0 */
   z-index: 100; /* 确保在其他内容之上 */
@@ -105,7 +105,7 @@ onUnmounted(() => {
 /* 标题样式 */
 .header h1 {
   font-size: 1.8rem; /* 标题字体大小 */
-  color: var(#303133); /* 标题文本颜色 */
+  color: #303133; /* 标题文本颜色 */
   margin: 0; /* 移除默认外边距 */
   flex-grow: 1; /* 允许标题占据可用空间 */
   text-align: left; /* 文本左对齐 */
