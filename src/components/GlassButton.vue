@@ -1,5 +1,18 @@
 <template>
+  <a
+    v-if="href"
+    :href="href"
+    :target="target"
+    :rel="rel"
+    :class="['glass-button', { 'dark-theme': darkTheme, 'primary': type === 'primary', 'success': type === 'success', 'warning': type === 'warning' }, $attrs.class]"
+    :disabled="disabled"
+    @click="$emit('click', $event)"
+  >
+    <slot name="icon"></slot>
+    <span v-if="$slots.default"><slot></slot></span>
+  </a>
   <button
+    v-else
     :class="['glass-button', { 'dark-theme': darkTheme, 'primary': type === 'primary', 'success': type === 'success', 'warning': type === 'warning' }, $attrs.class]"
     :disabled="disabled"
     @click="$emit('click', $event)"
@@ -24,6 +37,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  href: {
+    type: String,
+    default: '',
+  },
+  target: {
+    type: String,
+    default: '',
+  },
+  rel: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['click'])
@@ -47,6 +72,15 @@ const emit = defineEmits(['click'])
   background: rgba(255, 255, 255, 0.7);
   color: #1a202c;
   box-shadow: 0 4px 16px rgba(31, 38, 135, 0.1);
+  text-decoration: none;
+}
+
+.glass-button:link,
+.glass-button:visited,
+.glass-button:hover,
+.glass-button:active {
+  text-decoration: none;
+  color: #1a202c;
 }
 
 .glass-button::before {
@@ -113,6 +147,13 @@ const emit = defineEmits(['click'])
   color: #e2e8f0;
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.glass-button:link,
+.glass-button:visited,
+.glass-button:hover,
+.glass-button:active {
+  color: #e2e8f0;
 }
 
 .glass-button::before {

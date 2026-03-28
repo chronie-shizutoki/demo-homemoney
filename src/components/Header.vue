@@ -2,6 +2,17 @@
   <div ref="headerRef" :class="['header']">
     <h1>{{ title }}</h1>
 
+    <div class="github-button">
+      <GlassButton
+        href="https://github.com/chronie-shizutoki/Home-Finance-Tracker"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <template #icon><FontAwesomeIcon :icon="['fab', 'github']" /></template>
+        访问项目仓库以获取全部网页功能及安卓客户端
+      </GlassButton>
+    </div>
+
     <div class="language-buttons">
       <GlassButton
         v-for="lang in languages"
@@ -22,6 +33,7 @@
 import { useLanguageSwitch } from '@/composables/useLanguageSwitch';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 defineOptions({ name: 'AppHeader' });
 useI18n();
@@ -120,6 +132,24 @@ onUnmounted(() => {
   z-index: 1;
 }
 
+/* GitHub 按钮容器 */
+.github-button {
+  margin-left: 1rem; /* 左侧外边距 */
+}
+
+/* GitHub 按钮样式 */
+.github-button .glass-button {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.github-button .glass-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
 /* 语言按钮容器 */
 .language-buttons {
   display: flex; /* 使用 Flexbox 布局 */
@@ -151,6 +181,21 @@ onUnmounted(() => {
 
   .header h1 {
     font-size: 1.3rem; /* 减小移动端标题字体大小 */
+  }
+
+  /* GitHub 按钮移动端样式 */
+  .github-button {
+    margin-left: 0.5rem; /* 减小左侧外边距 */
+  }
+
+  .github-button :deep(.glass-button) {
+    padding: 8px !important; /* 减小内边距，只留图标空间 */
+    font-size: 12px !important; /* 减小字体大小 */
+  }
+
+  /* 移动端隐藏 GitHub 按钮文字，只显示图标 */
+  .github-button :deep(.glass-button) span {
+    display: none !important;
   }
 
   .earth-icon {
@@ -193,6 +238,17 @@ onUnmounted(() => {
     color: #e0e0e0;
     border-color: #555;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* GitHub 按钮深色模式样式 */
+  .github-button .glass-button {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .github-button .glass-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
 }
 

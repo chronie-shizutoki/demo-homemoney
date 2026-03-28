@@ -18,12 +18,18 @@ import {
   faEdit, faTrashAlt, faFileExport
 } from '@fortawesome/free-solid-svg-icons'
 
+// 导入Brands风格图标（包含GitHub图标）
+import {
+  faGithub
+} from '@fortawesome/free-brands-svg-icons'
+
 // 将图标添加到库中
 library.add(
   faPlus, faUpload, faDownload, faMicrochip,
   faFileAlt, faStar, faEnvelope, faQuestionCircle,
   faChartPie, faSyncAlt, faCog, faChartLine, faTimes,
-  faEdit, faTrashAlt, faFileExport
+  faEdit, faTrashAlt, faFileExport,
+  faGithub
 )
 
 import App from './App.vue';

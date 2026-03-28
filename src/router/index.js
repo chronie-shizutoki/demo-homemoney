@@ -44,7 +44,7 @@ const router = createRouter({
 });
 
 // 全局前置守卫：整合所有路由控制逻辑
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, _from) => {
   try {
     const userAgent = navigator.userAgent || 'unknown';
     // 更新页面标题
@@ -55,10 +55,10 @@ router.beforeEach(async (to, _from, next) => {
     // 记录路由访问日志
     console.log(`[Route Access] ${to.name} route accessed - User-Agent: ${userAgent}`);
 
-    next();
+    return true;
   } catch (error) {
     console.error('路由守卫错误:', error);
-    next();
+    return true;
   }
 });
 
